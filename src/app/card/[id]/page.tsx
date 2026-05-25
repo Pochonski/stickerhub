@@ -109,6 +109,15 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
               </div>
             ) : (
               <div className="text-center">
+                {/* Stadium/venue image fallback */}
+                {type !== "jugador" && (
+                  <img
+                    src={`/${type === "estadio" ? "estadio" : "sede"}-${teamId}.jpg`}
+                    alt={name}
+                    className="w-[70%] h-[75%] object-contain mx-auto mb-2"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  />
+                )}
                 <span className="font-[var(--font-display)] font-extrabold text-[40px] text-white/80 text-center tracking-tight drop-shadow-md block">
                   {name.split(" ").pop()?.toUpperCase()}
                 </span>
