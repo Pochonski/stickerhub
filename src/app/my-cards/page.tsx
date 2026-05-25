@@ -59,6 +59,15 @@ const POS_OPTIONS: { id: string; label: string }[] = [
   { id: "Delantero", label: "Delanteros" },
 ];
 
+const OVERALL_OPTIONS = [
+  { min: 90, max: 99, label: "90+" },
+  { min: 85, max: 89, label: "85-89" },
+  { min: 80, max: 84, label: "80-84" },
+  { min: 75, max: 79, label: "75-79" },
+  { min: 70, max: 74, label: "70-74" },
+  { min: 0, max: 69, label: "<70" },
+];
+
 export default function MyCardsPage() {
   const { state, isCollected, isDuplicate, coins } = useGame();
   const { addToast } = useToast();
@@ -66,6 +75,7 @@ export default function MyCardsPage() {
   const [cardTypeFilter, setCardTypeFilter] = useState<CardTypeFilter>("todos");
   const [teamFilter, setTeamFilter] = useState("");
   const [posFilter, setPosFilter] = useState("");
+  const [overallFilter, setOverallFilter] = useState<{ min: number; max: number } | null>(null);
   const [discardedIds, setDiscardedIds] = useState<Set<string>>(new Set());
   const [localCoins, setLocalCoins] = useState(coins);
   const [localDupeCount, setLocalDupeCount] = useState<number | null>(null);
@@ -92,10 +102,11 @@ export default function MyCardsPage() {
       if (cardTypeFilter === "sedes" && info.type !== "Sede") return false;
       if (teamFilter && info.teamId !== teamFilter) return false;
       if (posFilter && info.pos !== posFilter) return false;
+      if (overallFilter && info.overall !== undefined && (info.overall < overallFilter.min || info.overall > overallFilter.max)) return false;
       if (search && !info.name.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [collectedIds, cardTypeFilter, teamFilter, posFilter, search]);
+  }, [collectedIds, cardTypeFilter, teamFilter, posFilter, overallFilter, search]);
 
   const handleDiscard = async (cardId: string) => {
     const info = getCardInfo(cardId);
@@ -136,9 +147,10 @@ export default function MyCardsPage() {
     setCardTypeFilter("todos");
     setTeamFilter("");
     setPosFilter("");
+    setOverallFilter(null);
   };
 
-  const hasActiveFilters = search || cardTypeFilter !== "todos" || teamFilter || posFilter;
+  const hasActiveFilters = search || cardTypeFilter !== "todos" || teamFilter || posFilter || overallFilter !== null;
 
   return (
     <AppShell>
@@ -184,6 +196,7 @@ export default function MyCardsPage() {
                   setCardTypeFilter(f);
                   setTeamFilter("");
                   setPosFilter("");
+                  setOverallFilter(null);
                 }}
                 className={`px-3 py-1.5 rounded-full text-[12px] font-semibold cursor-pointer border-[1.5px] transition-colors ${
                   cardTypeFilter === f
@@ -242,6 +255,29 @@ export default function MyCardsPage() {
                     {p.label}
                   </button>
                 ))}
+              </div>
+            )}
+
+            {/* Overall rating filter (only for players) */}
+            {(cardTypeFilter === "jugadores" || cardTypeFilter === "todos") && (
+              <div className="flex gap-1.5 flex-wrap items-center">
+                <span className="text-[11px] text-[var(--color-muted)] font-medium">Rating:</span>
+                {OVERALL_OPTIONS.map((o) => {
+                  const isActive = overallFilter?.min === o.min && overallFilter?.max === o.max;
+                  return (
+                    <button
+                      key={o.label}
+                      onClick={() => setOverallFilter(isActive ? null : { min: o.min, max: o.max })}
+                      className={`px-3 py-1 rounded-full text-[11px] font-semibold cursor-pointer border-[1.5px] transition-colors ${
+                        isActive
+                          ? "bg-[var(--color-primary)] border-[var(--color-primary)] text-white"
+                          : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                      }`}
+                    >
+                      {o.label}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
