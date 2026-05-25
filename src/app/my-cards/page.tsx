@@ -7,14 +7,11 @@ import { Pill } from "@/components/ui/Pill";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useGame } from "@/context/GameContext";
 import { ALL_PLAYERS } from "@/data/players";
-import { ALL_STADIUM_CARDS, ALL_VENUE_CARDS } from "@/data/cards";
-import { TEAMS, STADIUMS, VENUES } from "@/data/teams";
-import { TEAM_LIST } from "@/data/teams";
-import type { Player } from "@/data/types";
-import { Search, WalletCards, Send, Inbox, Trash2, Coins, Filter } from "lucide-react";
-import { coinValue } from "@/hooks/useSupabasePacks";
+import { TEAMS, TEAM_LIST } from "@/data/teams";
 import { useToast } from "@/hooks/useToast";
 import { getSupabase } from "@/lib/supabase/client";
+import { coinValue } from "@/hooks/useSupabasePacks";
+import { Search, WalletCards, Send, Inbox, Trash2, Filter } from "lucide-react";
 
 interface CardInfo {
   name: string;
@@ -42,14 +39,10 @@ function getCardInfo(id: string): CardInfo | null {
       overall: player.overall ?? 0,
     };
   }
-  const stadium = ALL_STADIUM_CARDS.find((c) => c.id === id);
-  if (stadium) return { name: stadium.name, gradient: stadium.bg, type: "Estadio", teamId: stadium.teamId };
-  const venue = ALL_VENUE_CARDS.find((c) => c.id === id);
-  if (venue) return { name: venue.name, gradient: venue.bg, type: "Sede", teamId: venue.teamId };
   return null;
 }
 
-const CARD_TYPE_OPTIONS = ["todos", "jugadores", "estadios", "sedes"] as const;
+const CARD_TYPE_OPTIONS = ["todos", "jugadores"] as const;
 type CardTypeFilter = (typeof CARD_TYPE_OPTIONS)[number];
 
 const POS_OPTIONS: { id: string; label: string }[] = [
@@ -86,21 +79,17 @@ export default function MyCardsPage() {
   const displayDupeCount = localDupeCount ?? duplicateIds.length;
   const totalPlayerCards = ALL_PLAYERS.length;
   const playerCollected = ALL_PLAYERS.filter((p) => isCollected(p.id)).length;
-  const totalAll = totalPlayerCards + ALL_STADIUM_CARDS.length + ALL_VENUE_CARDS.length;
+  const totalAll = totalPlayerCards;
 
   const availableTeams = useMemo(() => {
-    if (cardTypeFilter === "estadios") return Object.entries(STADIUMS).map(([id, s]) => ({ id, name: s.name }));
-    if (cardTypeFilter === "sedes") return Object.entries(VENUES).map(([id, v]) => ({ id, name: v.name }));
     return TEAM_LIST.map((t) => ({ id: t.id, name: t.name }));
-  }, [cardTypeFilter]);
+  }, []);
 
   const filteredCollected = useMemo(() => {
     return collectedIds.filter((id) => {
       const info = getCardInfo(id);
       if (!info) return false;
       if (cardTypeFilter === "jugadores" && info.type !== "Jugador") return false;
-      if (cardTypeFilter === "estadios" && info.type !== "Estadio") return false;
-      if (cardTypeFilter === "sedes" && info.type !== "Sede") return false;
       if (teamFilter && info.teamId !== teamFilter) return false;
       if (posFilter && info.pos !== posFilter) return false;
       if (overallFilter && (info.overall === undefined || info.overall < overallFilter.min || info.overall > overallFilter.max)) return false;
@@ -205,7 +194,7 @@ export default function MyCardsPage() {
                     : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
                 }`}
               >
-                {f === "todos" ? "Todos" : f === "jugadores" ? "Jugadores" : f === "estadios" ? "Estadios" : "Sedes"}
+                {f === "todos" ? "Todos" : "Jugadores"}
               </button>
             ))}
             {hasActiveFilters && (
@@ -231,7 +220,7 @@ export default function MyCardsPage() {
                   className="px-3 py-1.5 rounded-full border-[1.5px] border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-medium text-[var(--color-fg)] min-w-0 max-w-[200px] cursor-pointer transition-colors focus:border-[var(--color-accent)] focus-visible:outline-none"
                 >
                   <option value="">
-                    {cardTypeFilter === "jugadores" ? "Todas las selecciones" : cardTypeFilter === "estadios" ? "Todos los estadios" : "Todas las sedes"}
+                    {cardTypeFilter === "jugadores" ? "Todas las selecciones" : "Todos"}
                   </option>
                   {availableTeams.map((t) => (
                     <option key={t.id} value={t.id}>{t.name}</option>

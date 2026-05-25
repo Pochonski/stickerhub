@@ -9,7 +9,6 @@ import { StickerSlot } from "@/components/album/StickerSlot";
 import { useGame } from "@/context/GameContext";
 import { getTeam } from "@/data/teams";
 import { PLAYERS } from "@/data/players";
-import { STADIUM_CARDS, VENUE_CARDS } from "@/data/cards";
 import type { CardType } from "@/data/types";
 import { PackageOpen, ArrowLeft } from "lucide-react";
 
@@ -64,24 +63,6 @@ export default function TeamAlbumPage({ params }: { params: Promise<{ team: stri
     }));
     sectionLabel = "Jugadores";
     sectionSub = "Selección Nacional";
-  } else if (type === "estadios" && STADIUM_CARDS[team]) {
-    cardList = STADIUM_CARDS[team].map((c) => ({
-      id: c.id,
-      name: c.name,
-      collected: isCollected(c.id),
-      gradient: c.bg,
-    }));
-    sectionLabel = "Estadios";
-    sectionSub = "Sedes del Mundial";
-  } else if (type === "sedes" && VENUE_CARDS[team]) {
-    cardList = VENUE_CARDS[team].map((c) => ({
-      id: c.id,
-      name: c.name,
-      collected: isCollected(c.id),
-      gradient: c.bg,
-    }));
-    sectionLabel = "Sedes";
-    sectionSub = "Ciudades Anfitrionas";
   } else {
     cardList = [];
   }

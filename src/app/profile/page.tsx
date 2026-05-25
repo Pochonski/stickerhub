@@ -8,7 +8,6 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useUser } from "@/hooks/useUser";
 import { useGame } from "@/context/GameContext";
 import { ALL_PLAYERS } from "@/data/players";
-import { ALL_STADIUM_CARDS, ALL_VENUE_CARDS } from "@/data/cards";
 import { Medal, Star, Gem, Crown, Send, Inbox, Handshake, Award, BadgeCheck, LogOut } from "lucide-react";
 
 function ProfileContent() {
@@ -29,11 +28,9 @@ function ProfileContent() {
   const createdAt = user?.created_at ? new Date(user.created_at).toLocaleDateString("es-CR", { year: "numeric", month: "long" }) : "—";
 
   const totalCollected = Object.keys(state.collected).length;
-  const totalAll = ALL_PLAYERS.length + ALL_STADIUM_CARDS.length + ALL_VENUE_CARDS.length;
+  const totalAll = ALL_PLAYERS.length;
   const pct = totalAll > 0 ? Math.round((totalCollected / totalAll) * 100) : 0;
   const playerCollected = ALL_PLAYERS.filter((p) => isCollected(p.id)).length;
-  const stadiumCollected = ALL_STADIUM_CARDS.filter((c) => isCollected(c.id)).length;
-  const venueCollected = ALL_VENUE_CARDS.filter((c) => isCollected(c.id)).length;
   const completedTrades = state.trades.filter((t) => t.status === "completed").length;
   const pendingTrades = state.trades.filter((t) => t.status === "pending").length;
   const rep = completedTrades > 0 ? Math.min(100, Math.round((completedTrades / (completedTrades + pendingTrades)) * 100)) : 100;
@@ -90,14 +87,6 @@ function ProfileContent() {
             <div className="flex justify-between text-sm">
               <span className="text-[var(--color-muted)]">Jugadores</span>
               <span className="font-semibold">{playerCollected} / {ALL_PLAYERS.length}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-[var(--color-muted)]">Estadios</span>
-              <span className="font-semibold">{stadiumCollected} / {ALL_STADIUM_CARDS.length}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-[var(--color-muted)]">Sedes</span>
-              <span className="font-semibold">{venueCollected} / {ALL_VENUE_CARDS.length}</span>
             </div>
           </div>
         </div>

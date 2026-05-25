@@ -5,8 +5,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Pill } from "@/components/ui/Pill";
 import { useGame } from "@/context/GameContext";
 import { ALL_PLAYERS, PLAYER_DETAILS } from "@/data/players";
-import { ALL_STADIUM_CARDS, ALL_VENUE_CARDS } from "@/data/cards";
-import { TEAMS, STADIUMS, VENUES } from "@/data/teams";
+import { TEAMS } from "@/data/teams";
 import type { PlayerDetail, Player, Team } from "@/data/types";
 
 interface CardInfo {
@@ -24,7 +23,7 @@ interface CardInfo {
 }
 
 function resolveTeam(teamId: string): Team | undefined {
-  return TEAMS[teamId] || STADIUMS[teamId] || VENUES[teamId];
+  return TEAMS[teamId];
 }
 
 function getCardInfo(id: string): CardInfo | null {
@@ -60,42 +59,6 @@ function getCardInfo(id: string): CardInfo | null {
       teamColorDark: team?.colorDark || "oklch(58% 0.12 250)",
       type: "jugador",
       player: player as PlayerDetail,
-      isDetailed: false,
-    };
-  }
-
-  // Check stadium cards
-  const stadium = ALL_STADIUM_CARDS.find((c) => c.id === id);
-  if (stadium) {
-    const team = resolveTeam(stadium.teamId);
-    return {
-      name: stadium.name,
-      num: 0,
-      pos: "Estadio",
-      teamId: stadium.teamId,
-      teamName: team?.name || stadium.teamId,
-      teamColor: team?.color || "oklch(75% 0.04 60)",
-      teamColorDark: team?.colorDark || "oklch(50% 0.05 60)",
-      type: "estadio",
-      bg: stadium.bg,
-      isDetailed: false,
-    };
-  }
-
-  // Check venue cards
-  const venue = ALL_VENUE_CARDS.find((c) => c.id === id);
-  if (venue) {
-    const team = resolveTeam(venue.teamId);
-    return {
-      name: venue.name,
-      num: 0,
-      pos: "Sede",
-      teamId: venue.teamId,
-      teamName: team?.name || venue.teamId,
-      teamColor: team?.color || "oklch(80% 0.03 95)",
-      teamColorDark: team?.colorDark || "oklch(55% 0.04 95)",
-      type: "sede",
-      bg: venue.bg,
       isDetailed: false,
     };
   }

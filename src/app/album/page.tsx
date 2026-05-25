@@ -1,26 +1,20 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
-import { Tabs } from "@/components/ui/Tabs";
 import { TeamCard } from "@/components/album/TeamCard";
 import { useGame } from "@/context/GameContext";
-import { TEAM_LIST, STADIUM_LIST, VENUE_LIST } from "@/data/teams";
+import { TEAM_LIST } from "@/data/teams";
 import { PLAYERS } from "@/data/players";
-import { STADIUM_CARDS, VENUE_CARDS } from "@/data/cards";
 import { PackageOpen, BookOpen } from "lucide-react";
 
 export default function AlbumPage() {
   const { state, isCollected } = useGame();
-  const [tab, setTab] = useState("jugadores");
 
   const totalCollected = Object.keys(state.collected).length;
   const totalPlayerCards = Object.values(PLAYERS).flat().length;
   const playerCollected = Object.values(PLAYERS).flat().filter((p) => isCollected(p.id)).length;
-  const stadiumCollected = Object.values(STADIUM_CARDS).flat().filter((c) => isCollected(c.id)).length;
-  const venueCollected = Object.values(VENUE_CARDS).flat().filter((c) => isCollected(c.id)).length;
-  const totalAll = totalPlayerCards + Object.values(STADIUM_CARDS).flat().length + Object.values(VENUE_CARDS).flat().length;
+  const totalAll = totalPlayerCards;
 
   return (
     <AppShell>
@@ -50,24 +44,12 @@ export default function AlbumPage() {
         </Link>
       </div>
 
-      <Tabs
-        tabs={[
-          { id: "jugadores", label: "Jugadores" },
-          { id: "estadios", label: "Estadios" },
-          { id: "sedes", label: "Sedes" },
-        ]}
-        active={tab}
-        onChange={setTab}
-      />
-
-      {tab === "jugadores" && (
-        <>
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-[22px] font-bold font-[var(--font-display)] tracking-tight">Selecciones</h2>
-            <span className="text-sm text-[var(--color-muted)]">{playerCollected} de {totalPlayerCards} jugadores</span>
-          </div>
-          <div className="grid grid-cols-3 gap-5 mb-12 max-lg:grid-cols-2 max-sm:grid-cols-1">
-            {TEAM_LIST.map((team) => {
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-[22px] font-bold font-[var(--font-display)] tracking-tight">Selecciones</h2>
+        <span className="text-sm text-[var(--color-muted)]">{playerCollected} de {totalPlayerCards} jugadores</span>
+      </div>
+      <div className="grid grid-cols-3 gap-5 mb-12 max-lg:grid-cols-2 max-sm:grid-cols-1">
+        {TEAM_LIST.map((team) => {
               const players = PLAYERS[team.id] || [];
               const collected = players.filter((p) => isCollected(p.id)).length;
               return (
@@ -79,60 +61,8 @@ export default function AlbumPage() {
                   href={`/album/${team.id}?type=jugadores`}
                 />
               );
-            })}
-          </div>
-        </>
-      )}
-
-      {tab === "estadios" && (
-        <>
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-[22px] font-bold font-[var(--font-display)] tracking-tight">Estadios</h2>
-            <span className="text-sm text-[var(--color-muted)]">{stadiumCollected} de {Object.values(STADIUM_CARDS).flat().length} estadios</span>
-          </div>
-          <div className="grid grid-cols-4 gap-4 mb-12 max-lg:grid-cols-3 max-sm:grid-cols-2">
-            {STADIUM_LIST.map((stadium) => {
-              const cards = STADIUM_CARDS[stadium.id] || [];
-              const collected = cards.filter((c) => isCollected(c.id)).length;
-              return (
-                <TeamCard
-                  key={stadium.id}
-                  team={stadium}
-                  collected={collected}
-                  total={cards.length}
-                  href={`/album/${stadium.id}?type=estadios`}
-                  isPlayers={false}
-                />
-              );
-            })}
-          </div>
-        </>
-      )}
-
-      {tab === "sedes" && (
-        <>
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-[22px] font-bold font-[var(--font-display)] tracking-tight">Sedes</h2>
-            <span className="text-sm text-[var(--color-muted)]">{venueCollected} de {Object.values(VENUE_CARDS).flat().length} sedes</span>
-          </div>
-          <div className="grid grid-cols-4 gap-4 mb-12 max-lg:grid-cols-3 max-sm:grid-cols-2">
-            {VENUE_LIST.map((venue) => {
-              const cards = VENUE_CARDS[venue.id] || [];
-              const collected = cards.filter((c) => isCollected(c.id)).length;
-              return (
-                <TeamCard
-                  key={venue.id}
-                  team={venue}
-                  collected={collected}
-                  total={cards.length}
-                  href={`/album/${venue.id}?type=sedes`}
-                  isPlayers={false}
-                />
-              );
-            })}
-          </div>
-        </>
-      )}
+          })}
+        </div>
     </AppShell>
   );
 }
