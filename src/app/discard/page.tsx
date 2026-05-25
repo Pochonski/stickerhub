@@ -117,7 +117,7 @@ export default function DiscardPage() {
             return (
               <div key={id} className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                 <div className="aspect-[3/4] relative">
-                  <div className="w-full h-[60%] flex items-center justify-center relative" style={{ background: info.gradient || "oklch(72% 0.1 250)", backgroundBlendMode: "overlay" }}>
+                  <div className="w-full h-[60%] flex items-center justify-center relative" style={{ background: `${info.gradient || "oklch(72% 0.1 250)"}, url('/card-bg.png') center/cover`, backgroundBlendMode: "overlay" }}>
                     {info.faceUrl ? (
                       <img src={info.faceUrl} alt={info.name} className="w-[65%] h-[70%] object-contain" referrerPolicy="no-referrer" />
                     ) : (
