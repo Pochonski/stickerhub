@@ -239,13 +239,6 @@ export function BoosterPack({
               </span>
             </div>
 
-            {/* Team name */}
-            <div className="flex items-center gap-2 bg-black/20 rounded-full px-4 py-1.5">
-              <span className="text-lg">{teamFlag}</span>
-              <span className="text-xs font-bold text-white/80 tracking-wider uppercase">
-                {teamName}
-              </span>
-            </div>
 
             {/* Sparkles bottom */}
             <Sparkles

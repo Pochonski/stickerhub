@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { AppNav } from "./AppNav";
 import { useUser } from "@/hooks/useUser";
-import { Trophy, User, LogIn } from "lucide-react";
+import { Trophy, User, LogIn, Coins } from "lucide-react";
+import { useGame } from "@/context/GameContext";
 
 export function AppHeader() {
   const { user, loading } = useUser();
+  const { coins } = useGame();
 
   return (
     <header className="flex items-center justify-between py-4 border-b border-[var(--color-border)] mb-8">
@@ -21,19 +23,28 @@ export function AppHeader() {
         <AppNav />
         {!loading && (
           user ? (
-            <Link
-              href="/profile"
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--color-accent-soft)] text-[var(--color-accent)] text-sm font-semibold no-underline transition-colors hover:bg-[var(--color-accent)]/10"
-            >
-              <div className="w-6 h-6 rounded-full bg-[var(--color-accent)] grid place-items-center text-white text-[11px] font-bold overflow-hidden">
-                {user.user_metadata?.avatar_url ? (
-                  <img src={user.user_metadata.avatar_url} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                ) : (
-                  <User size={12} />
-                )}
-              </div>
-              {user.user_metadata?.full_name || user.email?.split("@")[0]}
-            </Link>
+            <>
+              <Link
+                href="/shop"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-accent-soft)] text-[var(--color-accent)] text-xs font-semibold no-underline"
+              >
+                <Coins size={14} />
+                {coins.toLocaleString()}
+              </Link>
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--color-accent-soft)] text-[var(--color-accent)] text-sm font-semibold no-underline transition-colors hover:bg-[var(--color-accent)]/10"
+              >
+                <div className="w-6 h-6 rounded-full bg-[var(--color-accent)] grid place-items-center text-white text-[11px] font-bold overflow-hidden">
+                  {user.user_metadata?.avatar_url ? (
+                    <img src={user.user_metadata.avatar_url} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    <User size={12} />
+                  )}
+                </div>
+                {user.user_metadata?.full_name || user.email?.split("@")[0]}
+              </Link>
+            </>
           ) : (
             <Link
               href="/login"

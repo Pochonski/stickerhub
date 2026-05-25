@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: "/trading", label: "Intercambios" },
   { href: "/my-cards", label: "Mis Stickers" },
   { href: "/profile", label: "Perfil" },
+  { href: "/shop", label: "Tienda" },
 ];
 
 export function AppNav() {

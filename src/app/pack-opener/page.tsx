@@ -18,7 +18,7 @@ import { PackageOpen, Sparkles } from "lucide-react";
 function PackOpenerContent() {
   const searchParams = useSearchParams();
   const teamParam = searchParams.get("team") || "argentina";
-  const { state, openPack, collectCard, addPacks } = useGame();
+  const { state, openPack, collectCard } = useGame();
   const { addToast } = useToast();
 
   const [stage, setStage] = useState<"idle" | "torn" | "reveal" | "summary">("idle");
@@ -70,7 +70,7 @@ function PackOpenerContent() {
         <EmptyState
           icon={<PackageOpen size={36} strokeWidth={1.5} />}
           title="Sin sobres disponibles"
-          description="Ya abriste todos tus sobres. Conseguí más participando en intercambios o completando desafíos."
+          description="Ganá monedas descartando repetidas o completando equipos. ¡Visita la tienda para comprar más sobres!"
           action={
             <div className="flex gap-3 justify-center">
               <Link
@@ -79,12 +79,12 @@ function PackOpenerContent() {
               >
                 Ir a la colección
               </Link>
-              <button
-                onClick={() => addPacks(3)}
+              <Link
+                href="/shop"
                 className="inline-flex items-center gap-2 px-[22px] py-2.5 rounded-full border-[1.5px] border-[var(--color-border)] text-[var(--color-fg)] text-sm font-semibold cursor-pointer transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
               >
-                +3 sobres (demo)
-              </button>
+                🛒 Ir a la tienda
+              </Link>
             </div>
           }
         />

@@ -9,9 +9,12 @@ import { ALL_PLAYERS } from "@/data/players";
 import { ALL_STADIUM_CARDS, ALL_VENUE_CARDS } from "@/data/cards";
 import { TEAMS, STADIUMS, VENUES } from "@/data/teams";
 import type { Player } from "@/data/types";
-import { Search, WalletCards, Send, Inbox, ArrowRightLeft } from "lucide-react";
+import { Search, WalletCards, Send, Inbox, Trash2, Coins } from "lucide-react";
+import { coinValue } from "@/hooks/useSupabasePacks";
+import { useToast } from "@/hooks/useToast";
+import { getSupabase } from "@/lib/supabase/client";
 
-function getCardInfo(id: string): { name: string; gradient: string; sub?: string; type: string; faceUrl?: string } | null {
+function getCardInfo(id: string): { name: string; gradient: string; sub?: string; type: string; faceUrl?: string; overall?: number } | null {
   const player = ALL_PLAYERS.find((p) => p.id === id);
   if (player) {
     const team = TEAMS[player.teamId];
@@ -21,6 +24,7 @@ function getCardInfo(id: string): { name: string; gradient: string; sub?: string
       sub: `${player.pos} · #${player.num}`,
       type: "Jugador",
       faceUrl: player.faceUrl,
+      overall: player.overall ?? 0,
     };
   }
   const stadium = ALL_STADIUM_CARDS.find((c) => c.id === id);
@@ -31,7 +35,8 @@ function getCardInfo(id: string): { name: string; gradient: string; sub?: string
 }
 
 export default function MyCardsPage() {
-  const { state, isCollected, isDuplicate } = useGame();
+  const { state, isCollected, isDuplicate, coins } = useGame();
+  const { addToast } = useToast();
   const [search, setSearch] = useState("");
 
   const collectedIds = Object.keys(state.collected).filter((id) => isCollected(id));
@@ -40,11 +45,43 @@ export default function MyCardsPage() {
   const playerCollected = ALL_PLAYERS.filter((p) => isCollected(p.id)).length;
   const totalAll = totalPlayerCards + ALL_STADIUM_CARDS.length + ALL_VENUE_CARDS.length;
 
-  const filteredCollected = collectedIds.filter((id) => {
+const filteredCollected = collectedIds.filter((id) => {
     if (!search) return true;
     const info = getCardInfo(id);
     return info?.name.toLowerCase().includes(search.toLowerCase());
   });
+
+  const handleDiscard = async (cardId: string) => {
+    const info = getCardInfo(cardId);
+    if (!info) return;
+    const value = info.overall ? coinValue(info.overall) : 150;
+
+    const sb = getSupabase();
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return;
+
+    // Delete the duplicate from collection
+    const { error } = await sb
+      .from("user_collections")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("card_id", cardId)
+      .eq("is_duplicate", true);
+
+    if (error) { addToast("Error al descartar", "error"); return; }
+
+    // Add coins
+    const { data: packData } = await sb
+      .from("user_packs")
+      .select("coins")
+      .eq("user_id", user.id)
+      .single();
+
+    const newCoins = (packData?.coins ?? 0) + value;
+    await sb.from("user_packs").upsert({ user_id: user.id, coins: newCoins, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+
+    addToast(`¡Descartado! +${value} 🪙`, "success");
+  };
 
   return (
     <AppShell>
@@ -132,9 +169,17 @@ export default function MyCardsPage() {
                       <span className="text-xs font-semibold text-white">{info.name} · Repetida</span>
                     </div>
                   </div>
-                  <button className="w-full mt-2 px-3.5 py-1.5 rounded-full border-[1.5px] border-[var(--color-border)] text-sm font-semibold text-[var(--color-fg)] cursor-pointer transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]">
-                    Intercambiar
-                  </button>
+                  <div className="flex gap-1.5 mt-2">
+                    <button className="flex-1 px-2 py-1.5 rounded-full border-[1.5px] border-[var(--color-border)] text-xs font-semibold text-[var(--color-fg)] cursor-pointer transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]">
+                      Intercambiar
+                    </button>
+                    <button
+                      onClick={() => handleDiscard(id)}
+                      className="flex items-center gap-1 px-2 py-1.5 rounded-full bg-[var(--color-danger)]/10 border border-[var(--color-danger)]/20 text-xs font-semibold text-[var(--color-danger)] cursor-pointer transition-colors hover:bg-[var(--color-danger)]/20"
+                    >
+                      <Trash2 size={12} /> {info.overall ? `+${coinValue(info.overall)}` : "+150"}
+                    </button>
+                  </div>
                 </div>
               );
             })}

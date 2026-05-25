@@ -21,6 +21,7 @@ interface GameContextValue {
   resetGame: () => void;
   addPacks: (count: number) => void;
   usingSupabase: boolean;
+  coins: number;
 }
 
 const DEFAULT_STATE: GameState = {
@@ -171,7 +172,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const addPacks = useCallback(
     (count: number) => {
       if (usingSupabase) {
-        supabasePacks.addPacks(count);
+        supabasePacks.addCoins(count * 500); // For existing demo compatibility
         return;
       }
       setLocalState((prev) => ({ ...prev, packs: prev.packs + count }));
@@ -195,6 +196,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         resetGame,
         addPacks,
         usingSupabase,
+        coins: supabasePacks.coins,
       }}
     >
       {children}
