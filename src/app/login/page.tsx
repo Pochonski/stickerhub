@@ -25,16 +25,30 @@ export default function LoginPage() {
     if (!email || sending || cooldown > 0) return;
     setSending(true);
     setError("");
+
+    // Safety timeout: force reset if stuck > 8s
+    const timeout = setTimeout(() => {
+      setSending(false);
+      setError("El servidor no responde. Revisá tu conexión e intentá de nuevo.");
+      setCooldown(15);
+    }, 8000);
+
     try {
       await signIn(email);
+      clearTimeout(timeout);
       setSent(true);
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "";
-      if (msg.includes("429") || msg.includes("rate") || msg.includes("Too Many")) {
-        setError("Demasiados intentos. Esperá un minuto y probá de nuevo.");
-        setCooldown(60);
+      clearTimeout(timeout);
+      const msg = e instanceof Error ? e.message : String(e);
+      if (msg.includes("429") || msg.includes("rate") || msg.includes("Too Many") || msg.includes("limit")) {
+        setError("Demasiados intentos. Esperá 2 minutos y probá de nuevo.");
+        setCooldown(120);
+      } else if (msg.includes("400") || msg.includes("Bad Request")) {
+        setError("Email inválido o servicio no disponible. Revisá el email.");
+        setCooldown(10);
       } else {
-        setError("Error al enviar. Revisá el email e intentá de nuevo.");
+        setError(`Error: ${msg.slice(0, 60)}`);
+        setCooldown(30);
       }
     }
     setSending(false);
