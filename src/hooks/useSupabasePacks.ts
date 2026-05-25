@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getSupabase } from "@/lib/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 
@@ -34,6 +34,14 @@ export function usePacks() {
   const [totalOpened, setTotalOpened] = useState(0);
   const [coins, setCoins] = useState(2000);
   const [loading, setLoading] = useState(true);
+
+  const quantityRef = useRef(0);
+  const totalOpenedRef = useRef(0);
+  const coinsRef = useRef(2000);
+
+  useEffect(() => { quantityRef.current = quantity; }, [quantity]);
+  useEffect(() => { totalOpenedRef.current = totalOpened; }, [totalOpened]);
+  useEffect(() => { coinsRef.current = coins; }, [coins]);
 
   const fetchPacks = useCallback(async () => {
     if (!user) {
@@ -70,10 +78,11 @@ export function usePacks() {
   useEffect(() => { fetchPacks(); }, [fetchPacks]);
 
   const decrementPacks = useCallback(async (count: number) => {
-    if (quantity <= 0 || count <= 0 || !user) return false;
-    const actualCount = Math.min(count, quantity);
-    const newQty = quantity - actualCount;
-    const newOpened = totalOpened + actualCount;
+    const qty = quantityRef.current;
+    if (qty <= 0 || count <= 0 || !user) return false;
+    const actualCount = Math.min(count, qty);
+    const newQty = qty - actualCount;
+    const newOpened = totalOpenedRef.current + actualCount;
     setQuantity(newQty);
     setTotalOpened(newOpened);
     try {
@@ -83,20 +92,21 @@ export function usePacks() {
         { onConflict: "user_id" }
       );
     } catch {
-      setQuantity(quantity);
-      setTotalOpened(totalOpened);
+      setQuantity(qty);
+      setTotalOpened(totalOpenedRef.current);
       return false;
     }
     return true;
-  }, [quantity, totalOpened, user]);
+  }, [user]);
 
   const decrementPack = useCallback(async () => {
     return decrementPacks(1);
   }, [decrementPacks]);
 
   const spendCoins = useCallback(async (amount: number): Promise<boolean> => {
-    if (coins < amount || !user) return false;
-    const newCoins = coins - amount;
+    const c = coinsRef.current;
+    if (c < amount || !user) return false;
+    const newCoins = c - amount;
     setCoins(newCoins);
     try {
       const supabase = getSupabase();
@@ -106,14 +116,15 @@ export function usePacks() {
       );
       if (error) throw error;
     } catch {
-      setCoins(coins);
+      setCoins(c);
       return false;
     }
     return true;
-  }, [coins, user]);
+  }, [user]);
 
   const addCoins = useCallback(async (amount: number) => {
-    const newCoins = coins + amount;
+    const c = coinsRef.current;
+    const newCoins = c + amount;
     setCoins(newCoins);
     try {
       const supabase = getSupabase();
@@ -121,13 +132,15 @@ export function usePacks() {
         { user_id: user!.id, coins: newCoins, updated_at: new Date().toISOString() },
         { onConflict: "user_id" }
       );
-    } catch { setCoins(coins); }
-  }, [coins, user]);
+    } catch { setCoins(c); }
+  }, [user]);
 
   const buyPacks = useCallback(async (bundle: PackBundle): Promise<boolean> => {
-    if (coins < bundle.price || !user) return false;
-    const newCoins = coins - bundle.price;
-    const newQty = quantity + bundle.quantity;
+    const c = coinsRef.current;
+    const qty = quantityRef.current;
+    if (c < bundle.price || !user) return false;
+    const newCoins = c - bundle.price;
+    const newQty = qty + bundle.quantity;
     setCoins(newCoins);
     setQuantity(newQty);
     try {
@@ -139,11 +152,11 @@ export function usePacks() {
       if (error) throw error;
       return true;
     } catch {
-      setCoins(coins);
-      setQuantity(quantity);
+      setCoins(c);
+      setQuantity(qty);
       return false;
     }
-  }, [coins, quantity, user]);
+  }, [user]);
 
   return { quantity, totalOpened, coins, loading, decrementPack, decrementPacks, spendCoins, addCoins, buyPacks, refresh: fetchPacks };
 }
