@@ -32,7 +32,7 @@ export function usePacks() {
   const { user } = useAuth();
   const [quantity, setQuantity] = useState(0);
   const [totalOpened, setTotalOpened] = useState(0);
-  const [coins, setCoins] = useState(0);
+  const [coins, setCoins] = useState(2000);
   const [loading, setLoading] = useState(true);
 
   const fetchPacks = useCallback(async () => {
@@ -53,14 +53,14 @@ export function usePacks() {
 
       if (!data) {
         await supabase.from("user_packs").upsert(
-          { user_id: user.id, quantity: 0, coins: 500, updated_at: new Date().toISOString() },
+          { user_id: user.id, quantity: 0, coins: 2000, updated_at: new Date().toISOString() },
           { onConflict: "user_id" }
         );
         setQuantity(0);
-        setCoins(500);
+        setCoins(2000);
       } else {
         setQuantity(data.quantity);
-        setCoins(data.coins ?? 500);
+        setCoins(data.coins ?? 2000);
         setTotalOpened(data.total_opened ?? 0);
       }
     } catch {}
