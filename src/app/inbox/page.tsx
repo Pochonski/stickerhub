@@ -43,7 +43,29 @@ export default function InboxPage() {
           .select("*")
           .or(`from_user_id.eq.${user.id},to_user_id.eq.${user.id}`)
           .order("created_at", { ascending: false });
-        if (data) setTrades(data as TradeItem[]);
+        if (data) {
+          setTrades(data as TradeItem[]);
+          // Show celebration if user received a card from a recently completed trade (as sender)
+          const recentCompleted = (data as TradeItem[]).find(
+            (t) => t.from_user_id === user.id && t.status === "completed" && !localStorage.getItem(`celebrated-trade-${t.id}`)
+          );
+          if (recentCompleted) {
+            const player = ALL_PLAYERS.find((p) => p.id === recentCompleted.requested_card_id);
+            const team = player ? TEAMS[player.teamId] : null;
+            setCelebration({
+              receivedCard: {
+                name: recentCompleted.requested_card_name,
+                faceUrl: player?.faceUrl,
+                teamColor: team?.color,
+                teamColorDark: team?.colorDark,
+                num: player?.num,
+                teamName: team?.name,
+              },
+              givenCard: { name: recentCompleted.offered_card_name },
+            });
+            localStorage.setItem(`celebrated-trade-${recentCompleted.id}`, "true");
+          }
+        }
       } finally {
         setLoading(false);
       }
