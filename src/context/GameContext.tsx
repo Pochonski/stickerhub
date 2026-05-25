@@ -35,7 +35,7 @@ const GameContext = createContext<GameContextValue | null>(null);
 
 export function GameProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const [localState, setLocalState] = useLocalStorage<GameState>("album-virtual-state", DEFAULT_STATE);
+  const [localState, setLocalState] = useLocalStorage<GameState>("stickerhub-state", DEFAULT_STATE);
   const supabaseCollection = useCollection();
   const supabasePacks = usePacks();
   const usingSupabase = !!user;

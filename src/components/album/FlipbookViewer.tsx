@@ -101,7 +101,7 @@ export function FlipbookViewer() {
       <div className="flipbook-wrapper">
         {!isReady && (
           <div className="flex items-center justify-center w-[800px] h-[560px] max-sm:w-[360px] max-sm:h-[500px] text-[var(--color-muted)]">
-            Cargando álbum...
+            Cargando...
           </div>
         )}
 
@@ -134,7 +134,7 @@ export function FlipbookViewer() {
               <div className="text-center p-6">
                 <span className="text-[64px] block mb-3 drop-shadow-lg">🏆</span>
                 <h1 className="font-[var(--font-display)] text-[24px] font-extrabold tracking-tight mb-1.5">
-                  Álbum Virtual
+                  StickerHub
                 </h1>
                 <p className="font-[var(--font-display)] text-[15px] font-bold tracking-[0.2em] uppercase opacity-80">
                   FIFA World Cup

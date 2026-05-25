@@ -14,7 +14,7 @@ export default function Home() {
     <AppShell>
       <div className="text-center py-16 px-6">
         <h1 className="font-[var(--font-display)] text-[clamp(32px,5vw,48px)] font-extrabold tracking-tight bg-[linear-gradient(135deg,var(--color-accent),oklch(68%_0.16_68),var(--color-accent-hover))] bg-clip-text text-transparent">
-          Álbum Virtual FIFA
+          StickerHub FIFA
         </h1>
         <p className="text-[var(--color-muted)] text-lg max-w-[520px] mx-auto mt-3">
           Colecciona las postales de cada selección, estadio y sede del Mundial. Intercambia tus repetidas y descubre contenido exclusivo de cada jugador.
@@ -30,9 +30,9 @@ export default function Home() {
             <BookOpen className={iconClass} strokeWidth={1.5} />
           </div>
           <div className="p-4 flex flex-col flex-1">
-            <h3 className="text-[17px] font-bold font-[var(--font-display)] mb-1">Álbum</h3>
-            <p className="text-sm text-[var(--color-muted)] leading-relaxed flex-1">Explora el álbum por selección: cada equipo tiene su página con las postales que tienes y las que te faltan.</p>
-            <span className="inline-flex items-center gap-1.5 mt-3.5 text-sm font-semibold text-[var(--color-accent)]">Abrir álbum &rarr;</span>
+            <h3 className="text-[17px] font-bold font-[var(--font-display)] mb-1">Colección</h3>
+            <p className="text-sm text-[var(--color-muted)] leading-relaxed flex-1">Explora las selecciones: cada equipo tiene su página con los stickers que tenés y los que te faltan.</p>
+            <span className="inline-flex items-center gap-1.5 mt-3.5 text-sm font-semibold text-[var(--color-accent)]">Abrir colección &rarr;</span>
           </div>
         </Link>
 
@@ -58,7 +58,7 @@ export default function Home() {
             <WalletCards className={iconClass} strokeWidth={1.5} />
           </div>
           <div className="p-4 flex flex-col flex-1">
-            <h3 className="text-[17px] font-bold font-[var(--font-display)] mb-1">Mis Postales</h3>
+            <h3 className="text-[17px] font-bold font-[var(--font-display)] mb-1">Mis Stickers</h3>
             <p className="text-sm text-[var(--color-muted)] leading-relaxed flex-1">Tu colección personal: postales obtenidas, repetidas, favoritas. Gestiona tu inventario para intercambios.</p>
             <span className="inline-flex items-center gap-1.5 mt-3.5 text-sm font-semibold text-[var(--color-accent)]">Ver colección &rarr;</span>
           </div>

@@ -58,7 +58,7 @@ export function PackSummary({ show, cards, teamFlag, teamName, onOpenAnother }: 
           href="/album"
           className="inline-flex items-center gap-2 px-[22px] py-2.5 rounded-full border-[1.5px] border-[var(--color-border)] text-[var(--color-fg)] text-sm font-semibold no-underline transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
         >
-          Ir al álbum
+          Ir a la colección
         </Link>
       </div>
     </div>

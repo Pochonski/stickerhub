@@ -72,7 +72,7 @@ function PackOpenerContent() {
                 href="/album"
                 className="inline-flex items-center gap-2 px-[22px] py-2.5 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold no-underline transition-colors hover:bg-[var(--color-accent-hover)]"
               >
-                Ir al álbum
+                Ir a la colección
               </Link>
               <button
                 onClick={() => addPacks(3)}

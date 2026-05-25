@@ -24,13 +24,13 @@ export default function AlbumPage() {
 
   return (
     <AppShell>
-      <h1 className="font-[var(--font-display)] text-[28px] font-bold tracking-tight mb-2">Álbum Mundial FIFA 2026</h1>
+      <h1 className="font-[var(--font-display)] text-[28px] font-bold tracking-tight mb-2">StickerHub Mundial FIFA 2026</h1>
       <p className="text-[var(--color-muted)] text-[15px] mb-8">Explora las selecciones, estadios y sedes. Completá tu colección abriendo sobres e intercambiando repetidas.</p>
 
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4 mb-9 max-sm:grid-cols-2">
         <StatCard num={totalCollected} label="Postales obtenidas" />
-        <StatCard num={`${totalAll > 0 ? Math.round((totalCollected / totalAll) * 100) : 0}%`} label="Álbum completado" />
+        <StatCard num={`${totalAll > 0 ? Math.round((totalCollected / totalAll) * 100) : 0}%`} label="Completado" />
         <StatCard num={`${state.packs}`} label="Sobres disponibles" />
         <StatCard num={`${TEAM_LIST.length}`} label="Selecciones" />
       </div>
@@ -46,7 +46,7 @@ export default function AlbumPage() {
           href="/album/flipbook"
           className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full border-[1.5px] border-[var(--color-accent)] text-[var(--color-accent)] text-base font-semibold no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white"
         >
-          <BookOpen size={18} strokeWidth={2} /> Ver álbum completo
+          <BookOpen size={18} strokeWidth={2} /> Ver colección completa
         </Link>
       </div>
 

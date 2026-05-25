@@ -38,7 +38,7 @@ export function TeamCard({ team, collected, total, href, isPlayers = true }: Tea
           </span>
         ) : (
           <span className="inline-flex items-center gap-1.5 mt-3 text-[13px] font-semibold text-[var(--color-accent)]">
-            {isPlayers ? "Ver álbum" : "Ver postal"} &rarr;
+            {isPlayers ? "Ver colección" : "Ver sticker"} &rarr;
           </span>
         )}
       </div>

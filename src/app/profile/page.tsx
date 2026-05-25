@@ -44,8 +44,8 @@ function ProfileContent() {
     { id: 3, earned: completedTrades >= 1, icon: <Handshake size={24} strokeWidth={2} />, title: "Primer intercambio" },
     { id: 4, earned: completedTrades >= 10, icon: <Star size={24} strokeWidth={2} />, title: "10 intercambios" },
     { id: 5, earned: totalCollected >= 50, icon: <Medal size={24} strokeWidth={2} />, title: "50 postales" },
-    { id: 6, earned: pct >= 25, icon: <Award size={24} strokeWidth={2} />, title: "Álbum al 25%" },
-    { id: 7, earned: pct >= 50, icon: <Crown size={24} strokeWidth={2} />, title: "Álbum al 50%" },
+    { id: 6, earned: pct >= 25, icon: <Award size={24} strokeWidth={2} />, title: "Colección al 25%" },
+    { id: 7, earned: pct >= 50, icon: <Crown size={24} strokeWidth={2} />, title: "Colección al 50%" },
     { id: 8, earned: rep >= 100, icon: <Gem size={24} strokeWidth={2} />, title: "Reputación 100%" },
   ];
 
@@ -80,7 +80,7 @@ function ProfileContent() {
       <div className="grid grid-cols-2 gap-8 mb-12 max-sm:grid-cols-1">
         {/* Album summary */}
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-6 shadow-sm">
-          <h3 className="text-[17px] font-bold font-[var(--font-display)] mb-4">Resumen del álbum</h3>
+          <h3 className="text-[17px] font-bold font-[var(--font-display)] mb-4">Resumen</h3>
           <div className="flex flex-col gap-3">
             <div className="flex justify-between text-sm">
               <span className="text-[var(--color-muted)]">Progreso total</span>

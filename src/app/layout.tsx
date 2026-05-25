@@ -3,7 +3,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "Álbum Virtual — Mundial FIFA",
+  title: "StickerHub — Mundial FIFA",
   description: "Colecciona las postales de cada selección, estadio y sede del Mundial. Intercambia tus repetidas y descubre contenido exclusivo.",
 };
 

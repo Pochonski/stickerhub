@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
-  { href: "/album", label: "Álbum" },
+  { href: "/album", label: "Colección" },
   { href: "/trading", label: "Intercambios" },
-  { href: "/my-cards", label: "Mis Postales" },
+  { href: "/my-cards", label: "Mis Stickers" },
   { href: "/profile", label: "Perfil" },
 ];
 

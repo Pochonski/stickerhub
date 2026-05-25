@@ -53,7 +53,7 @@ export default function MyCardsPage() {
 
       <div className="grid grid-cols-4 gap-5 mb-10 max-sm:grid-cols-2">
         <StatCard num={collectedIds.length} label="Postales obtenidas" />
-        <StatCard num={`${totalAll > 0 ? Math.round((collectedIds.length / totalAll) * 100) : 0}%`} label="Álbum completado" />
+        <StatCard num={`${totalAll > 0 ? Math.round((collectedIds.length / totalAll) * 100) : 0}%`} label="Completado" />
         <StatCard num={duplicateIds.length} label="Repetidas" />
         <StatCard num={state.trades.filter((t) => t.status === "pending").length} label="En intercambio" />
       </div>
