@@ -38,9 +38,13 @@ export default function MyCardsPage() {
   const { state, isCollected, isDuplicate, coins } = useGame();
   const { addToast } = useToast();
   const [search, setSearch] = useState("");
+  const [discardedIds, setDiscardedIds] = useState<Set<string>>(new Set());
+  const [localCoins, setLocalCoins] = useState(coins);
+  const [localDupeCount, setLocalDupeCount] = useState<number | null>(null);
 
   const collectedIds = Object.keys(state.collected).filter((id) => isCollected(id));
-  const duplicateIds = state.duplicates;
+  const duplicateIds = state.duplicates.filter((id) => !discardedIds.has(id));
+  const displayDupeCount = localDupeCount ?? duplicateIds.length;
   const totalPlayerCards = ALL_PLAYERS.length;
   const playerCollected = ALL_PLAYERS.filter((p) => isCollected(p.id)).length;
   const totalAll = totalPlayerCards + ALL_STADIUM_CARDS.length + ALL_VENUE_CARDS.length;
@@ -79,6 +83,11 @@ const filteredCollected = collectedIds.filter((id) => {
 
     const newCoins = (packData?.coins ?? 0) + value;
     await sb.from("user_packs").upsert({ user_id: user.id, coins: newCoins, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+
+    // Update local state
+    setDiscardedIds((prev) => new Set(prev).add(cardId));
+    setLocalDupeCount((prev) => (prev ?? duplicateIds.length) - 1);
+    setLocalCoins(newCoins);
 
     addToast(`¡Descartado! +${value} 🪙`, "success");
   };
@@ -152,9 +161,9 @@ const filteredCollected = collectedIds.filter((id) => {
       <div className="mb-12">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-[22px] font-bold font-[var(--font-display)] tracking-tight">Postales repetidas</h2>
-          <Pill variant="warning">{duplicateIds.length} para intercambiar</Pill>
+          <Pill variant="warning">{displayDupeCount} para intercambiar</Pill>
         </div>
-        {duplicateIds.length === 0 ? (
+        {displayDupeCount === 0 ? (
           <p className="text-sm text-[var(--color-muted)]">No tienes postales repetidas. ¡Sigue abriendo sobres!</p>
         ) : (
           <div className="flex gap-4 flex-wrap">
