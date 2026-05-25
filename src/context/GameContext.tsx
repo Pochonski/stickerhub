@@ -11,6 +11,7 @@ interface GameContextValue {
   state: GameState;
   collectCard: (cardId: string) => void;
   openPack: (teamId: string) => number;
+  openPacks: (count: number) => void;
   requestTrade: (cardId: string, cardName: string, fromUser: string, offeredCardId: string, offeredCardName: string) => void;
   cancelTrade: (tradeId: string) => void;
   completeTrade: (tradeId: string) => void;
@@ -97,6 +98,23 @@ export function GameProvider({ children }: { children: ReactNode }) {
       return localState.packs;
     },
     [usingSupabase, supabasePacks, localState.packs, setLocalState]
+  );
+
+  const openPacks = useCallback(
+    (count: number) => {
+      if (usingSupabase) {
+        for (let i = 0; i < count; i++) {
+          supabasePacks.decrementPack();
+        }
+        return;
+      }
+      setLocalState((prev) => ({
+        ...prev,
+        packs: Math.max(0, prev.packs - count),
+        openedPacks: prev.openedPacks + count,
+      }));
+    },
+    [usingSupabase, supabasePacks, setLocalState]
   );
 
   const requestTrade = useCallback(
@@ -186,6 +204,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         state,
         collectCard,
         openPack,
+        openPacks,
         requestTrade,
         cancelTrade,
         completeTrade,

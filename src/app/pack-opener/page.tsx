@@ -20,7 +20,7 @@ const QUANTITY_OPTIONS = [1, 2, 3, 5, 10];
 function PackOpenerContent() {
   const searchParams = useSearchParams();
   const teamParam = searchParams.get("team") || "argentina";
-  const { state, openPack, collectCard } = useGame();
+  const { state, openPacks, collectCard } = useGame();
   const { addToast } = useToast();
 
   const [stage, setStage] = useState<"idle" | "torn" | "reveal" | "summary">("idle");
@@ -33,10 +33,12 @@ function PackOpenerContent() {
   const handleTearComplete = useCallback(() => {
     if (state.packs <= 0) return;
     
+    const actualCount = Math.min(quantity, state.packs);
+    openPacks(actualCount);
+    
     // Generate cards for all packs
     const allCards: PackCard[] = [];
-    for (let i = 0; i < Math.min(quantity, state.packs); i++) {
-      openPack(teamParam);
+    for (let i = 0; i < actualCount; i++) {
       allCards.push(...generateMixedPack(state.collected));
     }
     
@@ -53,7 +55,7 @@ function PackOpenerContent() {
     } else {
       setStage("reveal");
     }
-  }, [state.packs, state.collected, openPack, teamParam, quantity, collectCard, addToast]);
+  }, [state.packs, state.collected, openPacks, quantity, collectCard, addToast]);
 
   const handleFlipCard = useCallback(
     (_idx: number) => {
