@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, ArrowRightLeft, WalletCards, Store, User, PackageOpen, Trash2, Ellipsis } from "lucide-react";
+import { BookOpen, ArrowRightLeft, WalletCards, Store, User, PackageOpen, Trash2, Inbox, Ellipsis } from "lucide-react";
 import { useState } from "react";
 
 const MAIN_ITEMS = [
@@ -14,7 +14,8 @@ const MAIN_ITEMS = [
 ];
 
 const MORE_ITEMS = [
-  { href: "/pack-opener", label: "Abrir Sobres", icon: PackageOpen },
+  { href: "/pack-opener", label: "Sobres", icon: PackageOpen },
+  { href: "/inbox", label: "Buzón", icon: Inbox },
   { href: "/discard", label: "Descartes", icon: Trash2 },
 ];
 
