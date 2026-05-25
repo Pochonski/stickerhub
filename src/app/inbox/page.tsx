@@ -51,41 +51,15 @@ export default function InboxPage() {
 
   const handleAccept = async (trade: TradeItem) => {
     const sb = getSupabase();
-    // Transfer offered card (from initiator) to recipient
-    const { error: removeOffered } = await sb.from("user_collections").delete()
-      .eq("user_id", trade.from_user_id).eq("card_id", trade.offered_card_id).eq("is_duplicate", true);
-    if (removeOffered) { addToast("Error al transferir", "error"); return; }
-
-    await sb.from("user_collections").upsert(
-      { user_id: user!.id, card_id: trade.offered_card_id, is_duplicate: false, source: "trade", collected_at: new Date().toISOString() },
-      { onConflict: "user_id, card_id, is_duplicate" }
-    );
-
-    // Transfer requested card (from recipient) to initiator
-    const { error: removeReq } = await sb.from("user_collections").delete()
-      .eq("user_id", user!.id).eq("card_id", trade.requested_card_id).eq("is_duplicate", true);
-    if (removeReq) { addToast("Error al transferir", "error"); return; }
-
-    await sb.from("user_collections").upsert(
-      { user_id: trade.from_user_id, card_id: trade.requested_card_id, is_duplicate: false, source: "trade", collected_at: new Date().toISOString() },
-      { onConflict: "user_id, card_id, is_duplicate" }
-    );
-
-    await sb.from("trade_offers").update({ status: "completed", completed_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", trade.id);
-    if (trade.listing_id) {
-      await sb.from("trade_listings").update({ is_active: false, updated_at: new Date().toISOString() }).eq("id", trade.listing_id);
-    }
-
-    await sb.from("notifications").insert({
-      user_id: trade.from_user_id, type: "trade_completed",
-      title: "Intercambio completado", body: `Recibiste ${trade.requested_card_name}`,
+    const { error } = await sb.rpc("accept_trade", {
+      trade_id: trade.id,
+      acceptor_id: user!.id,
     });
-
-    try { await sb.rpc("increment_reputation", { user_id: trade.from_user_id }); } catch {}
-    try { await sb.rpc("increment_reputation", { user_id: user!.id }); } catch {}
-
+    if (error) {
+      addToast("Error al aceptar: " + error.message, "error");
+      return;
+    }
     setTrades((prev) => prev.map((t) => t.id === trade.id ? { ...t, status: "completed" } : t));
-    completeTrade(trade.id);
     addToast("¡Intercambio aceptado! Cartas transferidas.", "success");
   };
 
