@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useCallback, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useCollection } from "@/hooks/useSupabaseCollection";
 import { usePacks } from "@/hooks/useSupabasePacks";
@@ -12,7 +12,7 @@ interface GameContextValue {
   state: GameState;
   collectCard: (cardId: string) => void;
   openPack: (teamId: string) => number;
-  openPacks: (count: number) => void;
+  openPacks: (count: number) => number;
   requestTrade: (cardId: string, cardName: string, toUserId: string, offeredCardId: string, offeredCardName: string, listingId?: string) => void;
   cancelTrade: (tradeId: string) => void;
   completeTrade: (tradeId: string) => void;
@@ -81,7 +81,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [user, localState]);
 
   // Build state from Supabase when available, fall back to localStorage
-  const state: GameState = usingSupabase
+  const state: GameState = useMemo(() => usingSupabase
     ? {
         collected: Object.fromEntries(
           supabaseCollection.collected
@@ -93,7 +93,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         trades: supabaseTrades,
         openedPacks: supabasePacks.totalOpened,
       }
-    : localState;
+    : localState, [usingSupabase, supabaseCollection.collected, supabaseCollection.duplicates, supabasePacks.quantity, supabasePacks.totalOpened, supabaseTrades, localState]);
 
   const collectCard = useCallback(
     (cardId: string) => {
@@ -116,10 +116,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
   );
 
   const openPack = useCallback(
-    (teamId: string) => {
+    (teamId: string): number => {
       if (usingSupabase) {
-        supabasePacks.decrementPack();
-        return supabasePacks.quantity;
+        return supabasePacks.decrementPack();
       }
       if (localState.packs <= 0) return 0;
       setLocalState((prev) => ({
@@ -127,24 +126,27 @@ export function GameProvider({ children }: { children: ReactNode }) {
         packs: prev.packs - 1,
         openedPacks: prev.openedPacks + 1,
       }));
-      return localState.packs;
+      return 1;
     },
     [usingSupabase, supabasePacks, localState.packs, setLocalState]
   );
 
   const openPacks = useCallback(
-    (count: number) => {
+    (count: number): number => {
       if (usingSupabase) {
-        supabasePacks.decrementPacks(count);
-        return;
+        return supabasePacks.decrementPacks(count);
       }
-      setLocalState((prev) => ({
-        ...prev,
-        packs: Math.max(0, prev.packs - count),
-        openedPacks: prev.openedPacks + count,
-      }));
+      setLocalState((prev) => {
+        const actual = Math.min(count, prev.packs);
+        return {
+          ...prev,
+          packs: Math.max(0, prev.packs - count),
+          openedPacks: prev.openedPacks + count,
+        };
+      });
+      return Math.min(count, localState.packs);
     },
-    [usingSupabase, supabasePacks, setLocalState]
+    [usingSupabase, supabasePacks, localState.packs, setLocalState]
   );
 
   const requestTrade = useCallback(

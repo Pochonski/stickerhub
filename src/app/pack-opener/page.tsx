@@ -27,14 +27,16 @@ function PackOpenerContent() {
   const [currentPack, setCurrentPack] = useState<PackCard[]>([]);
   const [flipped, setFlipped] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [openedCount, setOpenedCount] = useState(0);
 
   const team = TEAMS[teamParam] || TEAMS.argentina;
 
   const handleTearComplete = useCallback(() => {
     if (state.packs <= 0) return;
     
-    const actualCount = Math.min(quantity, state.packs);
-    openPacks(actualCount);
+    const actualCount = openPacks(quantity);
+    if (actualCount <= 0) return;
+    setOpenedCount(actualCount);
     
     // Generate cards for all packs
     const allCards: PackCard[] = [];
@@ -46,11 +48,11 @@ function PackOpenerContent() {
     setFlipped(0);
 
     // If opening multiple packs, skip flip animation and collect immediately
-    if (quantity > 1) {
+    if (actualCount > 1) {
       allCards.forEach((card) => collectCard(card.id));
       const newCards = allCards.filter((c) => c.isNew).length;
       const dupeCards = allCards.filter((c) => !c.isNew).length;
-      addToast(`¡${quantity} sobres abiertos! ${newCards} nuevas, ${dupeCards} repetidas`, "success");
+      addToast(`¡${actualCount} sobres abiertos! ${newCards} nuevas, ${dupeCards} repetidas`, "success");
       setStage("summary");
     } else {
       setStage("reveal");
@@ -79,6 +81,7 @@ function PackOpenerContent() {
       setStage("idle");
       setCurrentPack([]);
       setFlipped(0);
+      setOpenedCount(0);
     }
   }, [state.packs]);
 
@@ -112,14 +115,12 @@ function PackOpenerContent() {
     );
   }
 
-  const maxCanOpen = Math.min(quantity, state.packs);
-
   return (
     <AppShell>
       <h1 className="font-[var(--font-display)] text-[28px] font-bold tracking-tight mb-2">
         {stage === "idle" && "Abrir sobres"}
         {stage === "reveal" && "Revelá tus stickers"}
-        {stage === "summary" && `Resultado de ${quantity > 1 ? `${quantity} sobres` : "sobre"}`}
+        {stage === "summary" && `Resultado de ${openedCount > 1 ? `${openedCount} sobres` : "sobre"}`}
       </h1>
       <p className="text-[var(--color-muted)] text-[15px] mb-8">
         {stage === "idle" && `Tocá el sobre para rasgarlo. Tenés ${state.packs} disponible${state.packs !== 1 ? "s" : ""}.`}
@@ -197,7 +198,7 @@ function PackOpenerContent() {
         {stage === "summary" && currentPack.length > 0 && (
           <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-6 shadow-md">
             <h3 className="font-[var(--font-display)] text-xl font-bold mb-4">
-              {quantity > 1 ? `${currentPack.length} stickers de ${quantity} sobres` : "¡Sobre abierto!"}
+              {openedCount > 1 ? `${currentPack.length} stickers de ${openedCount} sobres` : "¡Sobre abierto!"}
             </h3>
             <div className="flex gap-3 justify-center flex-wrap mb-6 max-h-[400px] overflow-y-auto p-2">
               {currentPack.map((card, i) => (
@@ -225,7 +226,7 @@ function PackOpenerContent() {
               disabled={state.packs <= 0}
               className="px-6 py-3 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-hover)] disabled:opacity-40"
             >
-              {state.packs > 0 ? `Abrir otro${quantity > 1 ? "s" : ""} (${state.packs} disponible${state.packs !== 1 ? "s" : ""})` : "Sin sobres"}
+              {state.packs > 0 ? `Abrir otro${openedCount > 1 ? "s" : ""} (${state.packs} disponible${state.packs !== 1 ? "s" : ""})` : "Sin sobres"}
             </button>
           </div>
         )}

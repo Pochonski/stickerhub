@@ -39,9 +39,9 @@ export function usePacks() {
   const totalOpenedRef = useRef(0);
   const coinsRef = useRef(2000);
 
-  useEffect(() => { quantityRef.current = quantity; }, [quantity]);
-  useEffect(() => { totalOpenedRef.current = totalOpened; }, [totalOpened]);
-  useEffect(() => { coinsRef.current = coins; }, [coins]);
+  quantityRef.current = quantity;
+  totalOpenedRef.current = totalOpened;
+  coinsRef.current = coins;
 
   const fetchPacks = useCallback(async () => {
     if (!user) {
@@ -77,29 +77,32 @@ export function usePacks() {
 
   useEffect(() => { fetchPacks(); }, [fetchPacks]);
 
-  const decrementPacks = useCallback(async (count: number) => {
+  const decrementPacks = useCallback((count: number): number => {
     const qty = quantityRef.current;
-    if (qty <= 0 || count <= 0 || !user) return false;
+    if (qty <= 0 || count <= 0 || !user) return 0;
     const actualCount = Math.min(count, qty);
     const newQty = qty - actualCount;
     const newOpened = totalOpenedRef.current + actualCount;
     setQuantity(newQty);
     setTotalOpened(newOpened);
-    try {
-      const supabase = getSupabase();
-      await supabase.from("user_packs").upsert(
-        { user_id: user.id, quantity: newQty, total_opened: newOpened, updated_at: new Date().toISOString() },
-        { onConflict: "user_id" }
-      );
-    } catch {
-      setQuantity(qty);
-      setTotalOpened(totalOpenedRef.current);
-      return false;
-    }
-    return true;
+
+    (async () => {
+      try {
+        const supabase = getSupabase();
+        await supabase.from("user_packs").upsert(
+          { user_id: user.id, quantity: newQty, total_opened: newOpened, updated_at: new Date().toISOString() },
+          { onConflict: "user_id" }
+        );
+      } catch {
+        setQuantity(qty);
+        setTotalOpened(totalOpenedRef.current);
+      }
+    })();
+
+    return actualCount;
   }, [user]);
 
-  const decrementPack = useCallback(async () => {
+  const decrementPack = useCallback((): number => {
     return decrementPacks(1);
   }, [decrementPacks]);
 
