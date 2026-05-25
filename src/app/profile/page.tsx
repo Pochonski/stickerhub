@@ -53,7 +53,7 @@ function ProfileContent() {
 
   return (
     <AppShell>
-      <div className="flex items-center gap-6 mb-10 max-sm:flex-col max-sm:text-center">
+      <div className="flex items-center gap-6 mb-10 max-sm:flex-col max-sm:text-center max-sm:gap-4">
         <div className="w-20 h-20 rounded-full overflow-hidden bg-[linear-gradient(135deg,var(--color-accent),oklch(68%_0.16_68))] grid place-items-center text-white text-[32px] font-bold font-[var(--font-display)] shrink-0">
           {avatarUrl ? (
             <img src={avatarUrl} alt={displayName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
@@ -61,17 +61,17 @@ function ProfileContent() {
             initials
           )}
         </div>
-        <div>
+        <div className="max-sm:flex max-sm:flex-col max-sm:items-center">
           <h1 className="font-[var(--font-display)] text-[26px] font-bold">{displayName}</h1>
           <p className="text-sm text-[var(--color-muted)] mt-0.5">{userEmail}</p>
-          <div className="flex gap-3 mt-2">
+          <div className="flex gap-3 mt-2 max-sm:justify-center">
             <Pill variant="accent">{badgeTier}</Pill>
             {user && <Pill variant="field">Online</Pill>}
           </div>
         </div>
         <button
           onClick={signOut}
-          className="ml-auto inline-flex items-center gap-2 px-4 py-2 rounded-full border-[1.5px] border-[var(--color-border)] text-sm font-semibold text-[var(--color-fg)] cursor-pointer transition-colors hover:border-[var(--color-danger)] hover:text-[var(--color-danger)] max-sm:ml-0"
+          className="ml-auto inline-flex items-center gap-2 px-4 py-2 rounded-full border-[1.5px] border-[var(--color-border)] text-sm font-semibold text-[var(--color-fg)] cursor-pointer transition-colors hover:border-[var(--color-danger)] hover:text-[var(--color-danger)] max-sm:ml-0 max-sm:mt-2"
         >
           <LogOut size={14} /> Salir
         </button>

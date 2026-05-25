@@ -16,7 +16,7 @@ export function AppNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex gap-2">
+    <nav className="hidden md:flex gap-2">
       {NAV_ITEMS.map((item) => {
         const isActive = pathname.startsWith(item.href);
         return (

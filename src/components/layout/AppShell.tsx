@@ -2,6 +2,7 @@
 
 import { useState, useEffect, type ReactNode } from "react";
 import { AppHeader } from "./AppHeader";
+import { MobileNav } from "./MobileNav";
 import { ToastContainer } from "./ToastContainer";
 import { useToast } from "@/hooks/useToast";
 
@@ -20,10 +21,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   useEffect(() => { setMounted(true); }, []);
 
   return (
-    <div className="max-w-[1200px] mx-auto px-6 max-sm:px-4">
+    <div className="max-w-[1200px] mx-auto px-4 md:px-6 pb-20 md:pb-0">
       <AppHeader />
       {mounted ? children : <ShellSkeleton />}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <MobileNav />
     </div>
   );
 }

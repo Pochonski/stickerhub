@@ -213,7 +213,7 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
             </div>
           )}
 
-          <div className="flex gap-3 mt-6">
+          <div className="flex gap-3 mt-6 max-sm:flex-col">
             <button
               onClick={() => collectCard(id)}
               className="px-7 py-3.5 rounded-full bg-[var(--color-accent)] text-white text-base font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-hover)]"

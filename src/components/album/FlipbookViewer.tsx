@@ -55,25 +55,25 @@ export function FlipbookViewer() {
   return (
     <div className="flex flex-col items-center gap-4">
       {/* Navigation bar */}
-      <div className="flex items-center justify-between w-full max-w-[800px] gap-4 px-4">
+      <div className="flex items-center justify-between w-full max-w-[800px] gap-2 md:gap-4 px-2 md:px-4 flex-wrap">
         <button
           onClick={() => router.back()}
           className="inline-flex items-center gap-1 text-sm text-[var(--color-muted)] hover:text-[var(--color-accent)] transition-colors shrink-0 bg-transparent border-none cursor-pointer"
         >
-          <ArrowLeft size={14} /> Volver
+          <ArrowLeft size={14} /> <span className="hidden sm:inline">Volver</span>
         </button>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3 order-1 sm:order-none">
           <button
             onClick={goPrev}
             disabled={currentPage <= 0}
             className="p-2 rounded-full border border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             aria-label="Página anterior"
           >
-            <ChevronLeft size={20} />
+            <ChevronLeft size={18} className="md:size-5" />
           </button>
 
-          <span className="text-sm text-[var(--color-muted)] font-medium min-w-[100px] text-center">
+          <span className="text-xs md:text-sm text-[var(--color-muted)] font-medium min-w-[80px] md:min-w-[100px] text-center">
             {isReady && currentTeam ? `${currentTeamIndex + 1} / ${TEAM_LIST.length}` : isReady ? "Portada" : "..."}
           </span>
 
@@ -83,7 +83,7 @@ export function FlipbookViewer() {
             className="p-2 rounded-full border border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             aria-label="Página siguiente"
           >
-            <ChevronRight size={20} />
+            <ChevronRight size={18} className="md:size-5" />
           </button>
         </div>
 
@@ -92,7 +92,7 @@ export function FlipbookViewer() {
             href={`/pack-opener?team=${currentTeam.id}`}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--color-accent)] text-white text-xs font-semibold no-underline hover:bg-[var(--color-accent-hover)] transition-colors shrink-0"
           >
-            <PackageOpen size={14} strokeWidth={2} /> Sobres
+            <PackageOpen size={14} strokeWidth={2} /> <span className="hidden sm:inline">Sobres</span>
           </Link>
         )}
       </div>
@@ -100,7 +100,7 @@ export function FlipbookViewer() {
       {/* Flipbook */}
       <div className="flipbook-wrapper">
         {!isReady && (
-          <div className="flex items-center justify-center w-[800px] h-[560px] max-sm:w-[360px] max-sm:h-[500px] text-[var(--color-muted)]">
+          <div className="flex items-center justify-center w-[360px] sm:w-[800px] h-[500px] sm:h-[560px] text-[var(--color-muted)]">
             Cargando...
           </div>
         )}
@@ -194,8 +194,8 @@ export function FlipbookViewer() {
                     </div>
 
                     {/* Sticker grid */}
-                    <div className="flex-1 p-3 overflow-auto">
-                      <div className="grid grid-cols-5 gap-2">
+                    <div className="flex-1 p-2 md:p-3 overflow-auto">
+                      <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5 md:gap-2">
                         {players.map((p, i) => {
                           const collected2 = isCollected(p.id);
                           return (

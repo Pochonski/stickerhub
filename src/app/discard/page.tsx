@@ -77,12 +77,12 @@ export default function DiscardPage() {
 
   return (
     <AppShell>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-8 gap-4 max-sm:flex-col max-sm:items-start">
         <div>
           <h1 className="font-[var(--font-display)] text-[28px] font-bold tracking-tight mb-1">Descartes</h1>
           <p className="text-[var(--color-muted)] text-[15px]">Descartá tus stickers repetidas por monedas.</p>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 md:gap-6 max-sm:flex-wrap max-sm:w-full">
           <div className="text-right">
             <div className="text-xs text-[var(--color-muted)] uppercase tracking-wider">Valor total</div>
             <div className="flex items-center gap-1.5 justify-end">
@@ -93,7 +93,7 @@ export default function DiscardPage() {
           {duplicates.length > 0 && (
             <button
               onClick={handleDiscardAll}
-              className="px-5 py-2.5 rounded-full bg-[var(--color-danger)] text-white text-sm font-semibold cursor-pointer border-none flex items-center gap-2 transition-colors hover:opacity-90"
+              className="px-5 py-2.5 rounded-full bg-[var(--color-danger)] text-white text-sm font-semibold cursor-pointer border-none flex items-center gap-2 transition-colors hover:opacity-90 shrink-0"
             >
               <Trash2 size={16} /> Descartar todos (+{totalCoins.toLocaleString()} 🪙)
             </button>

@@ -52,12 +52,12 @@ export default function ShopPage() {
 
   return (
     <AppShell>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-8 gap-4 max-sm:flex-col max-sm:items-start">
         <div>
           <h1 className="font-[var(--font-display)] text-[28px] font-bold tracking-tight mb-1">Tienda de Sobres</h1>
           <p className="text-[var(--color-muted)] text-[15px]">Comprá sobres con monedas. Ganá monedas descartando repetidas.</p>
         </div>
-        <div className="flex items-center gap-2 bg-[var(--color-accent-soft)] rounded-full px-5 py-2.5">
+        <div className="flex items-center gap-2 bg-[var(--color-accent-soft)] rounded-full px-5 py-2.5 shrink-0">
           <Coins size={20} className="text-[var(--color-accent)]" />
           <span className="font-[var(--font-display)] text-xl font-bold text-[var(--color-accent)]">{coins.toLocaleString()}</span>
           <span className="text-sm text-[var(--color-muted)]">monedas</span>

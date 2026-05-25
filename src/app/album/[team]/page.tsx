@@ -95,42 +95,42 @@ export default function TeamAlbumPage({ params }: { params: Promise<{ team: stri
     <div className="flex flex-col h-full justify-between min-h-[300px]">
       <div>
         {/* Team crest */}
-        <div className="flex items-center gap-5 mb-6">
+        <div className="flex items-center gap-4 md:gap-5 mb-4 md:mb-6 max-sm:flex-col max-sm:items-start max-sm:text-center max-sm:w-full">
           <div
-            className="w-[80px] h-[80px] rounded-xl grid place-items-center text-[40px] shrink-0 shadow-sm"
+            className="w-[64px] h-[64px] md:w-[80px] md:h-[80px] rounded-xl grid place-items-center text-[32px] md:text-[40px] shrink-0 shadow-sm max-sm:self-center"
             style={{
               background: `linear-gradient(135deg, ${teamData.color}, ${teamData.colorDark})`,
             }}
           >
             {teamData.flag}
           </div>
-          <div>
+          <div className="max-sm:text-center max-sm:self-center">
             <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--color-muted)] mb-1 font-semibold">
               {sectionSub}
             </p>
-            <h1 className="font-[var(--font-display)] text-[30px] font-extrabold tracking-tight leading-tight">
+            <h1 className="font-[var(--font-display)] text-[24px] md:text-[30px] font-extrabold tracking-tight leading-tight">
               {teamData.name}
             </h1>
           </div>
         </div>
 
         {/* Progress ring */}
-        <div className="bg-white/30 backdrop-blur-[2px] rounded-xl p-5 mb-6">
-          <div className="flex items-center gap-4">
+        <div className="bg-white/30 backdrop-blur-[2px] rounded-xl p-4 md:p-5 mb-6">
+          <div className="flex items-center gap-3 md:gap-4 max-sm:flex-col max-sm:text-center">
             <div
-              className="relative w-[72px] h-[72px] shrink-0"
+              className="relative w-[60px] h-[60px] md:w-[72px] md:h-[72px] shrink-0"
               style={{
                 background: `conic-gradient(${isComplete ? "var(--color-success)" : "var(--color-accent)"} ${pct}%, var(--color-border) ${pct}%)`,
                 borderRadius: "50%",
               }}
             >
-              <div className="absolute inset-[6px] rounded-full bg-[var(--color-surface)] flex items-center justify-center">
-                <span className="font-[var(--font-display)] text-xl font-extrabold text-[var(--color-fg)]">{pct}%</span>
+              <div className="absolute inset-[5px] md:inset-[6px] rounded-full bg-[var(--color-surface)] flex items-center justify-center">
+                <span className="font-[var(--font-display)] text-lg md:text-xl font-extrabold text-[var(--color-fg)]">{pct}%</span>
               </div>
             </div>
             <div className="flex-1">
-              <div className="flex items-baseline gap-2 mb-1">
-                <span className="font-[var(--font-display)] text-[28px] font-extrabold text-[var(--color-accent)]">
+              <div className="flex items-baseline gap-2 mb-1 max-sm:justify-center">
+                <span className="font-[var(--font-display)] text-[22px] md:text-[28px] font-extrabold text-[var(--color-accent)]">
                   {collectedCount}
                 </span>
                 <span className="text-sm text-[var(--color-muted)]">de {total} stickers</span>
@@ -185,7 +185,7 @@ export default function TeamAlbumPage({ params }: { params: Promise<{ team: stri
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-3 max-sm:grid-cols-3">
+      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 md:gap-3">
         {cardList.map((card, i) => (
           <StickerSlot
             key={card.id}

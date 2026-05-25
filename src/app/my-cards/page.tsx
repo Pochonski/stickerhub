@@ -166,12 +166,12 @@ const filteredCollected = collectedIds.filter((id) => {
         {displayDupeCount === 0 ? (
           <p className="text-sm text-[var(--color-muted)]">No tienes postales repetidas. ¡Sigue abriendo sobres!</p>
         ) : (
-          <div className="flex gap-4 flex-wrap">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {duplicateIds.map((id) => {
               const info = getCardInfo(id);
               if (!info) return null;
               return (
-                <div key={id} className="w-40">
+                <div key={id} className="w-full">
                   <div className="aspect-[3/4] rounded-[var(--radius-md)] border border-[var(--color-border)] overflow-hidden relative">
                     <div className="w-full h-full" style={{ background: `${info.gradient}, url('/card-bg.png') center/cover`, backgroundBlendMode: "overlay" }} />
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8">

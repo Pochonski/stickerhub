@@ -141,11 +141,11 @@ export default function TradingPage() {
               </p>
             ) : (
               filtered.map((listing) => (
-                <div key={listing.id} className="flex items-center gap-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-4 px-5 transition-shadow hover:shadow-md max-sm:flex-wrap">
+                <div key={listing.id} className="flex items-center gap-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-4 px-5 transition-shadow hover:shadow-md max-sm:flex-col max-sm:items-start max-sm:gap-3">
                   <div className="w-16 h-[84px] rounded-lg overflow-hidden shrink-0 bg-[linear-gradient(180deg,oklch(72%_0.1_250),oklch(58%_0.12_250))] flex items-center justify-center text-white text-xs font-bold">
                     {listing.card_name.slice(0, 2)}
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 max-sm:w-full">
                     <div className="font-bold text-[15px] mb-0.5">{listing.card_name}</div>
                     <div className="text-[13px] text-[var(--color-muted)]">{listing.team_name || "—"}</div>
                     {listing.looking_for && (
@@ -158,7 +158,7 @@ export default function TradingPage() {
                   </div>
                   <button
                     onClick={() => openExchange(listing.card_name, listing.profiles?.[0]?.display_name || "Anónimo")}
-                    className="px-[22px] py-2.5 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-hover)]"
+                    className="px-[22px] py-2.5 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-hover)] max-sm:w-full"
                   >
                     Solicitar intercambio
                   </button>
