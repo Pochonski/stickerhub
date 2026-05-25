@@ -220,9 +220,6 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
             >
               {collected ? "Ya en tu colección" : "Agregar a colección"}
             </button>
-            <button className="px-7 py-3.5 rounded-full border-[1.5px] border-[var(--color-border)] text-[var(--color-fg)] text-base font-semibold cursor-pointer transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]">
-              Marcar como repetida
-            </button>
           </div>
         </div>
       </div>
