@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { Search, Send, Inbox, Plus, Upload } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Pill } from "@/components/ui/Pill";
 import { Modal } from "@/components/ui/Modal";
@@ -10,7 +10,8 @@ import { useGame } from "@/context/GameContext";
 import { getSupabase } from "@/lib/supabase/client";
 import { useToast } from "@/hooks/useToast";
 import { ALL_PLAYERS } from "@/data/players";
-import { Search, Send, Inbox, Plus, Upload } from "lucide-react";
+import { ALL_STADIUM_CARDS, ALL_VENUE_CARDS } from "@/data/cards";
+import { TEAMS, STADIUMS, VENUES } from "@/data/teams";
 
 interface ListingItem {
   id: string;
@@ -47,8 +48,12 @@ export default function TradingPage() {
   const handlePublish = async () => {
     if (!user || !publishCard) return;
     const player = ALL_PLAYERS.find((p) => p.id === publishCard.id);
-    const teamName = player ? (await import("@/data/teams").then(m => m.TEAMS[player.teamId]?.name)) : "";
-    const teamNameStr = teamName || "";
+    const stadium = ALL_STADIUM_CARDS.find((c) => c.id === publishCard.id);
+    const venue = ALL_VENUE_CARDS.find((c) => c.id === publishCard.id);
+    let teamNameStr = "";
+    if (player) teamNameStr = TEAMS[player.teamId]?.name || "";
+    else if (stadium) teamNameStr = STADIUMS[stadium.teamId]?.name || "";
+    else if (venue) teamNameStr = VENUES[venue.teamId]?.name || "";
     const sb = getSupabase();
     const { error } = await sb.from("trade_listings").insert({
       user_id: user.id, card_id: publishCard.id, card_name: publishCard.name,
@@ -91,7 +96,12 @@ export default function TradingPage() {
   const duplicates = state.duplicates;
   const duplicateNames = duplicates.map((id) => {
     const p = ALL_PLAYERS.find((pl) => pl.id === id);
-    return p ? { id: p.id, name: `${p.name} (${p.teamId.toUpperCase()})` } : { id, name: id };
+    if (p) return { id: p.id, name: `${p.name} (${p.teamId.toUpperCase()})` };
+    const s = ALL_STADIUM_CARDS.find((c) => c.id === id);
+    if (s) return { id: s.id, name: `${s.name} (${STADIUMS[s.teamId]?.name || s.teamId})` };
+    const v = ALL_VENUE_CARDS.find((c) => c.id === id);
+    if (v) return { id: v.id, name: `${v.name} (${VENUES[v.teamId]?.name || v.teamId})` };
+    return { id, name: id };
   });
 
   const filtered = listings.filter((t) =>
