@@ -11,6 +11,7 @@ import { ALL_STADIUM_CARDS, ALL_VENUE_CARDS } from "@/data/cards";
 import { TEAMS, TEAM_LIST, STADIUMS, VENUES } from "@/data/teams";
 import { Check, X, Send, Inbox, Loader2, Search } from "lucide-react";
 import { TradeCelebration } from "@/components/trade/TradeCelebration";
+import { TeamCompleteCelebration } from "@/components/celebration/TeamCompleteCelebration";
 
 interface TradeItem {
   id: string;
@@ -27,7 +28,7 @@ interface TradeItem {
 
 export default function InboxPage() {
   const { user } = useAuth();
-  const { state, completeTrade, cancelTrade, isCollected, refreshCollection } = useGame();
+  const { state, completeTrade, cancelTrade, isCollected, refreshCollection, checkTeamCompletions, completedTeams } = useGame();
   const { addToast } = useToast();
   const [tab, setTab] = useState<"received" | "sent">("received");
   const [trades, setTrades] = useState<TradeItem[]>([]);
@@ -35,6 +36,7 @@ export default function InboxPage() {
   const [search, setSearch] = useState("");
   const [nationFilter, setNationFilter] = useState("");
   const [celebration, setCelebration] = useState<{ receivedCard: { name: string; faceUrl?: string; teamColor?: string; teamColorDark?: string; num?: number; teamName?: string; flag?: string }; givenCard: { name: string } } | null>(null);
+  const [teamCelebration, setTeamCelebration] = useState<{ teamId: string; teamName: string; teamFlag: string; teamColor: string } | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -81,6 +83,12 @@ export default function InboxPage() {
 
     setTrades((prev) => prev.map((t) => t.id === trade.id ? { ...t, status: "completed" } : t));
     await refreshCollection();
+    checkTeamCompletions().then(teams => {
+      if (teams.length > 0) {
+        const t = TEAMS[teams[0]];
+        setTeamCelebration({ teamId: teams[0], teamName: t.name, teamFlag: t.flag, teamColor: t.color });
+      }
+    });
     addToast("¡Intercambio aceptado! Cartas transferidas.", "success");
 
     // Show celebration
@@ -247,6 +255,17 @@ export default function InboxPage() {
         givenCard={celebration?.givenCard || { name: "" }}
         onClose={() => setCelebration(null)}
       />
+      {teamCelebration && (
+        <TeamCompleteCelebration
+          show={!!teamCelebration}
+          teamName={teamCelebration.teamName}
+          teamFlag={teamCelebration.teamFlag}
+          teamColor={teamCelebration.teamColor}
+          reward={500}
+          totalCompleted={completedTeams.length}
+          onClose={() => setTeamCelebration(null)}
+        />
+      )}
     </AppShell>
   );
 }

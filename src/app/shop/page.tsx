@@ -8,17 +8,20 @@ import { TeamSelectModal } from "@/components/shop/TeamSelectModal";
 import { TeamPackResult } from "@/components/shop/TeamPackResult";
 import { generateTeamPack, type PackCard } from "@/lib/pack-generator";
 import { PackageOpen, Coins, Sparkles, Flag, Trash2, Trophy } from "lucide-react";
+import { TeamCompleteCelebration } from "@/components/celebration/TeamCompleteCelebration";
+import { TEAMS } from "@/data/teams";
 import { useState, useCallback } from "react";
 import type { Team } from "@/data/types";
 
 export default function ShopPage() {
-  const { coins, buyPacks, spendCoins, addCoins, collectCard, refreshCollection, state } = useGame();
+  const { coins, buyPacks, spendCoins, addCoins, collectCard, refreshCollection, checkTeamCompletions, completedTeams, state } = useGame();
   const { addToast } = useToast();
   const [buying, setBuying] = useState(false);
   const [showTeamModal, setShowTeamModal] = useState(false);
   const [teamPackResult, setTeamPackResult] = useState<PackCard[] | null>(null);
   const [teamPackTeam, setTeamPackTeam] = useState<Team | null>(null);
   const [teamPackLoading, setTeamPackLoading] = useState(false);
+  const [teamCelebration, setTeamCelebration] = useState<{ teamId: string; teamName: string; teamFlag: string; teamColor: string } | null>(null);
 
   const handleBuy = async (bundle: typeof PACK_BUNDLES[0]) => {
     if (coins < bundle.price) return;
@@ -55,6 +58,12 @@ export default function ShopPage() {
       }
       cards.forEach((c) => collectCard(c.id));
       await refreshCollection();
+      checkTeamCompletions().then(teams => {
+        if (teams.length > 0) {
+          const t = TEAMS[teams[0]];
+          setTeamCelebration({ teamId: teams[0], teamName: t.name, teamFlag: t.flag, teamColor: t.color });
+        }
+      });
       setTeamPackTeam(team);
       setTeamPackResult(cards);
       const newCount = cards.filter((c) => c.isNew).length;
@@ -175,6 +184,17 @@ export default function ShopPage() {
         teamFlag={teamPackTeam?.flag ?? ""}
         onClose={() => setTeamPackResult(null)}
       />
+      {teamCelebration && (
+        <TeamCompleteCelebration
+          show={!!teamCelebration}
+          teamName={teamCelebration.teamName}
+          teamFlag={teamCelebration.teamFlag}
+          teamColor={teamCelebration.teamColor}
+          reward={500}
+          totalCompleted={completedTeams.length}
+          onClose={() => setTeamCelebration(null)}
+        />
+      )}
     </AppShell>
   );
 }

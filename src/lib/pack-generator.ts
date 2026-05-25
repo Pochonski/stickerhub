@@ -1,4 +1,5 @@
 import { ALL_PLAYERS } from "@/data/players";
+import { TEAMS } from "@/data/teams";
 
 export interface PackCard {
   id: string;
@@ -38,14 +39,17 @@ export function generateMixedPack(collected: Record<string, boolean>): PackCard[
 }
 
 function makePackCard(p: typeof ALL_PLAYERS[0], collected: Record<string, boolean>): PackCard {
+  const team = TEAMS[p.teamId];
+  const tc = team?.color ?? "oklch(72% 0.1 250)";
+  const td = team?.colorDark ?? "oklch(58% 0.12 250)";
   return {
     id: p.id,
     name: p.name,
     num: p.num,
     pos: p.pos,
-    gradient: `linear-gradient(180deg, var(--team-color, oklch(72% 0.1 250)) 0%, var(--team-color-dark, oklch(58% 0.12 250)) 100%)`,
-    teamColor: "oklch(72% 0.1 250)",
-    teamColorDark: "oklch(58% 0.12 250)",
+    gradient: `linear-gradient(180deg, ${tc} 0%, ${td} 100%)`,
+    teamColor: tc,
+    teamColorDark: td,
     isNew: !collected[p.id],
     teamId: p.teamId,
     faceUrl: p.faceUrl,

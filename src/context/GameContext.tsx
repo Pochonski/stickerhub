@@ -8,6 +8,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { getSupabase } from "@/lib/supabase/client";
 import type { TradeOffer, GameState } from "@/data/types";
 import type { PackBundle } from "@/hooks/useSupabasePacks";
+import { PLAYERS } from "@/data/players";
 
 interface GameContextValue {
   state: GameState;
@@ -27,6 +28,8 @@ interface GameContextValue {
   refreshCollection: () => Promise<void>;
   addCoins: (amount: number) => Promise<void>;
   spendCoins: (amount: number) => Promise<boolean>;
+  completedTeams: string[];
+  checkTeamCompletions: () => Promise<string[]>;
   usingSupabase: boolean;
   coins: number;
 }
@@ -48,6 +51,34 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const supabasePacks = usePacks();
   const [supabaseTrades, setSupabaseTrades] = useState<TradeOffer[]>([]);
   const usingSupabase = !!user;
+  const [completedTeams, setCompletedTeams] = useLocalStorage<string[]>("stickerhub-completed-teams", []);
+
+  // Check for newly completed teams and award coins
+  const checkTeamCompletions = useCallback(async (): Promise<string[]> => {
+    const collected = usingSupabase
+      ? Object.fromEntries(supabaseCollection.collected.filter(c => !c.is_duplicate).map(c => [c.card_id, true]))
+      : localState.collected;
+
+    const newlyCompleted: string[] = [];
+    for (const teamId of Object.keys(PLAYERS)) {
+      if (completedTeams.includes(teamId)) continue;
+      const players = PLAYERS[teamId];
+      const collectedCount = players.filter(p => collected[p.id]).length;
+      if (collectedCount >= players.length && players.length > 0) {
+        newlyCompleted.push(teamId);
+      }
+    }
+
+    if (newlyCompleted.length > 0) {
+      const prev = completedTeams;
+      const updated = [...prev, ...newlyCompleted];
+      setCompletedTeams(updated);
+      for (const _ of newlyCompleted) {
+        await supabasePacks.addCoins(500);
+      }
+    }
+    return newlyCompleted;
+  }, [usingSupabase, supabaseCollection.collected, localState.collected, completedTeams, setCompletedTeams, supabasePacks]);
 
   // Fetch trades from Supabase
   const fetchTrades = useCallback(async () => {
@@ -283,6 +314,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
         refreshCollection: supabaseCollection.refresh,
         addCoins: supabasePacks.addCoins,
         spendCoins: supabasePacks.spendCoins,
+        completedTeams,
+        checkTeamCompletions,
         usingSupabase,
         coins: supabasePacks.coins,
       }}

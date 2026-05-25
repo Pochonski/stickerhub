@@ -16,13 +16,14 @@ import { TEAMS } from "@/data/teams";
 import { PackageOpen, Sparkles, Trophy, ShoppingCart, Coins } from "lucide-react";
 import { ALL_PLAYERS } from "@/data/players";
 import { coinValue } from "@/hooks/useSupabasePacks";
+import { TeamCompleteCelebration } from "@/components/celebration/TeamCompleteCelebration";
 
 const QUANTITY_OPTIONS = [1, 2, 3, 5, 10, 15, 20, 25, 50];
 
 function PackOpenerContent() {
   const searchParams = useSearchParams();
   const teamParam = searchParams.get("team") || "argentina";
-  const { state, openPacks, collectCard, refreshCollection } = useGame();
+  const { state, openPacks, collectCard, refreshCollection, checkTeamCompletions, completedTeams } = useGame();
   const { addToast } = useToast();
 
   const [stage, setStage] = useState<"idle" | "torn" | "reveal" | "summary">("idle");
@@ -30,6 +31,7 @@ function PackOpenerContent() {
   const [flipped, setFlipped] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [openedCount, setOpenedCount] = useState(0);
+  const [teamCelebration, setTeamCelebration] = useState<{ teamId: string; teamName: string; teamFlag: string; teamColor: string } | null>(null);
 
   const team = TEAMS[teamParam] || TEAMS.argentina;
 
@@ -52,7 +54,12 @@ function PackOpenerContent() {
     // If opening multiple packs, skip flip animation and collect immediately
     if (actualCount > 1) {
       allCards.forEach((card) => collectCard(card.id));
-      refreshCollection();
+      refreshCollection().then(() => checkTeamCompletions().then(teams => {
+        if (teams.length > 0) {
+          const t = TEAMS[teams[0]];
+          setTeamCelebration({ teamId: teams[0], teamName: t.name, teamFlag: t.flag, teamColor: t.color });
+        }
+      }));
       const newCards = allCards.filter((c) => c.isNew).length;
       const dupeCards = allCards.filter((c) => !c.isNew).length;
       addToast(`¡${actualCount} sobres abiertos! ${newCards} nuevas, ${dupeCards} repetidas`, "success");
@@ -60,7 +67,7 @@ function PackOpenerContent() {
     } else {
       setStage("reveal");
     }
-  }, [state.packs, state.collected, openPacks, quantity, collectCard, refreshCollection, addToast]);
+  }, [state.packs, state.collected, openPacks, quantity, collectCard, refreshCollection, checkTeamCompletions, addToast]);
 
   const handleFlipCard = useCallback(
     (_idx: number) => {
@@ -68,7 +75,12 @@ function PackOpenerContent() {
         const next = prev + 1;
         if (next >= currentPack.length) {
           currentPack.forEach((card) => collectCard(card.id));
-          refreshCollection();
+          refreshCollection().then(() => checkTeamCompletions().then(teams => {
+            if (teams.length > 0) {
+              const t = TEAMS[teams[0]];
+              setTeamCelebration({ teamId: teams[0], teamName: t.name, teamFlag: t.flag, teamColor: t.color });
+            }
+          }));
           const newCards = currentPack.filter((c) => c.isNew).length;
           const dupeCards = currentPack.filter((c) => !c.isNew).length;
           addToast(`¡Sobre abierto! ${newCards} nuevas, ${dupeCards} repetidas`, "success");
@@ -115,6 +127,17 @@ function PackOpenerContent() {
             </div>
           }
         />
+      {teamCelebration && (
+        <TeamCompleteCelebration
+          show={!!teamCelebration}
+          teamName={teamCelebration.teamName}
+          teamFlag={teamCelebration.teamFlag}
+          teamColor={teamCelebration.teamColor}
+          reward={500}
+          totalCompleted={completedTeams.length}
+          onClose={() => setTeamCelebration(null)}
+        />
+      )}
       </AppShell>
     );
   }
