@@ -356,12 +356,20 @@ export default function TradingPage() {
                 {!isCardAvailable(d.id) ? (
                   <div className="absolute top-1.5 right-1.5 bg-[var(--color-warning)]/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-sm">En uso</div>
                 ) : (
-                  <button
-                    onClick={() => { setPublishCard({ id: d.id, name: d.name }); setLookingFor(""); setPublishModal(true); }}
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center bg-black/40"
-                  >
-                    <span className="px-4 py-2 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold">Publicar</span>
-                  </button>
+                  <>
+                    <button
+                      onClick={() => { setPublishCard({ id: d.id, name: d.name }); setLookingFor(""); setPublishModal(true); }}
+                      className="max-sm:hidden absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center bg-black/40"
+                    >
+                      <span className="px-4 py-2 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold">Publicar</span>
+                    </button>
+                    <button
+                      onClick={() => { setPublishCard({ id: d.id, name: d.name }); setLookingFor(""); setPublishModal(true); }}
+                      className="sm:hidden absolute bottom-0 left-0 right-0 py-1.5 bg-[var(--color-primary)] text-white text-[11px] font-semibold text-center"
+                    >
+                      Publicar
+                    </button>
+                  </>
                 )}
               </div>
             ))}
