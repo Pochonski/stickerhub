@@ -203,7 +203,7 @@ function PackOpenerContent() {
             <div className="flex gap-3 justify-center flex-wrap mb-6 max-h-[400px] overflow-y-auto p-2">
               {currentPack.map((card, i) => (
                 <div key={i} className="w-[72px] aspect-[3/4] rounded-lg relative overflow-hidden border border-[var(--color-border)] shrink-0">
-                  <div className="w-full h-[55%] flex items-center justify-center" style={{ background: card.gradient }}>
+                  <div className="w-full h-[55%] flex items-center justify-center" style={{ background: `${card.gradient}, url('/card-bg.png') center/cover`, backgroundBlendMode: "overlay" }}>
                     {card.faceUrl ? (
                       <img src={card.faceUrl} alt={card.name} className="w-[60%] aspect-square object-contain" referrerPolicy="no-referrer" />
                     ) : card.num ? (

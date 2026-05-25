@@ -81,6 +81,7 @@ export default function TradingPage() {
   const [myListings, setMyListings] = useState<ListingItem[]>([]);
   const [loadingListings, setLoadingListings] = useState(false);
   const [loadingMyListings, setLoadingMyListings] = useState(false);
+  const [pendingOfferedIds, setPendingOfferedIds] = useState<Set<string>>(new Set());
   const [publishModal, setPublishModal] = useState(false);
   const [publishCard, setPublishCard] = useState<{ id: string; name: string } | null>(null);
   const [lookingFor, setLookingFor] = useState("");
@@ -92,6 +93,11 @@ export default function TradingPage() {
     const alreadyPublished = myListings.some((l) => l.card_id === publishCard.id);
     if (alreadyPublished) {
       addToast("Esta carta ya está publicada", "warning");
+      setPublishModal(false); setPublishCard(null);
+      return;
+    }
+    if (pendingOfferedIds.has(publishCard.id)) {
+      addToast("Ya tenés esta carta en un intercambio pendiente", "warning");
       setPublishModal(false); setPublishCard(null);
       return;
     }
@@ -147,6 +153,16 @@ export default function TradingPage() {
     fetchListings();
     fetchMyListings();
 
+    // Fetch cards already in pending trades (can't offer these again if limited)
+    const fetchPending = async () => {
+      const sb = getSupabase();
+      const { data } = await sb.from("trade_offers")
+        .select("offered_card_id")
+        .eq("from_user_id", user.id).eq("status", "pending");
+      if (data) setPendingOfferedIds(new Set(data.map((t: { offered_card_id: string }) => t.offered_card_id)));
+    };
+    fetchPending();
+
     // Realtime: new listings appear automatically
     const sb2 = getSupabase();
     const channel = sb2
@@ -173,6 +189,10 @@ export default function TradingPage() {
   const filteredDupes = sideSearch ? dupes.filter((d) => d.name.toLowerCase().includes(sideSearch.toLowerCase()) || d.teamName?.toLowerCase().includes(sideSearch.toLowerCase())) : dupes;
 
   const duplicateNames = dupes.map((d) => ({ id: d.id, name: d.name }));
+  // Filter out cards already in use (published or in pending trades)
+  const availableForExchange = duplicateNames.filter(
+    (d) => !publishedIds.has(d.id) && !pendingOfferedIds.has(d.id)
+  );
 
   const filtered = listings.filter((t) => {
     if (search && !t.card_name.toLowerCase().includes(search.toLowerCase()) && !t.team_name?.toLowerCase().includes(search.toLowerCase())) return false;
@@ -181,13 +201,13 @@ export default function TradingPage() {
 
   const openExchange = (listing: ListingItem) => {
     setSelectedTrade({ name: listing.card_name, owner: listing.profiles?.[0]?.display_name || "Anónimo", userId: listing.user_id, listingId: listing.id });
-    setOfferCardId(duplicateNames[0]?.id || "");
+    setOfferCardId(availableForExchange[0]?.id || "");
     setModalOpen(true);
   };
 
   const confirmExchange = () => {
     if (!selectedTrade || !offerCardId) return;
-    const offered = duplicateNames.find((d) => d.id === offerCardId);
+    const offered = availableForExchange.find((d) => d.id === offerCardId);
     requestTrade(selectedTrade.listingId, selectedTrade.name, selectedTrade.userId, offerCardId, offered?.name || offerCardId, selectedTrade.listingId);
     addToast("Solicitud enviada", "success");
     setModalOpen(false);
@@ -256,7 +276,7 @@ export default function TradingPage() {
             {filteredDupes.map((d) => (
               <div key={d.id} className="group relative bg-[var(--color-bg)] rounded-lg overflow-hidden border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 transition-all">
                 <div className="aspect-[3/4] relative">
-                  <div className="w-full h-[58%] flex items-center justify-center relative" style={{ background: d.teamColor ? `linear-gradient(180deg, ${d.teamColor} 0%, ${d.teamColorDark} 100%)` : "oklch(72% 0.1 250)" }}>
+                  <div className="w-full h-[58%] flex items-center justify-center relative" style={{ background: d.teamColor ? `linear-gradient(180deg, ${d.teamColor} 0%, ${d.teamColorDark} 100%), url('/card-bg.png') center/cover` : "oklch(72% 0.1 250)", backgroundBlendMode: d.teamColor ? "overlay" : undefined }}>
                     {d.faceUrl ? (
                       <img src={d.faceUrl} alt={d.name} className="w-[60%] h-[70%] object-contain" referrerPolicy="no-referrer" />
                     ) : (
@@ -273,6 +293,8 @@ export default function TradingPage() {
                 </div>
                 {publishedIds.has(d.id) ? (
                   <div className="absolute top-1.5 right-1.5 bg-[var(--color-success)]/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-sm">Publicada</div>
+                ) : pendingOfferedIds.has(d.id) ? (
+                  <div className="absolute top-1.5 right-1.5 bg-[var(--color-warning)]/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-sm">En uso</div>
                 ) : (
                   <button
                     onClick={() => { setPublishCard({ id: d.id, name: d.name }); setLookingFor(""); setPublishModal(true); }}
@@ -300,7 +322,7 @@ export default function TradingPage() {
                 const info = getDupeInfo(ml.card_id);
                 return (
                   <div key={ml.id} className="flex items-center gap-3 p-3 bg-[var(--color-bg)] rounded-lg border border-[var(--color-border)] max-sm:flex-col max-sm:items-start">
-                    <div className="w-[44px] h-[58px] rounded overflow-hidden shrink-0 flex items-center justify-center relative" style={{ background: info?.teamColor ? `linear-gradient(180deg, ${info.teamColor} 0%, ${info.teamColorDark} 100%)` : "oklch(72% 0.1 250)" }}>
+                    <div className="w-[44px] h-[58px] rounded overflow-hidden shrink-0 flex items-center justify-center relative" style={{ background: info?.teamColor ? `linear-gradient(180deg, ${info.teamColor} 0%, ${info.teamColorDark} 100%), url('/card-bg.png') center/cover` : "oklch(72% 0.1 250)", backgroundBlendMode: info?.teamColor ? "overlay" : undefined }}>
                       {info?.faceUrl ? (
                         <img src={info.faceUrl} alt={ml.card_name} className="w-[60%] h-[60%] object-contain" referrerPolicy="no-referrer" />
                       ) : (
@@ -363,7 +385,7 @@ export default function TradingPage() {
               const info = getDupeInfo(listing.card_id);
               return (
                 <div key={listing.id} className="flex items-center gap-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-4 transition-shadow hover:shadow-md max-sm:flex-col max-sm:items-start max-sm:gap-3">
-                  <div className="w-[60px] h-[80px] rounded-lg overflow-hidden shrink-0 flex items-center justify-center relative" style={{ background: info?.teamColor ? `linear-gradient(180deg, ${info.teamColor} 0%, ${info.teamColorDark} 100%)` : "oklch(72% 0.1 250)" }}>
+                  <div className="w-[60px] h-[80px] rounded-lg overflow-hidden shrink-0 flex items-center justify-center relative" style={{ background: info?.teamColor ? `linear-gradient(180deg, ${info.teamColor} 0%, ${info.teamColorDark} 100%), url('/card-bg.png') center/cover` : "oklch(72% 0.1 250)", backgroundBlendMode: info?.teamColor ? "overlay" : undefined }}>
                     {info?.faceUrl ? (
                       <img src={info.faceUrl} alt={listing.card_name} className="w-[65%] h-[65%] object-contain" referrerPolicy="no-referrer" />
                     ) : (
@@ -398,7 +420,11 @@ export default function TradingPage() {
         <p className="text-sm text-[var(--color-muted)] mb-5">Estás solicitando <strong>{selectedTrade?.name}</strong> de <strong>{selectedTrade?.owner}</strong>.</p>
         <label className="text-[13px] font-semibold block mb-1.5">Ofrecer a cambio:</label>
         <select value={offerCardId} onChange={(e) => setOfferCardId(e.target.value)} className="w-full px-3.5 py-2.5 rounded-[var(--radius-md)] border-[1.5px] border-[var(--color-border)] text-sm bg-[var(--color-bg)] mb-5">
-          {duplicateNames.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+          {availableForExchange.length === 0 ? (
+            <option value="">No tenés repetidas disponibles</option>
+          ) : (
+            availableForExchange.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)
+          )}
         </select>
         <div className="flex gap-2.5 justify-end">
           <button onClick={() => setModalOpen(false)} className="px-5 py-2.5 rounded-full bg-transparent text-[var(--color-muted)] text-sm font-semibold cursor-pointer border-none hover:bg-[var(--color-accent-soft)]">Cancelar</button>

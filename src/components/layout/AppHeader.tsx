@@ -11,19 +11,25 @@ export function AppHeader() {
   const { user, loading } = useUser();
   const [coins, setCoins] = useState(0);
   const [packs, setPacks] = useState(0);
+  const [pendingTrades, setPendingTrades] = useState(0);
 
   // Fetch initial + subscribe to realtime
   useEffect(() => {
     if (!user) return;
     const sb = getSupabase();
 
-    // Initial fetch
+    // Initial fetch: coins and packs
     sb.from("user_packs").select("coins, quantity").eq("user_id", user.id).maybeSingle().then(({ data }) => {
       if (data) { setCoins(data.coins ?? 0); setPacks(data.quantity ?? 0); }
     });
 
-    // Realtime subscription
-    const channel = sb
+    // Initial fetch: pending received trades
+    sb.from("trade_offers").select("id", { count: "exact", head: true })
+      .eq("to_user_id", user.id).eq("status", "pending")
+      .then(({ count }) => { setPendingTrades(count ?? 0); });
+
+    // Realtime for packs
+    const channel1 = sb
       .channel(`header-packs:${user.id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "user_packs", filter: `user_id=eq.${user.id}` },
         (payload) => { const d = payload.new as Record<string, unknown>; setCoins((d.coins as number) ?? 0); setPacks((d.quantity as number) ?? 0); })
@@ -31,7 +37,19 @@ export function AppHeader() {
         (payload) => { const d = payload.new as Record<string, unknown>; setCoins((d.coins as number) ?? 0); setPacks((d.quantity as number) ?? 0); })
       .subscribe();
 
-    return () => { sb.removeChannel(channel); };
+    // Realtime for incoming trades (for notification badge)
+    const channel2 = sb
+      .channel(`header-trades:${user.id}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "trade_offers", filter: `to_user_id=eq.${user.id}` },
+        () => { setPendingTrades((p) => p + 1); })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "trade_offers", filter: `to_user_id=eq.${user.id}` },
+        (payload) => {
+          const s = (payload.new as Record<string, unknown>).status as string;
+          if (s !== "pending") setPendingTrades((p) => Math.max(0, p - 1));
+        })
+      .subscribe();
+
+    return () => { sb.removeChannel(channel1); sb.removeChannel(channel2); };
   }, [user]);
 
   return (
@@ -54,6 +72,17 @@ export function AppHeader() {
               >
                 <Coins size={12} className="md:size-3.5" />
                 {coins.toLocaleString()}
+              </Link>
+              <Link
+                href="/inbox"
+                className="flex items-center gap-1 md:gap-1.5 px-2.5 md:px-3 py-1 md:py-1.5 rounded-full bg-[var(--color-accent-soft)] text-[var(--color-accent)] text-[11px] md:text-xs font-semibold no-underline relative"
+              >
+                📨
+                {pendingTrades > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-[var(--color-danger)] text-white text-[9px] font-bold w-4 h-4 rounded-full grid place-items-center">
+                    {pendingTrades > 9 ? "9+" : pendingTrades}
+                  </span>
+                )}
               </Link>
               <Link
                 href="/profile"
