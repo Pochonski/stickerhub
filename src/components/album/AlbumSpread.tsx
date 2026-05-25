@@ -17,9 +17,10 @@ export function AlbumSpread({
   return (
     <div className="album-spread relative flex max-lg:flex-col">
       {/* Left page */}
-      <div className="album-page relative flex-1 rounded-l-md max-lg:rounded-t-md max-lg:rounded-bl-none overflow-hidden">
-        {/* Background image */}
-        <img src="/fondo-izq.jpeg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none" />
+      <div
+        className="album-page relative flex-1 rounded-l-md max-lg:rounded-t-md max-lg:rounded-bl-none"
+        style={{ backgroundImage: "url('/fondo-izq.jpeg')", backgroundSize: "cover", backgroundPosition: "center" }}
+      >
         {/* Paper texture overlay */}
         <div className="paper-texture absolute inset-0 rounded-l-md max-lg:rounded-t-md max-lg:rounded-bl-none pointer-events-none" />
 
@@ -49,9 +50,10 @@ export function AlbumSpread({
       <div className="hidden max-lg:block w-full h-[2px] bg-gradient-to-b from-black/5 to-transparent" />
 
       {/* Right page */}
-      <div className="album-page relative flex-1 rounded-r-md max-lg:rounded-b-md max-lg:rounded-tr-none overflow-hidden">
-        {/* Background image */}
-        <img src="/fondo-der.jpeg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none" />
+      <div
+        className="album-page relative flex-1 rounded-r-md max-lg:rounded-b-md max-lg:rounded-tr-none"
+        style={{ backgroundImage: "url('/fondo-der.jpeg')", backgroundSize: "cover", backgroundPosition: "center" }}
+      >
         {/* Paper texture overlay */}
         <div className="paper-texture absolute inset-0 rounded-r-md max-lg:rounded-b-md max-lg:rounded-tr-none pointer-events-none" />
 
