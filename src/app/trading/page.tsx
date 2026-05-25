@@ -84,6 +84,7 @@ export default function TradingPage() {
   const [publishModal, setPublishModal] = useState(false);
   const [publishCard, setPublishCard] = useState<{ id: string; name: string } | null>(null);
   const [lookingFor, setLookingFor] = useState("");
+  const [section, setSection] = useState<"publish" | "mine" | "market">("publish");
 
   const handlePublish = async () => {
     if (!user || !publishCard) return;
@@ -173,9 +174,35 @@ export default function TradingPage() {
           <span className="flex items-center gap-1"><Users size={14} /> {state.trades.filter((t) => t.status === "pending").length} activos</span>
         </div>
       </div>
-      <p className="text-[var(--color-muted)] text-[15px] mb-8">Publicá tus repetidas y encontrá las que te faltan.</p>
+      <p className="text-[var(--color-muted)] text-[15px] mb-6">Publicá tus repetidas y encontrá las que te faltan.</p>
 
-      {/* PUBLICAR MIS REPETIDAS - Top section */}
+      {/* Section tabs */}
+      <div className="flex gap-1 bg-[var(--color-border)] p-1 rounded-full w-fit mb-8">
+        {[
+          { id: "publish" as const, label: "Publicar", icon: <Upload size={14} />, count: dupes.length },
+          { id: "mine" as const, label: "Mis activas", icon: <Send size={14} />, count: myListings.length },
+          { id: "market" as const, label: "Marketplace", icon: <Users size={14} />, count: listings.length },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setSection(tab.id)}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer border-none ${
+              section === tab.id
+                ? "bg-[var(--color-surface)] text-[var(--color-fg)] shadow-sm"
+                : "bg-transparent text-[var(--color-muted)] hover:text-[var(--color-fg)]"
+            }`}
+          >
+            {tab.icon}
+            {tab.label}
+            {tab.count > 0 && (
+              <span className="ml-0.5 text-[10px] font-bold bg-[var(--color-accent-soft)] text-[var(--color-accent)] px-1.5 py-0.5 rounded-full">{tab.count}</span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* PUBLICAR MIS REPETIDAS */}
+      {section === "publish" && (
       <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-5 mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-[var(--font-display)] text-lg font-bold flex items-center gap-2"><Upload size={18} className="text-[var(--color-primary)]" /> Publicar mis repetidas</h2>
@@ -189,8 +216,8 @@ export default function TradingPage() {
               />
             </div>
             <span className="text-xs text-[var(--color-muted)]">{filteredDupes.length} / {dupes.length}</span>
-          </div>
         </div>
+      </div>
 
         {dupes.length === 0 ? (
           <p className="text-sm text-[var(--color-muted)] text-center py-6">No tenés repetidas. ¡Abrí sobres para conseguir!</p>
@@ -227,42 +254,45 @@ export default function TradingPage() {
           </div>
         )}
       </div>
+      )}
 
       {/* MIS PUBLICACIONES ACTIVAS */}
-      {myListings.length > 0 && (
+      {section === "mine" && (
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-5 mb-8">
           <h2 className="font-[var(--font-display)] text-lg font-bold mb-4 flex items-center gap-2"><Send size={18} className="text-[var(--color-accent)]" /> Mis publicaciones activas</h2>
-          <div className="flex flex-col gap-2">
-            {myListings.map((ml) => {
-              const info = getDupeInfo(ml.card_id);
-              return (
-                <div key={ml.id} className="flex items-center gap-3 p-3 bg-[var(--color-bg)] rounded-lg border border-[var(--color-border)] max-sm:flex-col max-sm:items-start">
-                  <div className="w-[44px] h-[58px] rounded overflow-hidden shrink-0 flex items-center justify-center relative" style={{ background: info?.teamColor ? `linear-gradient(180deg, ${info.teamColor} 0%, ${info.teamColorDark} 100%)` : "oklch(72% 0.1 250)" }}>
-                    {info?.faceUrl ? (
-                      <img src={info.faceUrl} alt={ml.card_name} className="w-[60%] h-[60%] object-contain" referrerPolicy="no-referrer" />
-                    ) : (
-                      <span className="text-xs font-extrabold text-white/25">{ml.card_name.slice(0, 2)}</span>
-                    )}
+          {loadingMyListings && <p className="text-sm text-[var(--color-muted)] text-center py-4">Cargando...</p>}
+          {!loadingMyListings && myListings.length === 0 && <p className="text-sm text-[var(--color-muted)] text-center py-6">No tenés publicaciones activas.</p>}
+          {!loadingMyListings && myListings.length > 0 && (
+            <div className="flex flex-col gap-2">
+              {myListings.map((ml) => {
+                const info = getDupeInfo(ml.card_id);
+                return (
+                  <div key={ml.id} className="flex items-center gap-3 p-3 bg-[var(--color-bg)] rounded-lg border border-[var(--color-border)] max-sm:flex-col max-sm:items-start">
+                    <div className="w-[44px] h-[58px] rounded overflow-hidden shrink-0 flex items-center justify-center relative" style={{ background: info?.teamColor ? `linear-gradient(180deg, ${info.teamColor} 0%, ${info.teamColorDark} 100%)` : "oklch(72% 0.1 250)" }}>
+                      {info?.faceUrl ? (
+                        <img src={info.faceUrl} alt={ml.card_name} className="w-[60%] h-[60%] object-contain" referrerPolicy="no-referrer" />
+                      ) : (
+                        <span className="text-xs font-extrabold text-white/25">{ml.card_name.slice(0, 2)}</span>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <span className="font-semibold text-sm">{ml.card_name}</span>
+                      {ml.looking_for && <span className="text-xs text-[var(--color-muted)] ml-2">Busca: {ml.looking_for}</span>}
+                    </div>
+                    <span className="text-[10px] text-[var(--color-muted)]">{new Date(ml.created_at).toLocaleDateString("es-CR")}</span>
+                    <button onClick={() => handleUnpublish(ml.id)} className="px-3 py-1 rounded-full bg-[var(--color-danger)]/10 text-[var(--color-danger)] text-[11px] font-semibold cursor-pointer border-none hover:bg-[var(--color-danger)]/20">
+                      <X size={12} className="inline mr-1" />Quitar
+                    </button>
                   </div>
-                  <div className="flex-1">
-                    <span className="font-semibold text-sm">{ml.card_name}</span>
-                    {ml.looking_for && <span className="text-xs text-[var(--color-muted)] ml-2">Busca: {ml.looking_for}</span>}
-                  </div>
-                  <span className="text-[10px] text-[var(--color-muted)]">{new Date(ml.created_at).toLocaleDateString("es-CR")}</span>
-                  <button
-                    onClick={() => handleUnpublish(ml.id)}
-                    className="px-3 py-1 rounded-full bg-[var(--color-danger)]/10 text-[var(--color-danger)] text-[11px] font-semibold cursor-pointer border-none hover:bg-[var(--color-danger)]/20"
-                  >
-                    <X size={12} className="inline mr-1" />Quitar
-                  </button>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
-      {/* MARKETPLACE - Bottom section */}
+      {/* MARKETPLACE */}
+      {section === "market" && (
       <div>
         <h2 className="font-[var(--font-display)] text-lg font-bold mb-4">Marketplace</h2>
         <div className="flex gap-2 flex-wrap mb-5">
@@ -328,6 +358,7 @@ export default function TradingPage() {
           )}
         </div>
       </div>
+      )}
 
       {/* Trade request modal */}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
