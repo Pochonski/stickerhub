@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getSupabase } from "@/lib/supabase/client";
 import { useAuth } from "@/components/auth/AuthProvider";
 
-interface PackBundle {
+export interface PackBundle {
   quantity: number;
   price: number;
   label: string;
@@ -76,6 +76,34 @@ export function usePacks() {
   }, [user]);
 
   useEffect(() => { fetchPacks(); }, [fetchPacks]);
+
+  useEffect(() => {
+    if (!user) return;
+    const supabase = getSupabase();
+    const channel = supabase
+      .channel(`packs:${user.id}`)
+      .on("postgres_changes",
+        { event: "UPDATE", schema: "public", table: "user_packs", filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          const r = payload.new as { quantity?: number; coins?: number; total_opened?: number };
+          if (typeof r.quantity === "number") setQuantity(r.quantity);
+          if (typeof r.coins === "number") setCoins(r.coins);
+          if (typeof r.total_opened === "number") setTotalOpened(r.total_opened);
+        }
+      )
+      .on("postgres_changes",
+        { event: "INSERT", schema: "public", table: "user_packs", filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          const r = payload.new as { quantity?: number; coins?: number; total_opened?: number };
+          if (typeof r.quantity === "number") setQuantity(r.quantity);
+          if (typeof r.coins === "number") setCoins(r.coins);
+          if (typeof r.total_opened === "number") setTotalOpened(r.total_opened);
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
 
   const decrementPacks = useCallback((count: number): number => {
     const qty = quantityRef.current;

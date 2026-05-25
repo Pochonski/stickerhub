@@ -6,10 +6,9 @@ import { useToast } from "@/hooks/useToast";
 import { PACK_BUNDLES } from "@/hooks/useSupabasePacks";
 import { PackageOpen, Coins, Sparkles } from "lucide-react";
 import { useState } from "react";
-import { getSupabase } from "@/lib/supabase/client";
 
 export default function ShopPage() {
-  const { coins } = useGame();
+  const { coins, buyPacks } = useGame();
   const { addToast } = useToast();
   const [buying, setBuying] = useState(false);
 
@@ -17,33 +16,12 @@ export default function ShopPage() {
     if (coins < bundle.price) return;
     setBuying(true);
     try {
-      const sb = getSupabase();
-      const { data: { user } } = await sb.auth.getUser();
-      if (!user) { addToast("Iniciá sesión para comprar", "error"); return; }
-
-      // Get current state
-      const { data: packData, error: fetchError } = await sb
-        .from("user_packs")
-        .select("coins, quantity")
-        .eq("user_id", user.id)
-        .single();
-
-      if (fetchError || !packData) { addToast("Error al comprar", "error"); return; }
-      if (packData.coins < bundle.price) { addToast("Monedas insuficientes", "error"); return; }
-
-      const newCoins = packData.coins - bundle.price;
-      const newQty = (packData.quantity ?? 0) + bundle.quantity;
-
-      const { error } = await sb
-        .from("user_packs")
-        .upsert(
-          { user_id: user.id, quantity: newQty, coins: newCoins, updated_at: new Date().toISOString() },
-          { onConflict: "user_id" }
-        );
-
-      if (error) { addToast("Error al comprar", "error"); return; }
-
-      addToast(`¡${bundle.label} comprado! ${bundle.savings ? `(${bundle.savings})` : ""}`, "success");
+      const ok = await buyPacks(bundle);
+      if (ok) {
+        addToast(`¡${bundle.label} comprado! ${bundle.savings ? `(${bundle.savings})` : ""}`, "success");
+      } else {
+        addToast("Error al comprar", "error");
+      }
     } catch {
       addToast("Error al comprar", "error");
     }

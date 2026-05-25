@@ -7,8 +7,8 @@ import { useGame } from "@/context/GameContext";
 import { useToast } from "@/hooks/useToast";
 import { getSupabase } from "@/lib/supabase/client";
 import { ALL_PLAYERS } from "@/data/players";
-import { TEAMS } from "@/data/teams";
-import { Check, X, Send, Inbox, Loader2 } from "lucide-react";
+import { TEAMS, TEAM_LIST } from "@/data/teams";
+import { Check, X, Send, Inbox, Loader2, Search } from "lucide-react";
 import { TradeCelebration } from "@/components/trade/TradeCelebration";
 
 interface TradeItem {
@@ -31,6 +31,8 @@ export default function InboxPage() {
   const [tab, setTab] = useState<"received" | "sent">("received");
   const [trades, setTrades] = useState<TradeItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [nationFilter, setNationFilter] = useState("");
   const [celebration, setCelebration] = useState<{ receivedCard: { name: string; faceUrl?: string; teamColor?: string; teamColorDark?: string; num?: number; teamName?: string; flag?: string }; givenCard: { name: string } } | null>(null);
 
   useEffect(() => {
@@ -112,9 +114,25 @@ export default function InboxPage() {
     addToast("Intercambio cancelado", "warning");
   };
 
-  const filteredTrades = trades.filter((t) =>
-    tab === "received" ? t.to_user_id === user?.id : t.from_user_id === user?.id
-  );
+  const getCardTeam = (cardId: string): string | undefined => {
+    const p = ALL_PLAYERS.find((pl) => pl.id === cardId);
+    return p?.teamId;
+  };
+
+  const filteredTrades = trades.filter((t) => {
+    const direction = tab === "received" ? t.to_user_id === user?.id : t.from_user_id === user?.id;
+    if (!direction) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      if (!t.requested_card_name.toLowerCase().includes(q) && !t.offered_card_name.toLowerCase().includes(q)) return false;
+    }
+    if (nationFilter) {
+      const reqTeam = getCardTeam(t.requested_card_id);
+      const offTeam = getCardTeam(t.offered_card_id);
+      if (reqTeam !== nationFilter && offTeam !== nationFilter) return false;
+    }
+    return true;
+  });
 
   return (
     <AppShell>
@@ -134,6 +152,29 @@ export default function InboxPage() {
           </button>
         ))}
       </div>
+
+      {trades.length > 0 && (
+        <div className="flex items-center gap-3 mb-5 max-sm:flex-col max-sm:items-stretch">
+          <div className="relative flex-1 max-w-[300px]">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" />
+            <input
+              type="text" placeholder="Buscar por carta..." value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-8 pr-3 py-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-xs outline-none focus:border-[var(--color-accent)]"
+            />
+          </div>
+          <select
+            value={nationFilter}
+            onChange={(e) => setNationFilter(e.target.value)}
+            className="px-3 py-1.5 rounded-full text-xs border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)] cursor-pointer outline-none focus:border-[var(--color-accent)]"
+          >
+            <option value="">Todas las naciones</option>
+            {TEAM_LIST.map((t) => (
+              <option key={t.id} value={t.id}>{t.flag} {t.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex justify-center py-12"><Loader2 size={24} className="animate-spin text-[var(--color-muted)]" /></div>

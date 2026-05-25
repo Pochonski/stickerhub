@@ -7,9 +7,9 @@ import { useToast } from "@/hooks/useToast";
 import { getSupabase } from "@/lib/supabase/client";
 import { ALL_PLAYERS } from "@/data/players";
 import { ALL_STADIUM_CARDS, ALL_VENUE_CARDS } from "@/data/cards";
-import { TEAMS } from "@/data/teams";
+import { TEAMS, TEAM_LIST } from "@/data/teams";
 import { coinValue } from "@/hooks/useSupabasePacks";
-import { Trash2, Coins, Sparkles } from "lucide-react";
+import { Trash2, Coins, Sparkles, Search } from "lucide-react";
 
 function getCardInfo(id: string): { name: string; gradient: string; sub?: string; type: string; faceUrl?: string; overall?: number; teamId?: string } | null {
   const player = ALL_PLAYERS.find((p) => p.id === id);
@@ -35,8 +35,17 @@ export default function DiscardPage() {
   const { addToast } = useToast();
   const [discardedIds, setDiscardedIds] = useState<Set<string>>(new Set());
   const [localCoins, setLocalCoins] = useState(coins);
+  const [search, setSearch] = useState("");
+  const [nationFilter, setNationFilter] = useState("");
 
-  const duplicates = state.duplicates.filter((id) => !discardedIds.has(id));
+  const allDuplicates = state.duplicates.filter((id) => !discardedIds.has(id));
+  const duplicates = allDuplicates.filter((id) => {
+    const info = getCardInfo(id);
+    if (!info) return false;
+    if (search && !info.name.toLowerCase().includes(search.toLowerCase())) return false;
+    if (nationFilter && info.teamId !== nationFilter) return false;
+    return true;
+  });
   const totalCoins = duplicates.reduce((sum, id) => {
     const info = getCardInfo(id);
     return sum + (info?.overall ? coinValue(info.overall, id) : 150);
@@ -100,6 +109,30 @@ export default function DiscardPage() {
           )}
         </div>
       </div>
+
+      {allDuplicates.length > 0 && (
+        <div className="flex items-center gap-3 mb-5 max-sm:flex-col max-sm:items-stretch">
+          <div className="relative flex-1 max-w-[300px]">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" />
+            <input
+              type="text" placeholder="Buscar por nombre..." value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-8 pr-3 py-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] text-xs outline-none focus:border-[var(--color-accent)]"
+            />
+          </div>
+          <select
+            value={nationFilter}
+            onChange={(e) => setNationFilter(e.target.value)}
+            className="px-3 py-1.5 rounded-full text-xs border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)] cursor-pointer outline-none focus:border-[var(--color-accent)]"
+          >
+            <option value="">Todas las naciones</option>
+            {TEAM_LIST.map((t) => (
+              <option key={t.id} value={t.id}>{t.flag} {t.name}</option>
+            ))}
+          </select>
+          <span className="text-xs text-[var(--color-muted)]">{duplicates.length} de {allDuplicates.length}</span>
+        </div>
+      )}
 
       {duplicates.length === 0 ? (
         <div className="text-center py-16">

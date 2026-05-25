@@ -7,6 +7,7 @@ import { usePacks } from "@/hooks/useSupabasePacks";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { getSupabase } from "@/lib/supabase/client";
 import type { TradeOffer, GameState } from "@/data/types";
+import type { PackBundle } from "@/hooks/useSupabasePacks";
 
 interface GameContextValue {
   state: GameState;
@@ -22,6 +23,7 @@ interface GameContextValue {
   getCollectedCount: () => number;
   resetGame: () => void;
   addPacks: (count: number) => void;
+  buyPacks: (bundle: PackBundle) => Promise<boolean>;
   usingSupabase: boolean;
   coins: number;
 }
@@ -275,6 +277,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         getCollectedCount,
         resetGame,
         addPacks,
+        buyPacks: supabasePacks.buyPacks,
         usingSupabase,
         coins: supabasePacks.coins,
       }}

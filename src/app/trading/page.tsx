@@ -10,7 +10,7 @@ import { getSupabase } from "@/lib/supabase/client";
 import { useToast } from "@/hooks/useToast";
 import { ALL_PLAYERS } from "@/data/players";
 import { ALL_STADIUM_CARDS, ALL_VENUE_CARDS } from "@/data/cards";
-import { TEAMS, STADIUMS, VENUES } from "@/data/teams";
+import { TEAMS, STADIUMS, VENUES, TEAM_LIST } from "@/data/teams";
 
 interface ListingItem {
   id: string;
@@ -74,7 +74,9 @@ export default function TradingPage() {
   const { addToast } = useToast();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("todos");
+  const [nationFilter, setNationFilter] = useState("");
   const [sideSearch, setSideSearch] = useState("");
+  const [sideNationFilter, setSideNationFilter] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTrade, setSelectedTrade] = useState<{ name: string; owner: string; userId: string; listingId: string } | null>(null);
   const [offerCardId, setOfferCardId] = useState("");
@@ -220,7 +222,11 @@ export default function TradingPage() {
   };
   
   const publishedIds = new Set(myListings.map((l) => l.card_id));
-  const filteredDupes = sideSearch ? dupes.filter((d) => d.name.toLowerCase().includes(sideSearch.toLowerCase()) || d.teamName?.toLowerCase().includes(sideSearch.toLowerCase())) : dupes;
+  const filteredDupes = dupes.filter((d) => {
+    if (sideSearch && !d.name.toLowerCase().includes(sideSearch.toLowerCase()) && !d.teamName?.toLowerCase().includes(sideSearch.toLowerCase())) return false;
+    if (sideNationFilter && d.teamId !== sideNationFilter) return false;
+    return true;
+  });
 
   const duplicateNames = dupes.map((d) => ({ id: d.id, name: d.name }));
   // Filter out cards already in use
@@ -230,6 +236,11 @@ export default function TradingPage() {
 
   const filtered = listings.filter((t) => {
     if (search && !t.card_name.toLowerCase().includes(search.toLowerCase()) && !t.team_name?.toLowerCase().includes(search.toLowerCase())) return false;
+    const info = getDupeInfo(t.card_id);
+    if (filter === "jugadores" && info?.overall === undefined) return false;
+    if (filter === "estadios" && (!ALL_STADIUM_CARDS.some((c) => c.id === t.card_id))) return false;
+    if (filter === "sedes" && (!ALL_VENUE_CARDS.some((c) => c.id === t.card_id))) return false;
+    if (nationFilter && info?.teamId !== nationFilter) return false;
     return true;
   });
 
@@ -297,6 +308,16 @@ export default function TradingPage() {
                 className="w-[200px] pl-8 pr-3 py-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] text-xs outline-none focus:border-[var(--color-accent)]"
               />
             </div>
+            <select
+              value={sideNationFilter}
+              onChange={(e) => setSideNationFilter(e.target.value)}
+              className="px-2.5 py-1.5 rounded-full text-xs border border-[var(--color-border)] bg-[var(--color-bg)] text-[var(--color-muted)] cursor-pointer outline-none focus:border-[var(--color-accent)] max-w-[140px] truncate"
+            >
+              <option value="">Todas</option>
+              {TEAM_LIST.map((t) => (
+                <option key={t.id} value={t.id}>{t.flag} {t.name}</option>
+              ))}
+            </select>
             <span className="text-xs text-[var(--color-muted)]">{filteredDupes.length} / {dupes.length}</span>
         </div>
       </div>
@@ -393,6 +414,16 @@ export default function TradingPage() {
               {f.label}
             </button>
           ))}
+          <select
+            value={nationFilter}
+            onChange={(e) => setNationFilter(e.target.value)}
+            className="px-3 py-1.5 rounded-full text-[13px] font-medium border-[1.5px] border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)] cursor-pointer outline-none focus:border-[var(--color-accent)]"
+          >
+            <option value="">Todas las naciones</option>
+            {TEAM_LIST.map((t) => (
+              <option key={t.id} value={t.id}>{t.flag} {t.name}</option>
+            ))}
+          </select>
         </div>
 
         <div className="relative max-w-full mb-6">
