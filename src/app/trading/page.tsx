@@ -88,6 +88,13 @@ export default function TradingPage() {
 
   const handlePublish = async () => {
     if (!user || !publishCard) return;
+    // Check if already published
+    const alreadyPublished = myListings.some((l) => l.card_id === publishCard.id);
+    if (alreadyPublished) {
+      addToast("Esta carta ya está publicada", "warning");
+      setPublishModal(false); setPublishCard(null);
+      return;
+    }
     const info = getDupeInfo(publishCard.id);
     const sb = getSupabase();
     const { error } = await sb.from("trade_listings").insert({
@@ -142,6 +149,7 @@ export default function TradingPage() {
   }, [user]);
 
   const dupes = state.duplicates.map((id) => getDupeInfo(id)).filter(Boolean) as DupeInfo[];
+  const publishedIds = new Set(myListings.map((l) => l.card_id));
   const filteredDupes = sideSearch ? dupes.filter((d) => d.name.toLowerCase().includes(sideSearch.toLowerCase()) || d.teamName?.toLowerCase().includes(sideSearch.toLowerCase())) : dupes;
 
   const duplicateNames = dupes.map((d) => ({ id: d.id, name: d.name }));
@@ -243,12 +251,16 @@ export default function TradingPage() {
                     {d.teamName && <span className="text-[10px] text-[var(--color-muted)] mt-0.5 truncate">{d.teamName}{d.num ? ` · #${d.num}` : ""}</span>}
                   </div>
                 </div>
-                <button
-                  onClick={() => { setPublishCard({ id: d.id, name: d.name }); setLookingFor(""); setPublishModal(true); }}
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center bg-black/40"
-                >
-                  <span className="px-4 py-2 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold">Publicar</span>
-                </button>
+                {publishedIds.has(d.id) ? (
+                  <div className="absolute top-1.5 right-1.5 bg-[var(--color-success)]/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-sm">Publicada</div>
+                ) : (
+                  <button
+                    onClick={() => { setPublishCard({ id: d.id, name: d.name }); setLookingFor(""); setPublishModal(true); }}
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center bg-black/40"
+                  >
+                    <span className="px-4 py-2 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold">Publicar</span>
+                  </button>
+                )}
               </div>
             ))}
           </div>
