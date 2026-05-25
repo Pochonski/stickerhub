@@ -45,7 +45,7 @@ export default function LoginPage() {
       <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-10 max-w-[420px] w-full text-center shadow-sm">
         <Trophy size={48} strokeWidth={1.5} className="mx-auto mb-4 text-[var(--color-accent)]" />
         <h1 className="font-[var(--font-display)] text-[24px] font-bold mb-2">
-          StickerHub FIFA
+          Sticker<span className="text-[var(--color-primary)]">Hub</span> FIFA
         </h1>
         <p className="text-sm text-[var(--color-muted)] mb-8">
           Ingresá tu email y te enviamos un link mágico para acceder a tu álbum del Mundial 2026.

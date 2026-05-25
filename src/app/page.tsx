@@ -14,7 +14,7 @@ export default function Home() {
     <AppShell>
       <div className="text-center py-16 px-6">
         <h1 className="font-[var(--font-display)] text-[clamp(32px,5vw,48px)] font-extrabold tracking-tight bg-[linear-gradient(135deg,var(--color-accent),oklch(68%_0.16_68),var(--color-accent-hover))] bg-clip-text text-transparent">
-          StickerHub FIFA
+          Sticker<span className="text-[var(--color-primary)]">Hub</span> FIFA
         </h1>
         <p className="text-[var(--color-muted)] text-lg max-w-[520px] mx-auto mt-3">
           Colecciona las postales de cada selección, estadio y sede del Mundial. Intercambia tus repetidas y descubre contenido exclusivo de cada jugador.

@@ -16,7 +16,7 @@ export function AppHeader() {
         <span className="w-9 h-9 grid place-items-center bg-[linear-gradient(135deg,var(--color-accent),oklch(68%_0.16_68))] rounded-lg text-white">
           <Trophy size={20} strokeWidth={2} />
         </span>
-        StickerHub
+        Sticker<span className="text-[var(--color-primary)]">Hub</span>
       </Link>
 
       <div className="flex items-center gap-4">
