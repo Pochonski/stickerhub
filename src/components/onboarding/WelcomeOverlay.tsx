@@ -37,7 +37,7 @@ export function WelcomeOverlay() {
       <div className="bg-[var(--color-surface)] rounded-[var(--radius-xl)] p-8 max-w-[440px] w-[90%] text-center shadow-2xl animate-slide-up">
         <span className="text-5xl block mb-4">🏆</span>
         <h2 className="font-[var(--font-display)] text-[28px] font-extrabold tracking-tight mb-2">
-          ¡Bienvenido a StickerHub, {displayName}!
+          ¡Bienvenido a Sticker<span className="text-[var(--color-primary)]">Hub</span>, {displayName}!
         </h2>
         <p className="text-sm text-[var(--color-muted)] mb-6 leading-relaxed">
           Tenés <strong className="text-[var(--color-accent)]">{state.packs} sobres gratis</strong> para empezar tu colección del Mundial 2026.

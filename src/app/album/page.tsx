@@ -24,7 +24,7 @@ export default function AlbumPage() {
 
   return (
     <AppShell>
-      <h1 className="font-[var(--font-display)] text-[28px] font-bold tracking-tight mb-2">StickerHub Mundial FIFA 2026</h1>
+      <h1 className="font-[var(--font-display)] text-[28px] font-bold tracking-tight mb-2">Sticker<span className="text-[var(--color-primary)]">Hub</span> Mundial FIFA 2026</h1>
       <p className="text-[var(--color-muted)] text-[15px] mb-8">Explora las selecciones, estadios y sedes. Completá tu colección abriendo sobres e intercambiando repetidas.</p>
 
       {/* Stats */}
