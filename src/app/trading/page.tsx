@@ -78,7 +78,9 @@ export default function TradingPage() {
   const [selectedTrade, setSelectedTrade] = useState<{ name: string; owner: string; userId: string; listingId: string } | null>(null);
   const [offerCardId, setOfferCardId] = useState("");
   const [listings, setListings] = useState<ListingItem[]>([]);
+  const [myListings, setMyListings] = useState<ListingItem[]>([]);
   const [loadingListings, setLoadingListings] = useState(false);
+  const [loadingMyListings, setLoadingMyListings] = useState(false);
   const [publishModal, setPublishModal] = useState(false);
   const [publishCard, setPublishCard] = useState<{ id: string; name: string } | null>(null);
   const [lookingFor, setLookingFor] = useState("");
@@ -94,9 +96,29 @@ export default function TradingPage() {
     if (!error) {
       addToast(`¡${publishCard.name} publicada!`, "success");
       setPublishModal(false); setLookingFor(""); setPublishCard(null);
+      fetchMyListings();
     } else {
       addToast("Error al publicar", "error");
     }
+  };
+
+  const handleUnpublish = async (listingId: string) => {
+    const sb = getSupabase();
+    await sb.from("trade_listings").update({ is_active: false, updated_at: new Date().toISOString() }).eq("id", listingId).eq("user_id", user!.id);
+    setMyListings((prev) => prev.filter((l) => l.id !== listingId));
+    addToast("Publicación eliminada", "success");
+  };
+
+  const fetchMyListings = async () => {
+    if (!user) return;
+    setLoadingMyListings(true);
+    const sb = getSupabase();
+    const { data } = await sb.from("trade_listings")
+      .select("id, card_id, card_name, team_name, looking_for, created_at, user_id")
+      .eq("is_active", true).eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+    if (data) setMyListings(data as ListingItem[]);
+    setLoadingMyListings(false);
   };
 
   useEffect(() => {
@@ -115,6 +137,7 @@ export default function TradingPage() {
       finally { setLoadingListings(false); }
     };
     fetchListings();
+    fetchMyListings();
   }, [user]);
 
   const dupes = state.duplicates.map((id) => getDupeInfo(id)).filter(Boolean) as DupeInfo[];
@@ -204,6 +227,40 @@ export default function TradingPage() {
           </div>
         )}
       </div>
+
+      {/* MIS PUBLICACIONES ACTIVAS */}
+      {myListings.length > 0 && (
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-5 mb-8">
+          <h2 className="font-[var(--font-display)] text-lg font-bold mb-4 flex items-center gap-2"><Send size={18} className="text-[var(--color-accent)]" /> Mis publicaciones activas</h2>
+          <div className="flex flex-col gap-2">
+            {myListings.map((ml) => {
+              const info = getDupeInfo(ml.card_id);
+              return (
+                <div key={ml.id} className="flex items-center gap-3 p-3 bg-[var(--color-bg)] rounded-lg border border-[var(--color-border)] max-sm:flex-col max-sm:items-start">
+                  <div className="w-[44px] h-[58px] rounded overflow-hidden shrink-0 flex items-center justify-center relative" style={{ background: info?.teamColor ? `linear-gradient(180deg, ${info.teamColor} 0%, ${info.teamColorDark} 100%)` : "oklch(72% 0.1 250)" }}>
+                    {info?.faceUrl ? (
+                      <img src={info.faceUrl} alt={ml.card_name} className="w-[60%] h-[60%] object-contain" referrerPolicy="no-referrer" />
+                    ) : (
+                      <span className="text-xs font-extrabold text-white/25">{ml.card_name.slice(0, 2)}</span>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <span className="font-semibold text-sm">{ml.card_name}</span>
+                    {ml.looking_for && <span className="text-xs text-[var(--color-muted)] ml-2">Busca: {ml.looking_for}</span>}
+                  </div>
+                  <span className="text-[10px] text-[var(--color-muted)]">{new Date(ml.created_at).toLocaleDateString("es-CR")}</span>
+                  <button
+                    onClick={() => handleUnpublish(ml.id)}
+                    className="px-3 py-1 rounded-full bg-[var(--color-danger)]/10 text-[var(--color-danger)] text-[11px] font-semibold cursor-pointer border-none hover:bg-[var(--color-danger)]/20"
+                  >
+                    <X size={12} className="inline mr-1" />Quitar
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* MARKETPLACE - Bottom section */}
       <div>
