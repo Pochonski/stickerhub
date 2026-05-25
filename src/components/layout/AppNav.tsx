@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: "/trading", label: "Intercambios" },
   { href: "/my-cards", label: "Mis Stickers" },
   { href: "/profile", label: "Perfil" },
+  { href: "/discard", label: "Descartes" },
   { href: "/shop", label: "Tienda" },
 ];
 
