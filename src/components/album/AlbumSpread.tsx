@@ -17,18 +17,17 @@ export function AlbumSpread({
   return (
     <div className="album-spread relative flex max-lg:flex-col">
       {/* Left page */}
-      <div
-        className="album-page relative flex-1 rounded-l-md max-lg:rounded-t-md max-lg:rounded-bl-none"
-        style={{ backgroundImage: "url('/fondo-izq.jpeg')", backgroundSize: "cover", backgroundPosition: "center" }}
-      >
+      <div className="album-page album-page-left relative flex-1 rounded-l-md max-lg:rounded-t-md max-lg:rounded-bl-none">
         {/* Paper texture overlay */}
-        <div className="paper-texture absolute inset-0 rounded-l-md max-lg:rounded-t-md max-lg:rounded-bl-none pointer-events-none" />
+        <div className="paper-texture absolute inset-0 rounded-l-md max-lg:rounded-t-md max-lg:rounded-bl-none pointer-events-none z-[1]" />
 
         {/* Binding edge */}
-        <BindingEdge />
+        <div className="relative z-[2]">
+          <BindingEdge />
+        </div>
 
         {/* Page content */}
-        <div className="relative pl-10 pr-6 py-8 max-sm:pl-8 max-sm:pr-4 max-sm:py-6">
+        <div className="relative z-[1] pl-10 pr-6 py-8 max-sm:pl-8 max-sm:pr-4 max-sm:py-6">
           {leftPage}
         </div>
 
@@ -50,15 +49,12 @@ export function AlbumSpread({
       <div className="hidden max-lg:block w-full h-[2px] bg-gradient-to-b from-black/5 to-transparent" />
 
       {/* Right page */}
-      <div
-        className="album-page relative flex-1 rounded-r-md max-lg:rounded-b-md max-lg:rounded-tr-none"
-        style={{ backgroundImage: "url('/fondo-der.jpeg')", backgroundSize: "cover", backgroundPosition: "center" }}
-      >
+      <div className="album-page album-page-right relative flex-1 rounded-r-md max-lg:rounded-b-md max-lg:rounded-tr-none">
         {/* Paper texture overlay */}
-        <div className="paper-texture absolute inset-0 rounded-r-md max-lg:rounded-b-md max-lg:rounded-tr-none pointer-events-none" />
+        <div className="paper-texture absolute inset-0 rounded-r-md max-lg:rounded-b-md max-lg:rounded-tr-none pointer-events-none z-[1]" />
 
         {/* Page content */}
-        <div className="relative pl-6 pr-10 py-8 max-sm:pl-4 max-sm:pr-8 max-sm:py-6">
+        <div className="relative z-[1] pl-6 pr-10 py-8 max-sm:pl-4 max-sm:pr-8 max-sm:py-6">
           {rightPage}
         </div>
 

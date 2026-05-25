@@ -168,9 +168,29 @@
 }
 
 .album-page {
+  position: relative;
   box-shadow:
     inset 0 0 30px rgba(0,0,0,0.03),
     0 0 0 1px rgba(0,0,0,0.04);
+}
+
+.album-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.album-page-left::before {
+  background-image: url('/fondo-izq.jpeg');
+}
+
+.album-page-right::before {
+  background-image: url('/fondo-der.jpeg');
 }
 
 .flipbook-wrapper {
