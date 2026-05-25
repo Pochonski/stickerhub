@@ -3,7 +3,7 @@
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Mail, Trophy } from "lucide-react";
+import { Mail, Trophy, LogIn } from "lucide-react";
 
 export default function LoginPage() {
   const { user, loading, signIn, signInWithPassword } = useAuth();
@@ -71,15 +71,17 @@ export default function LoginPage() {
           Ingresá tu email y te enviamos un link mágico para acceder a tu álbum del Mundial 2026.
         </p>
 
-        {sent ? (
+        {sent && !showPassword && (
           <div className="bg-[var(--color-accent-soft)] rounded-xl p-5 text-sm text-[var(--color-accent)]">
             <Mail size={28} className="mx-auto mb-3" strokeWidth={1.5} />
             <p className="font-semibold mb-1">¡Link mágico enviado!</p>
             <p className="opacity-70">
-              Revisá <strong>{email}</strong> y hacé clic en el enlace para ingresar. No necesitás contraseña.
+              Revisá <strong>{email}</strong> y hacé clic en el enlace para ingresar.
             </p>
           </div>
-        ) : (
+        )}
+
+        {!sent && (
           <>
             <input
               type="email"
@@ -91,11 +93,14 @@ export default function LoginPage() {
             />
             <button
               onClick={handleLogin}
-              disabled={sending || !email || cooldown > 0}
+              disabled={sending || !email || cooldown > 0 || (showPassword && !password)}
               className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-[var(--color-accent)] text-white text-base font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-hover)] disabled:opacity-50"
             >
-              <Mail size={16} />
-              {cooldown > 0 ? `Esperá ${cooldown}s...` : sending ? "Enviando..." : "Enviar link mágico"}
+              {showPassword ? (
+                <><LogIn size={16} /> {cooldown > 0 ? `Esperá ${cooldown}s...` : sending ? "Ingresando..." : "Ingresar"}</>
+              ) : (
+                <><Mail size={16} /> {cooldown > 0 ? `Esperá ${cooldown}s...` : sending ? "Enviando..." : "Enviar link mágico"}</>
+              )}
             </button>
 
             {error && (
