@@ -26,7 +26,7 @@ interface TradeItem {
 
 export default function InboxPage() {
   const { user } = useAuth();
-  const { state, completeTrade, cancelTrade, isCollected } = useGame();
+  const { state, completeTrade, cancelTrade, isCollected, refreshCollection } = useGame();
   const { addToast } = useToast();
   const [tab, setTab] = useState<"received" | "sent">("received");
   const [trades, setTrades] = useState<TradeItem[]>([]);
@@ -53,9 +53,12 @@ export default function InboxPage() {
         (payload) => {
           setTrades((prev) => [payload.new as TradeItem, ...prev]);
         })
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "trade_offers", filter: `or=(from_user_id.eq.${user.id},to_user_id.eq.${user.id})` },
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "trade_offers" },
         (payload) => {
-          setTrades((prev) => prev.map((t) => t.id === (payload.new as TradeItem).id ? (payload.new as TradeItem) : t));
+          const row = payload.new as TradeItem;
+          if (row.from_user_id === user.id || row.to_user_id === user.id) {
+            setTrades((prev) => prev.map((t) => t.id === row.id ? row : t));
+          }
         })
       .subscribe();
 
@@ -63,13 +66,11 @@ export default function InboxPage() {
   }, [user, celebration]);
 
   const handleAccept = async (trade: TradeItem) => {
-    const sb = getSupabase();
-    const { error } = await sb.rpc("accept_trade", {
-      trade_id: trade.id,
-      acceptor_id: user!.id,
-    });
-    if (error) {
-      addToast("Error al aceptar: " + error.message, "error");
+    // Use the API route which handles full card transfer atomically
+    const res = await fetch(`/api/trades/${trade.id}/accept`, { method: "PUT" });
+    const json = await res.json();
+    if (!res.ok) {
+      addToast("Error al aceptar: " + (json.error || "Error"), "error");
       return;
     }
 
@@ -78,6 +79,7 @@ export default function InboxPage() {
     const team = player ? TEAMS[player.teamId] : null;
 
     setTrades((prev) => prev.map((t) => t.id === trade.id ? { ...t, status: "completed" } : t));
+    await refreshCollection();
     addToast("¡Intercambio aceptado! Cartas transferidas.", "success");
 
     // Show celebration

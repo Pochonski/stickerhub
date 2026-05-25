@@ -56,10 +56,8 @@ const OVERALL_OPTIONS = [
 ];
 
 export default function DiscardPage() {
-  const { state, coins } = useGame();
+  const { state, coins, addCoins, refreshCollection } = useGame();
   const { addToast } = useToast();
-  const [discardedIds, setDiscardedIds] = useState<Set<string>>(new Set());
-  const [localCoins, setLocalCoins] = useState(coins);
   const [search, setSearch] = useState("");
   const [nationFilter, setNationFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("todos");
@@ -67,8 +65,7 @@ export default function DiscardPage() {
   const [overallFilter, setOverallFilter] = useState<{ min: number; max: number } | null>(null);
   const [sortOrder, setSortOrder] = useState<"desc" | "asc" | "">("desc");
 
-  const allDuplicates = state.duplicates.filter((id) => !discardedIds.has(id));
-  const duplicates = allDuplicates
+  const duplicates = state.duplicates
     .filter((id) => {
     const info = getCardInfo(id);
     if (!info) return false;
@@ -108,12 +105,7 @@ export default function DiscardPage() {
 
     if (error) { addToast("Error al descartar", "error"); return; }
 
-    const { data: pd } = await sb.from("user_packs").select("coins").eq("user_id", user.id).single();
-    const newCoins = (pd?.coins ?? localCoins) + value;
-    await sb.from("user_packs").upsert({ user_id: user.id, coins: newCoins, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
-
-    setDiscardedIds((prev) => new Set(prev).add(cardId));
-    setLocalCoins(newCoins);
+    await addCoins(value);
     addToast(`+${value} 🪙`, "success");
   };
 
@@ -122,6 +114,7 @@ export default function DiscardPage() {
     for (const id of duplicates) {
       await handleDiscard(id);
     }
+    await refreshCollection();
   };
 
   return (
@@ -150,7 +143,7 @@ export default function DiscardPage() {
         </div>
       </div>
 
-      {allDuplicates.length > 0 && (
+      {state.duplicates.length > 0 && (
         <>
         <div className="flex items-center gap-3 mb-3 max-sm:flex-col max-sm:items-stretch">
           <div className="relative flex-1 max-w-[300px]">
@@ -171,7 +164,7 @@ export default function DiscardPage() {
               <option key={t.id} value={t.id}>{t.flag} {t.name}</option>
             ))}
           </select>
-          <span className="text-xs text-[var(--color-muted)] shrink-0">{duplicates.length} de {allDuplicates.length}</span>
+          <span className="text-xs text-[var(--color-muted)] shrink-0">{duplicates.length} de {state.duplicates.length}</span>
           <select
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value as typeof sortOrder)}

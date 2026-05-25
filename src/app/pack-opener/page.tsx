@@ -20,7 +20,7 @@ const QUANTITY_OPTIONS = [1, 2, 3, 5, 10, 15, 20, 25, 50];
 function PackOpenerContent() {
   const searchParams = useSearchParams();
   const teamParam = searchParams.get("team") || "argentina";
-  const { state, openPacks, collectCard } = useGame();
+  const { state, openPacks, collectCard, refreshCollection } = useGame();
   const { addToast } = useToast();
 
   const [stage, setStage] = useState<"idle" | "torn" | "reveal" | "summary">("idle");
@@ -50,6 +50,7 @@ function PackOpenerContent() {
     // If opening multiple packs, skip flip animation and collect immediately
     if (actualCount > 1) {
       allCards.forEach((card) => collectCard(card.id));
+      refreshCollection();
       const newCards = allCards.filter((c) => c.isNew).length;
       const dupeCards = allCards.filter((c) => !c.isNew).length;
       addToast(`¡${actualCount} sobres abiertos! ${newCards} nuevas, ${dupeCards} repetidas`, "success");
@@ -57,7 +58,7 @@ function PackOpenerContent() {
     } else {
       setStage("reveal");
     }
-  }, [state.packs, state.collected, openPacks, quantity, collectCard, addToast]);
+  }, [state.packs, state.collected, openPacks, quantity, collectCard, refreshCollection, addToast]);
 
   const handleFlipCard = useCallback(
     (_idx: number) => {
@@ -65,6 +66,7 @@ function PackOpenerContent() {
         const next = prev + 1;
         if (next >= currentPack.length) {
           currentPack.forEach((card) => collectCard(card.id));
+          refreshCollection();
           const newCards = currentPack.filter((c) => c.isNew).length;
           const dupeCards = currentPack.filter((c) => !c.isNew).length;
           addToast(`¡Sobre abierto! ${newCards} nuevas, ${dupeCards} repetidas`, "success");
@@ -73,7 +75,7 @@ function PackOpenerContent() {
         return next;
       });
     },
-    [currentPack, collectCard, addToast]
+    [currentPack, collectCard, refreshCollection, addToast]
   );
 
   const handleOpenAnother = useCallback(() => {

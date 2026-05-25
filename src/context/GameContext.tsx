@@ -24,6 +24,8 @@ interface GameContextValue {
   resetGame: () => void;
   addPacks: (count: number) => void;
   buyPacks: (bundle: PackBundle) => Promise<boolean>;
+  refreshCollection: () => Promise<void>;
+  addCoins: (amount: number) => Promise<void>;
   usingSupabase: boolean;
   coins: number;
 }
@@ -278,6 +280,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
         resetGame,
         addPacks,
         buyPacks: supabasePacks.buyPacks,
+        refreshCollection: supabaseCollection.refresh,
+        addCoins: supabasePacks.addCoins,
         usingSupabase,
         coins: supabasePacks.coins,
       }}

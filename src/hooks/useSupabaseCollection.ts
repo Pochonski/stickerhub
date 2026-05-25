@@ -46,6 +46,29 @@ export function useCollection() {
     fetchCollection();
   }, [fetchCollection]);
 
+  // Realtime subscription: sync collection across tabs / external changes
+  useEffect(() => {
+    if (!user) return;
+    const supabase = getSupabase();
+    const channel = supabase
+      .channel(`collection:${user.id}`)
+      .on("postgres_changes",
+        { event: "INSERT", schema: "public", table: "user_collections", filter: `user_id=eq.${user.id}` },
+        () => { fetchCollection(); }
+      )
+      .on("postgres_changes",
+        { event: "DELETE", schema: "public", table: "user_collections", filter: `user_id=eq.${user.id}` },
+        () => { fetchCollection(); }
+      )
+      .on("postgres_changes",
+        { event: "UPDATE", schema: "public", table: "user_collections", filter: `user_id=eq.${user.id}` },
+        () => { fetchCollection(); }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user, fetchCollection]);
+
   const addCard = useCallback(async (cardId: string, isDuplicate = false, source = "pack") => {
     const supabase = getSupabase();
     if (!user) return false;

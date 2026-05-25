@@ -65,7 +65,7 @@ const OVERALL_OPTIONS = [
 ];
 
 export default function MyCardsPage() {
-  const { state, isCollected, isDuplicate, coins } = useGame();
+  const { state, isCollected, isDuplicate, coins, addCoins } = useGame();
   const { addToast } = useToast();
   const [search, setSearch] = useState("");
   const [cardTypeFilter, setCardTypeFilter] = useState<CardTypeFilter>("todos");
@@ -73,13 +73,10 @@ export default function MyCardsPage() {
   const [posFilter, setPosFilter] = useState("");
   const [overallFilter, setOverallFilter] = useState<{ min: number; max: number } | null>(null);
   const [sortOrder, setSortOrder] = useState<"desc" | "asc" | "">("desc");
-  const [discardedIds, setDiscardedIds] = useState<Set<string>>(new Set());
-  const [localCoins, setLocalCoins] = useState(coins);
-  const [localDupeCount, setLocalDupeCount] = useState<number | null>(null);
 
   const collectedIds = Object.keys(state.collected).filter((id) => isCollected(id));
-  const duplicateIds = state.duplicates.filter((id) => !discardedIds.has(id));
-  const displayDupeCount = localDupeCount ?? duplicateIds.length;
+  const duplicateIds = state.duplicates;
+  const displayDupeCount = duplicateIds.length;
   const totalPlayerCards = ALL_PLAYERS.length;
   const playerCollected = ALL_PLAYERS.filter((p) => isCollected(p.id)).length;
   const totalAll = totalPlayerCards;
@@ -125,19 +122,7 @@ export default function MyCardsPage() {
 
     if (error) { addToast("Error al descartar", "error"); return; }
 
-    const { data: packData } = await sb
-      .from("user_packs")
-      .select("coins")
-      .eq("user_id", user.id)
-      .single();
-
-    const newCoins = (packData?.coins ?? 0) + value;
-    await sb.from("user_packs").upsert({ user_id: user.id, coins: newCoins, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
-
-    setDiscardedIds((prev) => new Set(prev).add(cardId));
-    setLocalDupeCount((prev) => (prev ?? duplicateIds.length) - 1);
-    setLocalCoins(newCoins);
-
+    await addCoins(value);
     addToast(`¡Descartado! +${value} 🪙`, "success");
   };
 
