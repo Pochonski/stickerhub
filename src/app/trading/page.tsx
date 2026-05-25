@@ -266,17 +266,17 @@ export default function TradingPage() {
 
   return (
     <AppShell>
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex flex-wrap items-center justify-between mb-2 gap-2">
         <h1 className="font-[var(--font-display)] text-[28px] font-bold tracking-tight">Intercambios</h1>
-        <div className="flex items-center gap-3 text-sm text-[var(--color-muted)]">
-          <span className="flex items-center gap-1"><Tag size={14} /> {dupes.length} repetidas</span>
-          <span className="flex items-center gap-1"><Users size={14} /> {state.trades.filter((t) => t.status === "pending").length} activos</span>
+        <div className="flex items-center gap-3 text-sm text-[var(--color-muted)] max-sm:text-xs max-sm:gap-2">
+          <span className="flex items-center gap-1 shrink-0"><Tag size={14} /> {dupes.length} rep.</span>
+          <span className="flex items-center gap-1 shrink-0"><Users size={14} /> {state.trades.filter((t) => t.status === "pending").length} activos</span>
         </div>
       </div>
       <p className="text-[var(--color-muted)] text-[15px] mb-6">Publicá tus repetidas y encontrá las que te faltan.</p>
 
       {/* Section tabs */}
-      <div className="flex gap-1 bg-[var(--color-border)] p-1 rounded-full w-fit mb-8">
+      <div className="inline-flex flex-wrap gap-1 bg-[var(--color-border)] p-1 rounded-full mb-8">
         {[
           { id: "publish" as const, label: "Publicar", icon: <Upload size={14} />, count: dupes.length },
           { id: "mine" as const, label: "Mis activas", icon: <Send size={14} />, count: myListings.length },
@@ -285,7 +285,7 @@ export default function TradingPage() {
           <button
             key={tab.id}
             onClick={() => setSection(tab.id)}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer border-none ${
+            className={`flex items-center gap-1.5 px-3 max-sm:px-2 py-2 rounded-full text-sm max-sm:text-xs font-medium transition-colors cursor-pointer border-none shrink-0 ${
               section === tab.id
                 ? "bg-[var(--color-surface)] text-[var(--color-fg)] shadow-sm"
                 : "bg-transparent text-[var(--color-muted)] hover:text-[var(--color-fg)]"
@@ -389,7 +389,7 @@ export default function TradingPage() {
               {myListings.map((ml) => {
                 const info = getDupeInfo(ml.card_id);
                 return (
-                  <div key={ml.id} className="flex items-center gap-3 p-3 bg-[var(--color-bg)] rounded-lg border border-[var(--color-border)] max-sm:flex-col max-sm:items-start">
+                  <div key={ml.id} className="flex items-center gap-3 p-3 bg-[var(--color-bg)] rounded-lg border border-[var(--color-border)] max-sm:flex-col max-sm:items-start max-sm:gap-2">
                     <div className="w-[44px] h-[58px] rounded overflow-hidden shrink-0 flex items-center justify-center relative" style={{ background: info?.teamColor ? `linear-gradient(180deg, ${info.teamColor} 0%, ${info.teamColorDark} 100%), url('/card-bg.png') center/cover` : "oklch(72% 0.1 250)", backgroundBlendMode: info?.teamColor ? "overlay" : undefined }}>
                       {info?.faceUrl ? (
                         <img src={info.faceUrl} alt={ml.card_name} className="w-[60%] h-[60%] object-contain" referrerPolicy="no-referrer" />
@@ -397,16 +397,18 @@ export default function TradingPage() {
                         <span className="text-xs font-extrabold text-white/25">{ml.card_name.slice(0, 2)}</span>
                       )}
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0 max-sm:w-full">
                       {info?.flag && <span className="mr-1">{info.flag}</span>}
                       <span className="font-semibold text-sm">{ml.card_name}</span>
                       {ml.looking_for && <span className="text-xs text-[var(--color-muted)] ml-2">Busca: {ml.looking_for}</span>}
                     </div>
-                    <span className="text-xs text-[var(--color-muted)]">{new Date(ml.created_at).toLocaleDateString("es-CR")}</span>
-                    <button onClick={() => handleUnpublish(ml.id)} className="px-3 py-2 rounded-full bg-[var(--color-danger)]/10 text-[var(--color-danger)] text-xs font-semibold cursor-pointer border-none hover:bg-[var(--color-danger)]/20 min-h-[44px]">
-                      <X size={12} className="inline mr-1" />Quitar
+                    <div className="flex items-center gap-2 max-sm:w-full max-sm:justify-between">
+                      <span className="text-xs text-[var(--color-muted)]">{new Date(ml.created_at).toLocaleDateString("es-CR")}</span>
+                      <button onClick={() => handleUnpublish(ml.id)} className="px-3 py-2 rounded-full bg-[var(--color-danger)]/10 text-[var(--color-danger)] text-xs font-semibold cursor-pointer border-none hover:bg-[var(--color-danger)]/20 min-h-[44px]">
+                        <X size={12} className="inline mr-1" />Quitar
                     </button>
                   </div>
+                </div>
                 );
               })}
             </div>
@@ -422,7 +424,7 @@ export default function TradingPage() {
           {FILTER_TABS.map((f) => (
             <button
               key={f.id} onClick={() => setFilter(f.id)}
-              className={`px-4 py-1.5 rounded-full text-[13px] font-medium cursor-pointer border-[1.5px] transition-colors ${
+              className={`px-3 max-sm:px-2 py-1.5 rounded-full text-[13px] max-sm:text-[11px] font-medium cursor-pointer border-[1.5px] transition-colors ${
                 filter === f.id ? "bg-[var(--color-accent)] border-[var(--color-accent)] text-white" : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
               }`}
             >
@@ -432,7 +434,7 @@ export default function TradingPage() {
           <select
             value={nationFilter}
             onChange={(e) => setNationFilter(e.target.value)}
-            className="px-3 py-1.5 rounded-full text-[13px] font-medium border-[1.5px] border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)] cursor-pointer outline-none focus:border-[var(--color-accent)]"
+            className="px-3 py-1.5 rounded-full text-[13px] max-sm:text-[11px] font-medium border-[1.5px] border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)] cursor-pointer outline-none focus:border-[var(--color-accent)] max-sm:max-w-[140px] truncate"
           >
             <option value="">Todas las naciones</option>
             {TEAM_LIST.map((t) => (
@@ -442,7 +444,7 @@ export default function TradingPage() {
           <select
             value={marketSort}
             onChange={(e) => setMarketSort(e.target.value as typeof marketSort)}
-            className="px-3 py-1.5 rounded-full text-[13px] font-medium border-[1.5px] border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)] cursor-pointer outline-none focus:border-[var(--color-accent)]"
+            className="px-3 py-1.5 rounded-full text-[13px] max-sm:text-[11px] font-medium border-[1.5px] border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)] cursor-pointer outline-none focus:border-[var(--color-accent)] max-sm:max-w-[120px]"
           >
             <option value="desc">Mayor valor</option>
             <option value="asc">Menor valor</option>
@@ -483,10 +485,10 @@ export default function TradingPage() {
                       <span className="absolute bottom-1 right-1 bg-[var(--color-accent)] text-white text-[9px] font-bold px-1 rounded-sm">{info.overall}</span>
                     )}
                   </div>
-                  <div className="flex-1 max-sm:w-full">
-                    <div className="font-bold text-[15px]">{listing.card_name}</div>
-                    <div className="text-[13px] text-[var(--color-muted)]">{info?.flag && <span className="mr-1">{info.flag}</span>}{listing.team_name || info?.teamName || "—"}</div>
-                    {listing.looking_for && <div className="text-xs text-[var(--color-muted)] mt-0.5">Busca: {listing.looking_for}</div>}
+                  <div className="flex-1 max-sm:w-full min-w-0">
+                    <div className="font-bold text-[15px] break-words">{listing.card_name}</div>
+                    <div className="text-[13px] text-[var(--color-muted)] break-words">{info?.flag && <span className="mr-1">{info.flag}</span>}{listing.team_name || info?.teamName || "—"}</div>
+                    {listing.looking_for && <div className="text-xs text-[var(--color-muted)] mt-0.5 break-words">Busca: {listing.looking_for}</div>}
                     <div className="text-xs text-[var(--color-muted)] mt-1">
                       {listing.profiles?.[0]?.display_name || "Anónimo"} · {listing.profiles?.[0]?.reputation || 100}% rep
                     </div>
