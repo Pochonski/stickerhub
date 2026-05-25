@@ -13,7 +13,7 @@ import { useGame } from "@/context/GameContext";
 import { useToast } from "@/hooks/useToast";
 import { generateMixedPack, type PackCard } from "@/lib/pack-generator";
 import { TEAMS } from "@/data/teams";
-import { PackageOpen, Sparkles, Trophy } from "lucide-react";
+import { PackageOpen, Sparkles, Trophy, ShoppingCart, Coins } from "lucide-react";
 import { ALL_PLAYERS } from "@/data/players";
 import { coinValue } from "@/hooks/useSupabasePacks";
 
@@ -110,7 +110,7 @@ function PackOpenerContent() {
                 href="/shop"
                 className="inline-flex items-center gap-2 px-[22px] py-2.5 rounded-full border-[1.5px] border-[var(--color-border)] text-[var(--color-fg)] text-sm font-semibold no-underline transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
               >
-                🛒 Ir a la tienda
+                <ShoppingCart size={14} className="mr-1 inline" /> Ir a la tienda
               </Link>
             </div>
           }
@@ -242,7 +242,7 @@ function PackOpenerContent() {
 
                   {dupeCount > 0 && (
                     <p className="mt-5 text-sm text-[var(--color-muted)] text-center animate-celebration-enter" style={{ animationDelay: "300ms", animationFillMode: "both" }}>
-                      Valor estimado al descartar repetidas: <span className="font-bold text-[var(--color-accent)]">🪙 +{dupeCoins.toLocaleString()} monedas</span>
+                      Valor estimado al descartar repetidas: <span className="font-bold text-[var(--color-accent)]"><Coins size={14} className="inline" /> +{dupeCoins.toLocaleString()} monedas</span>
                     </p>
                   )}
                 </div>

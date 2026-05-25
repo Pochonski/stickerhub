@@ -26,6 +26,7 @@ interface GameContextValue {
   buyPacks: (bundle: PackBundle) => Promise<boolean>;
   refreshCollection: () => Promise<void>;
   addCoins: (amount: number) => Promise<void>;
+  spendCoins: (amount: number) => Promise<boolean>;
   usingSupabase: boolean;
   coins: number;
 }
@@ -71,7 +72,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
           direction: t.direction || (t.from_user_id === user.id ? "sent" : "received"),
         }) as TradeOffer));
       }
-    } catch {}
+    } catch (e) { console.error("fetchTrades error:", e); }
   }, [user]);
 
   useEffect(() => {
@@ -208,8 +209,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const completeTrade = useCallback(
     async (tradeId: string) => {
       if (usingSupabase) {
-        const sb = getSupabase();
-        await sb.from("trade_offers").update({ status: "completed", completed_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", tradeId).eq("to_user_id", user!.id);
+        await fetch(`/api/trades/${tradeId}/accept`, { method: "PUT" });
         fetchTrades();
         supabaseCollection.refresh();
         return;
@@ -219,7 +219,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         trades: prev.trades.map((t) => (t.id === tradeId ? { ...t, status: "completed" as const } : t)),
       }));
     },
-    [usingSupabase, user, fetchTrades, supabaseCollection, setLocalState]
+    [usingSupabase, fetchTrades, supabaseCollection, setLocalState]
   );
 
   const isCollected = useCallback(
@@ -282,6 +282,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         buyPacks: supabasePacks.buyPacks,
         refreshCollection: supabaseCollection.refresh,
         addCoins: supabasePacks.addCoins,
+        spendCoins: supabasePacks.spendCoins,
         usingSupabase,
         coins: supabasePacks.coins,
       }}

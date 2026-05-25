@@ -71,7 +71,7 @@ export function usePacks() {
         setCoins(data.coins ?? 2000);
         setTotalOpened(data.total_opened ?? 0);
       }
-    } catch {}
+    } catch (e) { console.error("fetchPacks error:", e); }
     setLoading(false);
   }, [user]);
 
@@ -154,13 +154,14 @@ export function usePacks() {
   }, [user]);
 
   const addCoins = useCallback(async (amount: number) => {
+    if (!user) return;
     const c = coinsRef.current;
     const newCoins = c + amount;
     setCoins(newCoins);
     try {
       const supabase = getSupabase();
       await supabase.from("user_packs").upsert(
-        { user_id: user!.id, coins: newCoins, updated_at: new Date().toISOString() },
+        { user_id: user.id, coins: newCoins, updated_at: new Date().toISOString() },
         { onConflict: "user_id" }
       );
     } catch { setCoins(c); }

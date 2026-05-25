@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
 import { useGame } from "@/context/GameContext";
-import { PackageOpen, BookOpen } from "lucide-react";
+import { PackageOpen, BookOpen, Trophy } from "lucide-react";
 
 export function WelcomeOverlay() {
   const { user } = useUser();
@@ -35,7 +35,7 @@ export function WelcomeOverlay() {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-[var(--color-surface)] rounded-[var(--radius-xl)] p-8 max-w-[440px] w-[90%] text-center shadow-2xl animate-slide-up">
-        <span className="text-5xl block mb-4">🏆</span>
+        <Trophy size={48} className="mx-auto mb-4 text-[var(--color-accent)]" />
         <h2 className="font-[var(--font-display)] text-[28px] font-extrabold tracking-tight mb-2">
           ¡Bienvenido a Sticker<span className="text-[var(--color-primary)]">Hub</span>, {displayName}!
         </h2>

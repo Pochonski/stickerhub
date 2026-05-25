@@ -37,7 +37,7 @@ export function useCollection() {
         .eq("user_id", userId)
         .order("collected_at", { ascending: false });
       setCollected(data ?? []);
-    } catch {}
+    } catch (e) { console.error("fetchCollection error:", e); }
     setLoading(false);
   }, [user]);
 

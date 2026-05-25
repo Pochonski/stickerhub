@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/useToast";
 import { getSupabase } from "@/lib/supabase/client";
 import { ALL_PLAYERS } from "@/data/players";
 import { ALL_STADIUM_CARDS, ALL_VENUE_CARDS } from "@/data/cards";
-import { TEAMS, TEAM_LIST } from "@/data/teams";
+import { TEAMS, TEAM_LIST, STADIUMS, VENUES } from "@/data/teams";
 import { Check, X, Send, Inbox, Loader2, Search } from "lucide-react";
 import { TradeCelebration } from "@/components/trade/TradeCelebration";
 
@@ -64,7 +64,7 @@ export default function InboxPage() {
       .subscribe();
 
     return () => { sb.removeChannel(channel); };
-  }, [user, celebration]);
+  }, [user]);
 
   const handleAccept = async (trade: TradeItem) => {
     // Use the API route which handles full card transfer atomically
@@ -126,9 +126,9 @@ export default function InboxPage() {
     const p = ALL_PLAYERS.find((pl) => pl.id === cardId);
     if (p) return TEAMS[p.teamId]?.flag;
     const s = ALL_STADIUM_CARDS.find((c) => c.id === cardId);
-    if (s) return TEAMS[s.teamId]?.flag;
+    if (s) return STADIUMS[s.teamId]?.flag;
     const v = ALL_VENUE_CARDS.find((c) => c.id === cardId);
-    if (v) return TEAMS[v.teamId]?.flag;
+    if (v) return VENUES[v.teamId]?.flag;
     return undefined;
   };
 
@@ -161,7 +161,7 @@ export default function InboxPage() {
               tab === t ? "bg-[var(--color-accent)] text-white" : "bg-[var(--color-border)] text-[var(--color-muted)] hover:bg-[var(--color-accent-soft)]"
             }`}
           >
-            {t === "received" ? <>📨 Recibidos</> : <>📤 Enviados</>}
+            {t === "received" ? <><Inbox size={14} className="mr-1 inline" /> Recibidos</> : <><Send size={14} className="mr-1 inline" /> Enviados</>}
           </button>
         ))}
       </div>

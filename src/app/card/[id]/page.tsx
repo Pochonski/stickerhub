@@ -1,6 +1,7 @@
 "use client";
 import { use } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Pill } from "@/components/ui/Pill";
 import { useGame } from "@/context/GameContext";
@@ -79,7 +80,7 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
     return (
       <AppShell>
         <p className="text-center py-16 text-[var(--color-muted)]">Postal no encontrada.</p>
-        <button onClick={() => router.back()} className="inline-flex items-center gap-1.5 text-sm text-[var(--color-muted)] bg-transparent border-none cursor-pointer hover:text-[var(--color-accent)] transition-colors">&larr; Volver</button>
+        <button onClick={() => router.back()} className="inline-flex items-center gap-1.5 text-sm text-[var(--color-muted)] bg-transparent border-none cursor-pointer hover:text-[var(--color-accent)] transition-colors"><ArrowLeft size={14} /> Volver</button>
       </AppShell>
     );
   }
@@ -91,7 +92,7 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
   return (
     <AppShell>
       <button onClick={() => router.back()} className="inline-flex items-center gap-1.5 text-sm text-[var(--color-muted)] bg-transparent border-none cursor-pointer hover:text-[var(--color-accent)] transition-colors mb-6">
-        &larr; Volver
+        <ArrowLeft size={14} /> Volver
       </button>
 
       <div className="grid grid-cols-[340px_1fr] gap-10 mb-12 max-lg:grid-cols-1 max-lg:max-w-[340px]">

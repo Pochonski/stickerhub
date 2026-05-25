@@ -9,7 +9,7 @@ import { ALL_PLAYERS } from "@/data/players";
 import { ALL_STADIUM_CARDS, ALL_VENUE_CARDS } from "@/data/cards";
 import { TEAMS, TEAM_LIST, STADIUMS, VENUES } from "@/data/teams";
 import { coinValue } from "@/hooks/useSupabasePacks";
-import { Trash2, Coins, Sparkles, Search, Filter } from "lucide-react";
+import { Trash2, Coins, Sparkles, Search, Filter, Star } from "lucide-react";
 
 function getCardInfo(id: string): { name: string; gradient: string; sub?: string; type: string; faceUrl?: string; overall?: number; teamId?: string; pos?: string; flag?: string } | null {
   const player = ALL_PLAYERS.find((p) => p.id === id);
@@ -113,15 +113,21 @@ export default function DiscardPage() {
     if (error) { addToast("Error al descartar", "error"); return; }
 
     await addCoins(value);
-    addToast(`+${value} 🪙`, "success");
+    addToast(`+${value}`, "success");
   };
 
   const handleDiscardAll = async () => {
     if (duplicates.length === 0) return;
+    let failed = false;
     for (const id of duplicates) {
-      await handleDiscard(id);
+      try {
+        await handleDiscard(id);
+      } catch {
+        failed = true;
+        break;
+      }
     }
-    await refreshCollection();
+    if (!failed) await refreshCollection();
   };
 
   return (
@@ -144,7 +150,7 @@ export default function DiscardPage() {
               onClick={handleDiscardAll}
               className="px-5 py-2.5 rounded-full bg-[var(--color-danger)] text-white text-sm font-semibold cursor-pointer border-none flex items-center gap-2 transition-colors hover:opacity-90 shrink-0"
             >
-              <Trash2 size={16} /> Descartar todos (+{totalCoins.toLocaleString()} 🪙)
+              <Trash2 size={16} /> Descartar todos
             </button>
           )}
         </div>
@@ -265,8 +271,8 @@ export default function DiscardPage() {
                     }`}
                   >
                     <Trash2 size={12} />
-                    Descartar +{value} 🪙
-                    {isStar && <span className="text-[10px]">⭐</span>}
+                    Descartar +{value}
+                    {isStar && <Star size={10} className="inline" />}
                   </button>
                 </div>
               </div>

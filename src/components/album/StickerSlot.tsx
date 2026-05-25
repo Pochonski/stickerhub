@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Star } from "lucide-react";
 import { PositionSilhouette } from "./PositionSilhouette";
 
 interface StickerSlotProps {
@@ -73,7 +74,7 @@ export function StickerSlot({
             {/* Special badge */}
             {isSpecial && (
               <span className="absolute top-1.5 right-1.5 bg-[var(--color-accent)] text-[9px] font-bold px-1.5 py-0.5 rounded-sm text-white leading-none">
-                ★
+                <Star size={9} className="inline" strokeWidth={3} fill="currentColor" />
               </span>
             )}
           </div>

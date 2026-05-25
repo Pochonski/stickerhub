@@ -79,7 +79,7 @@ export default function TradingPage() {
   const [sideNationFilter, setSideNationFilter] = useState("");
   const [marketSort, setMarketSort] = useState<"desc" | "asc" | "">("desc");
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedTrade, setSelectedTrade] = useState<{ name: string; owner: string; userId: string; listingId: string } | null>(null);
+  const [selectedTrade, setSelectedTrade] = useState<{ name: string; owner: string; userId: string; listingId: string; cardId: string } | null>(null);
   const [offerCardId, setOfferCardId] = useState("");
   const [listings, setListings] = useState<ListingItem[]>([]);
   const [myListings, setMyListings] = useState<ListingItem[]>([]);
@@ -154,7 +154,7 @@ export default function TradingPage() {
           .eq("is_active", true).neq("user_id", user.id)
           .order("created_at", { ascending: false }).limit(20);
         if (data) setListings(data as ListingItem[]);
-      } catch {}
+      } catch (e) { console.error("fetchListings error:", e); }
       finally { setLoadingListings(false); }
     };
     fetchListings();
@@ -251,7 +251,7 @@ export default function TradingPage() {
   });
 
   const openExchange = (listing: ListingItem) => {
-    setSelectedTrade({ name: listing.card_name, owner: listing.profiles?.[0]?.display_name || "Anónimo", userId: listing.user_id, listingId: listing.id });
+    setSelectedTrade({ name: listing.card_name, owner: listing.profiles?.[0]?.display_name || "Anónimo", userId: listing.user_id, listingId: listing.id, cardId: listing.card_id });
     setOfferCardId(availableForExchange[0]?.id || "");
     setModalOpen(true);
   };
@@ -259,7 +259,7 @@ export default function TradingPage() {
   const confirmExchange = () => {
     if (!selectedTrade || !offerCardId) return;
     const offered = availableForExchange.find((d) => d.id === offerCardId);
-    requestTrade(selectedTrade.listingId, selectedTrade.name, selectedTrade.userId, offerCardId, offered?.name || offerCardId, selectedTrade.listingId);
+    requestTrade(selectedTrade.cardId, selectedTrade.name, selectedTrade.userId, offerCardId, offered?.name || offerCardId, selectedTrade.listingId);
     addToast("Solicitud enviada", "success");
     setModalOpen(false);
   };

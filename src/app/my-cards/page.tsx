@@ -123,7 +123,7 @@ export default function MyCardsPage() {
     if (error) { addToast("Error al descartar", "error"); return; }
 
     await addCoins(value);
-    addToast(`¡Descartado! +${value} 🪙`, "success");
+    addToast(`¡Descartado! +${value}`, "success");
   };
 
   const handleClearFilters = () => {

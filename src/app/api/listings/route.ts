@@ -11,7 +11,6 @@ export async function GET(req: NextRequest) {
 
   const url = new URL(req.url);
   const search = url.searchParams.get("search") || "";
-  const teamId = url.searchParams.get("teamId") || "";
   const page = parseInt(url.searchParams.get("page") || "1");
   const limit = Math.min(parseInt(url.searchParams.get("limit") || "20"), 50);
 
@@ -25,9 +24,6 @@ export async function GET(req: NextRequest) {
 
   if (search) {
     query = query.or(`card_name.ilike.%${search}%,team_name.ilike.%${search}%`);
-  }
-  if (teamId) {
-    query = query.eq("cards.team_id", teamId);
   }
 
   const { data, error } = await query;

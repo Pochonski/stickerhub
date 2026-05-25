@@ -85,5 +85,5 @@ export function useRealtime({ table, filter, onInsert, onUpdate, onDelete }: Rea
     return () => {
       sb.removeChannel(channel);
     };
-  }, [user, table, filter]);
+  }, [user, table, filter, onInsert, onUpdate, onDelete]);
 }
