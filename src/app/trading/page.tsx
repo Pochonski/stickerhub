@@ -303,15 +303,15 @@ export default function TradingPage() {
       {/* PUBLICAR MIS REPETIDAS */}
       {section === "publish" && (
       <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-5 mb-8">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col max-sm:gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
           <h2 className="font-[var(--font-display)] text-lg font-bold flex items-center gap-2"><Upload size={18} className="text-[var(--color-primary)]" /> Publicar mis repetidas</h2>
-          <div className="flex items-center gap-3">
-            <div className="relative">
+          <div className="flex flex-wrap items-center gap-2 max-sm:w-full">
+            <div className="relative min-w-0 flex-1 sm:w-[160px] md:w-[200px]">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" />
               <input
                 type="text" placeholder="Filtrar mis repetidas..." value={sideSearch}
                 onChange={(e) => setSideSearch(e.target.value)}
-                className="w-[200px] pl-8 pr-3 py-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] text-xs outline-none focus:border-[var(--color-accent)]"
+                className="w-full pl-8 pr-3 py-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] text-xs outline-none focus:border-[var(--color-accent)]"
               />
             </div>
             <select
@@ -359,13 +359,13 @@ export default function TradingPage() {
                   <>
                     <button
                       onClick={() => { setPublishCard({ id: d.id, name: d.name }); setLookingFor(""); setPublishModal(true); }}
-                      className="max-sm:hidden absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center bg-black/40"
+                      className="hidden lg:block absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center bg-black/40"
                     >
                       <span className="px-4 py-2 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold">Publicar</span>
                     </button>
                     <button
                       onClick={() => { setPublishCard({ id: d.id, name: d.name }); setLookingFor(""); setPublishModal(true); }}
-                      className="sm:hidden absolute bottom-0 left-0 right-0 py-1.5 bg-[var(--color-primary)] text-white text-[11px] font-semibold text-center"
+                      className="lg:hidden absolute bottom-0 left-0 right-0 py-1.5 bg-[var(--color-primary)] text-white text-[11px] font-semibold text-center"
                     >
                       Publicar
                     </button>
@@ -402,8 +402,8 @@ export default function TradingPage() {
                       <span className="font-semibold text-sm">{ml.card_name}</span>
                       {ml.looking_for && <span className="text-xs text-[var(--color-muted)] ml-2">Busca: {ml.looking_for}</span>}
                     </div>
-                    <span className="text-[10px] text-[var(--color-muted)]">{new Date(ml.created_at).toLocaleDateString("es-CR")}</span>
-                    <button onClick={() => handleUnpublish(ml.id)} className="px-3 py-1 rounded-full bg-[var(--color-danger)]/10 text-[var(--color-danger)] text-[11px] font-semibold cursor-pointer border-none hover:bg-[var(--color-danger)]/20">
+                    <span className="text-xs text-[var(--color-muted)]">{new Date(ml.created_at).toLocaleDateString("es-CR")}</span>
+                    <button onClick={() => handleUnpublish(ml.id)} className="px-3 py-2 rounded-full bg-[var(--color-danger)]/10 text-[var(--color-danger)] text-xs font-semibold cursor-pointer border-none hover:bg-[var(--color-danger)]/20 min-h-[44px]">
                       <X size={12} className="inline mr-1" />Quitar
                     </button>
                   </div>
@@ -496,7 +496,7 @@ export default function TradingPage() {
                       Solicitado
                     </span>
                   ) : (
-                    <button onClick={() => openExchange(listing)} className="px-5 py-2.5 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-hover)] max-sm:w-full">
+                    <button onClick={() => openExchange(listing)} className="px-5 py-3 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-hover)] max-sm:w-full min-h-[44px]">
                       Solicitar
                     </button>
                   )}
@@ -521,8 +521,8 @@ export default function TradingPage() {
           )}
         </select>
         <div className="flex gap-2.5 justify-end">
-          <button onClick={() => setModalOpen(false)} className="px-5 py-2.5 rounded-full bg-transparent text-[var(--color-muted)] text-sm font-semibold cursor-pointer border-none hover:bg-[var(--color-accent-soft)]">Cancelar</button>
-          <button onClick={confirmExchange} className="px-5 py-2.5 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none hover:bg-[var(--color-accent-hover)]">Enviar solicitud</button>
+          <button onClick={() => setModalOpen(false)} className="px-5 py-3 rounded-full bg-transparent text-[var(--color-muted)] text-sm font-semibold cursor-pointer border-none hover:bg-[var(--color-accent-soft)] min-h-[44px]">Cancelar</button>
+          <button onClick={confirmExchange} className="px-5 py-3 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none hover:bg-[var(--color-accent-hover)] min-h-[44px]">Enviar solicitud</button>
         </div>
       </Modal>
 
@@ -537,8 +537,8 @@ export default function TradingPage() {
           className="w-full px-3.5 py-2.5 rounded-[var(--radius-md)] border-[1.5px] border-[var(--color-border)] text-sm bg-[var(--color-bg)] mb-5 outline-none focus:border-[var(--color-accent)]"
         />
         <div className="flex gap-2.5 justify-end">
-          <button onClick={() => setPublishModal(false)} className="px-5 py-2.5 rounded-full bg-transparent text-[var(--color-muted)] text-sm font-semibold cursor-pointer border-none hover:bg-[var(--color-accent-soft)]">Cancelar</button>
-          <button onClick={handlePublish} className="px-5 py-2.5 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold cursor-pointer border-none hover:bg-[var(--color-primary-hover)]">Publicar</button>
+          <button onClick={() => setPublishModal(false)} className="px-5 py-3 rounded-full bg-transparent text-[var(--color-muted)] text-sm font-semibold cursor-pointer border-none hover:bg-[var(--color-accent-soft)] min-h-[44px]">Cancelar</button>
+          <button onClick={handlePublish} className="px-5 py-3 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold cursor-pointer border-none hover:bg-[var(--color-primary-hover)] min-h-[44px]">Publicar</button>
         </div>
       </Modal>
     </AppShell>

@@ -21,7 +21,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   useEffect(() => { setMounted(true); }, []);
 
   return (
-    <div className="max-w-[1200px] mx-auto px-4 md:px-6 pb-20 md:pb-0">
+    <div className="max-w-[1200px] mx-auto px-4 md:px-6 pb-20 md:pb-0" style={{ paddingBottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
       <AppHeader />
       {mounted ? children : <ShellSkeleton />}
       <ToastContainer toasts={toasts} onRemove={removeToast} />

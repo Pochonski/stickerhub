@@ -165,7 +165,7 @@ export default function InboxPage() {
           <button
             key={t}
             onClick={() => setTab(t)}
-            className={`px-5 py-2 rounded-full text-sm font-semibold cursor-pointer border-none transition-colors ${
+            className={`px-5 py-2.5 rounded-full text-sm font-semibold cursor-pointer border-none transition-colors min-h-[44px] ${
               tab === t ? "bg-[var(--color-accent)] text-white" : "bg-[var(--color-border)] text-[var(--color-muted)] hover:bg-[var(--color-accent-soft)]"
             }`}
           >
@@ -211,17 +211,17 @@ export default function InboxPage() {
                 <div className={`w-10 h-10 rounded-full grid place-items-center shrink-0 ${trade.to_user_id === user?.id ? "bg-[var(--color-accent-soft)] text-[var(--color-accent)]" : "bg-[var(--color-field-soft)] text-[var(--color-field)]"}`}>
                   {trade.to_user_id === user?.id ? <Inbox size={18} /> : <Send size={18} />}
                 </div>
-                <div className="flex-1">
-                  <div className="font-semibold text-sm">
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-sm break-words">
                     {trade.to_user_id === user?.id
                       ? <>Usuario te ofrece {getCardFlag(trade.offered_card_id) && <span className="mr-0.5">{getCardFlag(trade.offered_card_id)}</span>}{trade.offered_card_name}</>
                       : <>Ofreciste {getCardFlag(trade.offered_card_id) && <span className="mr-0.5">{getCardFlag(trade.offered_card_id)}</span>}{trade.offered_card_name} a Usuario</>}
                   </div>
-                  <div className="text-xs text-[var(--color-muted)] mt-0.5">
+                  <div className="text-xs text-[var(--color-muted)] mt-0.5 break-words">
                     {trade.to_user_id === user?.id ? <>A cambio de: {getCardFlag(trade.requested_card_id) && <span className="mr-0.5">{getCardFlag(trade.requested_card_id)}</span>}{trade.requested_card_name}</> : <>Por: {getCardFlag(trade.requested_card_id) && <span className="mr-0.5">{getCardFlag(trade.requested_card_id)}</span>}{trade.requested_card_name}</>} · {new Date(trade.created_at).toLocaleDateString("es-CR")}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 max-sm:flex-wrap max-sm:gap-3">
                   <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
                     trade.status === "completed" ? "bg-[oklch(94%_0.06_156)] text-[var(--color-success)]" :
                     trade.status === "rejected" || trade.status === "cancelled" ? "bg-[oklch(94%_0.05_22)] text-[var(--color-danger)]" :
@@ -234,12 +234,18 @@ export default function InboxPage() {
                     <>
                       {trade.to_user_id === user?.id && (
                         <>
-                          <button onClick={() => handleAccept(trade)} className="px-3 py-1.5 rounded-full bg-[var(--color-success)] text-white text-xs font-semibold cursor-pointer border-none"><Check size={14} /></button>
-                          <button onClick={() => handleReject(trade)} className="px-3 py-1.5 rounded-full bg-[var(--color-danger)] text-white text-xs font-semibold cursor-pointer border-none"><X size={14} /></button>
+                          <button onClick={() => handleAccept(trade)} className="px-4 py-2.5 rounded-full bg-[var(--color-success)] text-white text-xs font-semibold cursor-pointer border-none min-h-[44px] min-w-[44px]">
+                            <Check size={14} className="max-sm:mr-1 max-sm:inline" />
+                            <span className="hidden max-sm:inline">Aceptar</span>
+                          </button>
+                          <button onClick={() => handleReject(trade)} className="px-4 py-2.5 rounded-full bg-[var(--color-danger)] text-white text-xs font-semibold cursor-pointer border-none min-h-[44px] min-w-[44px]">
+                            <X size={14} className="max-sm:mr-1 max-sm:inline" />
+                            <span className="hidden max-sm:inline">Rechazar</span>
+                          </button>
                         </>
                       )}
                       {trade.from_user_id === user?.id && (
-                        <button onClick={() => handleCancel(trade)} className="px-3 py-1.5 rounded-full bg-[var(--color-danger)] text-white text-xs font-semibold cursor-pointer border-none">Cancelar</button>
+                        <button onClick={() => handleCancel(trade)} className="px-4 py-2.5 rounded-full bg-[var(--color-danger)] text-white text-xs font-semibold cursor-pointer border-none min-h-[44px]">Cancelar</button>
                       )}
                     </>
                   )}

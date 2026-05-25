@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BookOpen, ArrowRightLeft, WalletCards, Store, User, PackageOpen, Trash2, Inbox, Ellipsis } from "lucide-react";
+import { useGame } from "@/context/GameContext";
 import { useState } from "react";
 
 const MAIN_ITEMS = [
@@ -22,6 +23,8 @@ const MORE_ITEMS = [
 export function MobileNav() {
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
+  const { state } = useGame();
+  const pendingTrades = state.trades.filter((t) => t.status === "pending").length;
 
   return (
     <>
@@ -35,8 +38,8 @@ export function MobileNav() {
 
       {/* "More" slide-up menu */}
       <div
-        className={`fixed bottom-16 left-0 right-0 z-40 bg-[var(--color-surface)] border-t border-[var(--color-border)] rounded-t-2xl shadow-lg px-4 py-3 transition-transform duration-200 md:hidden ${
-          moreOpen ? "translate-y-0" : "translate-y-full pointer-events-none"
+        className={`fixed bottom-16 left-0 right-0 z-40 bg-[var(--color-surface)] border-t border-[var(--color-border)] rounded-t-2xl shadow-lg px-4 py-3 transition-all duration-200 md:hidden safe-area-bottom ${
+          moreOpen ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
         }`}
       >
         <div className="flex justify-around">
@@ -47,7 +50,7 @@ export function MobileNav() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMoreOpen(false)}
-                className={`flex flex-col items-center gap-1 px-5 py-2 rounded-xl transition-colors no-underline ${
+                className={`flex flex-col items-center justify-center gap-1 px-5 py-2 rounded-xl transition-colors no-underline h-full ${
                   isActive
                     ? "text-[var(--color-accent)] bg-[var(--color-accent-soft)]"
                     : "text-[var(--color-muted)] hover:text-[var(--color-accent)]"
@@ -70,7 +73,7 @@ export function MobileNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl transition-colors no-underline min-w-0 ${
+                className={`relative flex flex-col items-center justify-center gap-0.5 px-2 h-full rounded-xl transition-colors no-underline min-w-0 ${
                   isActive
                     ? "text-[var(--color-accent)]"
                     : "text-[var(--color-muted)] hover:text-[var(--color-fg)]"
@@ -78,6 +81,9 @@ export function MobileNav() {
               >
                 <item.icon size={22} strokeWidth={isActive ? 2.5 : 1.8} />
                 <span className="text-[10px] font-semibold truncate max-w-[56px]">{item.label}</span>
+                {item.href === "/trading" && pendingTrades > 0 && (
+                  <span className="absolute top-0.5 right-0.5 w-2.5 h-2.5 rounded-full bg-[var(--color-danger)] border-2 border-[var(--color-surface)]" />
+                )}
               </Link>
             );
           })}
@@ -85,7 +91,7 @@ export function MobileNav() {
           {/* More button */}
           <button
             onClick={() => setMoreOpen(!moreOpen)}
-            className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl transition-colors bg-transparent border-none cursor-pointer ${
+            className={`relative flex flex-col items-center justify-center gap-0.5 px-2 h-full rounded-xl transition-colors bg-transparent border-none cursor-pointer ${
               moreOpen
                 ? "text-[var(--color-accent)]"
                 : "text-[var(--color-muted)] hover:text-[var(--color-fg)]"

@@ -29,13 +29,13 @@ export function Modal({ open, onClose, children }: ModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/35"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 cursor-pointer"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
     >
       <div
-        className="bg-[var(--color-surface)] rounded-[var(--radius-xl)] p-8 max-w-[480px] w-[90%] shadow-lg animate-slide-up focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
+        className="bg-[var(--color-surface)] rounded-[var(--radius-xl)] p-8 max-sm:p-4 max-w-[480px] w-[90%] max-h-[85vh] overflow-y-auto overscroll-contain shadow-lg animate-slide-up focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
         onClick={(e) => e.stopPropagation()}
       >
         {children}
