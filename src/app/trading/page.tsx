@@ -18,6 +18,7 @@ interface ListingItem {
   team_name: string;
   looking_for: string;
   created_at: string;
+  user_id: string;
   profiles: Array<{
     display_name: string;
     avatar_url: string;
@@ -33,7 +34,7 @@ export default function TradingPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("todos");
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedTrade, setSelectedTrade] = useState<{ name: string; owner: string } | null>(null);
+  const [selectedTrade, setSelectedTrade] = useState<{ name: string; owner: string; userId: string; listingId: string } | null>(null);
   const [offerCardId, setOfferCardId] = useState("");
   const [listings, setListings] = useState<ListingItem[]>([]);
   const [loadingListings, setLoadingListings] = useState(false);
@@ -47,7 +48,7 @@ export default function TradingPage() {
         const sb = getSupabase();
         const { data } = await sb
           .from("trade_listings")
-          .select("id, card_id, card_name, team_name, looking_for, created_at, profiles!inner(display_name, avatar_url, reputation, badge_tier)")
+          .select("id, card_id, card_name, team_name, looking_for, created_at, user_id, profiles!inner(display_name, avatar_url, reputation, badge_tier)")
           .eq("is_active", true)
           .neq("user_id", user.id)
           .order("created_at", { ascending: false })
@@ -72,8 +73,13 @@ export default function TradingPage() {
     search ? t.card_name.toLowerCase().includes(search.toLowerCase()) || t.team_name?.toLowerCase().includes(search.toLowerCase()) : true
   );
 
-  const openExchange = (name: string, owner: string) => {
-    setSelectedTrade({ name, owner });
+  const openExchange = (listing: ListingItem) => {
+    setSelectedTrade({
+      name: listing.card_name,
+      owner: listing.profiles?.[0]?.display_name || "Anónimo",
+      userId: listing.user_id,
+      listingId: listing.id,
+    });
     setOfferCardId(duplicateNames[0]?.id || "");
     setModalOpen(true);
   };
@@ -81,15 +87,15 @@ export default function TradingPage() {
   const confirmExchange = () => {
     if (!selectedTrade || !offerCardId) return;
     const offered = duplicateNames.find((d) => d.id === offerCardId);
-    // Find the listing's card_id
-    const listing = listings.find((l) => l.card_name === selectedTrade.name);
     requestTrade(
-      listing?.card_id || "",
+      selectedTrade.listingId,
       selectedTrade.name,
-      selectedTrade.owner,
+      selectedTrade.userId,
       offerCardId,
-      offered?.name || offerCardId
+      offered?.name || offerCardId,
+      selectedTrade.listingId
     );
+    addToast("Solicitud enviada", "success");
     setModalOpen(false);
   };
 
@@ -157,7 +163,7 @@ export default function TradingPage() {
                     </div>
                   </div>
                   <button
-                    onClick={() => openExchange(listing.card_name, listing.profiles?.[0]?.display_name || "Anónimo")}
+                    onClick={() => openExchange(listing)}
                     className="px-[22px] py-2.5 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-hover)] max-sm:w-full"
                   >
                     Solicitar intercambio

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Pill } from "@/components/ui/Pill";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -8,13 +8,25 @@ import { useGame } from "@/context/GameContext";
 import { ALL_PLAYERS } from "@/data/players";
 import { ALL_STADIUM_CARDS, ALL_VENUE_CARDS } from "@/data/cards";
 import { TEAMS, STADIUMS, VENUES } from "@/data/teams";
+import { TEAM_LIST } from "@/data/teams";
 import type { Player } from "@/data/types";
-import { Search, WalletCards, Send, Inbox, Trash2, Coins } from "lucide-react";
+import { Search, WalletCards, Send, Inbox, Trash2, Coins, Filter } from "lucide-react";
 import { coinValue } from "@/hooks/useSupabasePacks";
 import { useToast } from "@/hooks/useToast";
 import { getSupabase } from "@/lib/supabase/client";
 
-function getCardInfo(id: string): { name: string; gradient: string; sub?: string; type: string; faceUrl?: string; overall?: number } | null {
+interface CardInfo {
+  name: string;
+  gradient: string;
+  sub?: string;
+  type: string;
+  teamId?: string;
+  pos?: string;
+  faceUrl?: string;
+  overall?: number;
+}
+
+function getCardInfo(id: string): CardInfo | null {
   const player = ALL_PLAYERS.find((p) => p.id === id);
   if (player) {
     const team = TEAMS[player.teamId];
@@ -23,21 +35,37 @@ function getCardInfo(id: string): { name: string; gradient: string; sub?: string
       gradient: team ? `linear-gradient(180deg, ${team.color} 0%, ${team.colorDark} 100%)` : "linear-gradient(180deg, oklch(72% 0.1 250), oklch(58% 0.12 250))",
       sub: `${player.pos} · #${player.num}`,
       type: "Jugador",
+      teamId: player.teamId,
+      pos: player.pos,
       faceUrl: player.faceUrl,
       overall: player.overall ?? 0,
     };
   }
   const stadium = ALL_STADIUM_CARDS.find((c) => c.id === id);
-  if (stadium) return { name: stadium.name, gradient: stadium.bg, type: "Estadio" };
+  if (stadium) return { name: stadium.name, gradient: stadium.bg, type: "Estadio", teamId: stadium.teamId };
   const venue = ALL_VENUE_CARDS.find((c) => c.id === id);
-  if (venue) return { name: venue.name, gradient: venue.bg, type: "Sede" };
+  if (venue) return { name: venue.name, gradient: venue.bg, type: "Sede", teamId: venue.teamId };
   return null;
 }
+
+const CARD_TYPE_OPTIONS = ["todos", "jugadores", "estadios", "sedes"] as const;
+type CardTypeFilter = (typeof CARD_TYPE_OPTIONS)[number];
+
+const POS_OPTIONS: { id: string; label: string }[] = [
+  { id: "", label: "Todos" },
+  { id: "Arquero", label: "Arqueros" },
+  { id: "Defensa", label: "Defensas" },
+  { id: "Mediocampista", label: "Mediocampistas" },
+  { id: "Delantero", label: "Delanteros" },
+];
 
 export default function MyCardsPage() {
   const { state, isCollected, isDuplicate, coins } = useGame();
   const { addToast } = useToast();
   const [search, setSearch] = useState("");
+  const [cardTypeFilter, setCardTypeFilter] = useState<CardTypeFilter>("todos");
+  const [teamFilter, setTeamFilter] = useState("");
+  const [posFilter, setPosFilter] = useState("");
   const [discardedIds, setDiscardedIds] = useState<Set<string>>(new Set());
   const [localCoins, setLocalCoins] = useState(coins);
   const [localDupeCount, setLocalDupeCount] = useState<number | null>(null);
@@ -49,11 +77,25 @@ export default function MyCardsPage() {
   const playerCollected = ALL_PLAYERS.filter((p) => isCollected(p.id)).length;
   const totalAll = totalPlayerCards + ALL_STADIUM_CARDS.length + ALL_VENUE_CARDS.length;
 
-const filteredCollected = collectedIds.filter((id) => {
-    if (!search) return true;
-    const info = getCardInfo(id);
-    return info?.name.toLowerCase().includes(search.toLowerCase());
-  });
+  const availableTeams = useMemo(() => {
+    if (cardTypeFilter === "estadios") return Object.entries(STADIUMS).map(([id, s]) => ({ id, name: s.name }));
+    if (cardTypeFilter === "sedes") return Object.entries(VENUES).map(([id, v]) => ({ id, name: v.name }));
+    return TEAM_LIST.map((t) => ({ id: t.id, name: t.name }));
+  }, [cardTypeFilter]);
+
+  const filteredCollected = useMemo(() => {
+    return collectedIds.filter((id) => {
+      const info = getCardInfo(id);
+      if (!info) return false;
+      if (cardTypeFilter === "jugadores" && info.type !== "Jugador") return false;
+      if (cardTypeFilter === "estadios" && info.type !== "Estadio") return false;
+      if (cardTypeFilter === "sedes" && info.type !== "Sede") return false;
+      if (teamFilter && info.teamId !== teamFilter) return false;
+      if (posFilter && info.pos !== posFilter) return false;
+      if (search && !info.name.toLowerCase().includes(search.toLowerCase())) return false;
+      return true;
+    });
+  }, [collectedIds, cardTypeFilter, teamFilter, posFilter, search]);
 
   const handleDiscard = async (cardId: string) => {
     const info = getCardInfo(cardId);
@@ -64,7 +106,6 @@ const filteredCollected = collectedIds.filter((id) => {
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return;
 
-    // Delete the duplicate from collection
     const { error } = await sb
       .from("user_collections")
       .delete()
@@ -74,7 +115,6 @@ const filteredCollected = collectedIds.filter((id) => {
 
     if (error) { addToast("Error al descartar", "error"); return; }
 
-    // Add coins
     const { data: packData } = await sb
       .from("user_packs")
       .select("coins")
@@ -84,13 +124,21 @@ const filteredCollected = collectedIds.filter((id) => {
     const newCoins = (packData?.coins ?? 0) + value;
     await sb.from("user_packs").upsert({ user_id: user.id, coins: newCoins, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
 
-    // Update local state
     setDiscardedIds((prev) => new Set(prev).add(cardId));
     setLocalDupeCount((prev) => (prev ?? duplicateIds.length) - 1);
     setLocalCoins(newCoins);
 
     addToast(`¡Descartado! +${value} 🪙`, "success");
   };
+
+  const handleClearFilters = () => {
+    setSearch("");
+    setCardTypeFilter("todos");
+    setTeamFilter("");
+    setPosFilter("");
+  };
+
+  const hasActiveFilters = search || cardTypeFilter !== "todos" || teamFilter || posFilter;
 
   return (
     <AppShell>
@@ -106,9 +154,9 @@ const filteredCollected = collectedIds.filter((id) => {
 
       {/* All cards */}
       <div className="mb-12">
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-5 max-sm:flex-col max-sm:items-start max-sm:gap-3">
           <h2 className="text-[22px] font-bold font-[var(--font-display)] tracking-tight">Todas mis postales</h2>
-          <div className="relative max-w-[260px]">
+          <div className="relative w-full max-w-[260px]">
             <label className="sr-only" htmlFor="my-cards-search">Filtrar postales</label>
             <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" aria-hidden="true">
               <Search size={16} strokeWidth={2} />
@@ -116,7 +164,7 @@ const filteredCollected = collectedIds.filter((id) => {
             <input
               id="my-cards-search"
               type="text"
-              placeholder="Filtrar..."
+              placeholder="Buscar por nombre..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-3.5 py-2 rounded-full border-[1.5px] border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-fg)] transition-colors focus:border-[var(--color-accent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
@@ -124,36 +172,114 @@ const filteredCollected = collectedIds.filter((id) => {
           </div>
         </div>
 
+        {/* Filter bar */}
+        <div className="flex flex-col gap-3 mb-5">
+          {/* Type filter */}
+          <div className="flex gap-2 flex-wrap items-center">
+            <Filter size={14} className="text-[var(--color-muted)] shrink-0" />
+            {CARD_TYPE_OPTIONS.map((f) => (
+              <button
+                key={f}
+                onClick={() => {
+                  setCardTypeFilter(f);
+                  setTeamFilter("");
+                  setPosFilter("");
+                }}
+                className={`px-3 py-1.5 rounded-full text-[12px] font-semibold cursor-pointer border-[1.5px] transition-colors ${
+                  cardTypeFilter === f
+                    ? "bg-[var(--color-accent)] border-[var(--color-accent)] text-white"
+                    : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+                }`}
+              >
+                {f === "todos" ? "Todos" : f === "jugadores" ? "Jugadores" : f === "estadios" ? "Estadios" : "Sedes"}
+              </button>
+            ))}
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearFilters}
+                className="px-3 py-1.5 rounded-full text-[12px] font-semibold cursor-pointer border-[1.5px] border-[var(--color-danger)]/30 bg-transparent text-[var(--color-danger)] hover:bg-[var(--color-danger)]/10 transition-colors"
+              >
+                Limpiar filtros
+              </button>
+            )}
+          </div>
+
+          {/* Team + Position filters (only for players) */}
+          <div className="flex gap-3 flex-wrap items-center">
+            {/* Team select */}
+            {cardTypeFilter !== "todos" && (
+              <>
+                <label className="sr-only" htmlFor="team-filter">{cardTypeFilter === "jugadores" ? "Selección" : "Filtrar"}</label>
+                <select
+                  id="team-filter"
+                  value={teamFilter}
+                  onChange={(e) => setTeamFilter(e.target.value)}
+                  className="px-3 py-1.5 rounded-full border-[1.5px] border-[var(--color-border)] bg-[var(--color-surface)] text-xs font-medium text-[var(--color-fg)] min-w-0 max-w-[200px] cursor-pointer transition-colors focus:border-[var(--color-accent)] focus-visible:outline-none"
+                >
+                  <option value="">
+                    {cardTypeFilter === "jugadores" ? "Todas las selecciones" : cardTypeFilter === "estadios" ? "Todos los estadios" : "Todas las sedes"}
+                  </option>
+                  {availableTeams.map((t) => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </select>
+              </>
+            )}
+
+            {/* Position filters (only for players) */}
+            {(cardTypeFilter === "jugadores" || cardTypeFilter === "todos") && (
+              <div className="flex gap-1.5 flex-wrap">
+                {POS_OPTIONS.map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => setPosFilter(posFilter === p.id ? "" : p.id)}
+                    className={`px-3 py-1 rounded-full text-[11px] font-semibold cursor-pointer border-[1.5px] transition-colors ${
+                      posFilter === p.id
+                        ? "bg-[var(--color-field)] border-[var(--color-field)] text-white"
+                        : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-field)] hover:text-[var(--color-field)]"
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
         {filteredCollected.length === 0 ? (
           <EmptyState
             icon={<WalletCards size={36} strokeWidth={1.5} />}
-            title="Sin postales"
-            description={search ? "No se encontraron postales con ese filtro." : "Aún no tienes postales. ¡Abre un sobre para comenzar!"}
+            title={hasActiveFilters ? "Sin resultados" : "Sin postales"}
+            description={hasActiveFilters ? "No se encontraron postales con los filtros seleccionados." : "Aún no tienes postales. ¡Abre un sobre para comenzar!"}
           />
         ) : (
-          <div className="grid grid-cols-6 gap-3 max-lg:grid-cols-4 max-sm:grid-cols-3">
-            {filteredCollected.map((id) => {
-              const info = getCardInfo(id);
-              if (!info) return null;
-              return (
-                <div key={id} className="aspect-[3/4] rounded-[var(--radius-md)] border border-[var(--color-border)] overflow-hidden relative">
-                  <div className="w-full h-full" style={{ background: `${info.gradient}, url('/card-bg.png') center/cover`, backgroundBlendMode: "overlay" }}>
-                    <div className="w-full h-[60%] flex items-center justify-center">
-                      {info.faceUrl && (
-                        <div className="w-[65%] h-[65%] flex items-center justify-center">
-                          <img src={info.faceUrl} alt={info.name} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="w-full h-[40%] bg-[var(--color-surface)] border-t border-[var(--color-border)] p-2 flex flex-col justify-center">
-                      <span className="text-sm font-bold text-center leading-tight">{info.name}</span>
-                      {info.sub && <span className="text-[10px] text-[var(--color-muted)] text-center">{info.sub}</span>}
+          <>
+            <p className="text-xs text-[var(--color-muted)] mb-3">{filteredCollected.length} postal{filteredCollected.length !== 1 ? "es" : ""} encontrada{filteredCollected.length !== 1 ? "s" : ""}</p>
+            <div className="grid grid-cols-6 gap-3 max-lg:grid-cols-4 max-sm:grid-cols-3">
+              {filteredCollected.map((id) => {
+                const info = getCardInfo(id);
+                if (!info) return null;
+                return (
+                  <div key={id} className="aspect-[3/4] rounded-[var(--radius-md)] border border-[var(--color-border)] overflow-hidden relative">
+                    <div className="w-full h-full" style={{ background: `${info.gradient}, url('/card-bg.png') center/cover`, backgroundBlendMode: "overlay" }}>
+                      <div className="w-full h-[60%] flex items-center justify-center">
+                        {info.faceUrl && (
+                          <div className="w-[65%] h-[65%] flex items-center justify-center">
+                            <img src={info.faceUrl} alt={info.name} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="w-full h-[40%] bg-[var(--color-surface)] border-t border-[var(--color-border)] p-2 flex flex-col justify-center">
+                        <span className="text-sm font-bold text-center leading-tight">{info.name}</span>
+                        {info.sub && <span className="text-[10px] text-[var(--color-muted)] text-center">{info.sub}</span>}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
 

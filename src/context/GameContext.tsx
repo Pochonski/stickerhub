@@ -1,10 +1,11 @@
 "use client";
 
-import { createContext, useContext, useCallback, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useCallback, useEffect, useState, type ReactNode } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useCollection } from "@/hooks/useSupabaseCollection";
 import { usePacks } from "@/hooks/useSupabasePacks";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { getSupabase } from "@/lib/supabase/client";
 import type { TradeOffer, GameState } from "@/data/types";
 
 interface GameContextValue {
@@ -12,7 +13,7 @@ interface GameContextValue {
   collectCard: (cardId: string) => void;
   openPack: (teamId: string) => number;
   openPacks: (count: number) => void;
-  requestTrade: (cardId: string, cardName: string, fromUser: string, offeredCardId: string, offeredCardName: string) => void;
+  requestTrade: (cardId: string, cardName: string, toUserId: string, offeredCardId: string, offeredCardName: string, listingId?: string) => void;
   cancelTrade: (tradeId: string) => void;
   completeTrade: (tradeId: string) => void;
   isCollected: (cardId: string) => boolean;
@@ -40,7 +41,38 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [localState, setLocalState] = useLocalStorage<GameState>("stickerhub-state", DEFAULT_STATE);
   const supabaseCollection = useCollection();
   const supabasePacks = usePacks();
+  const [supabaseTrades, setSupabaseTrades] = useState<TradeOffer[]>([]);
   const usingSupabase = !!user;
+
+  // Fetch trades from Supabase
+  const fetchTrades = useCallback(async () => {
+    if (!user) return;
+    try {
+      const sb = getSupabase();
+      const { data } = await sb
+        .from("trade_offers")
+        .select("*")
+        .or(`from_user_id.eq.${user.id},to_user_id.eq.${user.id}`)
+        .order("created_at", { ascending: false });
+      if (data) {
+        setSupabaseTrades(data.map((t: any) => ({
+          id: t.id,
+          cardId: t.card_id || t.cardId || "",
+          cardName: t.card_name || t.cardName || "",
+          fromUser: t.fromUser || (t.from_user_id === user.id ? (t.to_user_name || "") : ""),
+          status: t.status,
+          date: t.date || t.created_at,
+          offeredCardId: t.offered_card_id || t.offeredCardId || "",
+          offeredCardName: t.offered_card_name || t.offeredCardName || "",
+          direction: t.direction || (t.from_user_id === user.id ? "sent" : "received"),
+        }) as TradeOffer));
+      }
+    } catch {}
+  }, [user]);
+
+  useEffect(() => {
+    if (usingSupabase) fetchTrades();
+  }, [usingSupabase, fetchTrades]);
 
   // Sync localStorage → Supabase on first auth
   useEffect(() => {
@@ -58,7 +90,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         ),
         duplicates: supabaseCollection.duplicates,
         packs: supabasePacks.quantity,
-        trades: [],
+        trades: supabaseTrades,
         openedPacks: supabasePacks.totalOpened,
       }
     : localState;
@@ -118,43 +150,72 @@ export function GameProvider({ children }: { children: ReactNode }) {
   );
 
   const requestTrade = useCallback(
-    (cardId: string, cardName: string, fromUser: string, offeredCardId: string, offeredCardName: string) => {
+    async (cardId: string, cardName: string, toUserId: string, offeredCardId: string, offeredCardName: string, listingId?: string) => {
+      if (usingSupabase) {
+        const sb = getSupabase();
+        const { error } = await sb.from("trade_offers").insert({
+          from_user_id: user!.id,
+          to_user_id: toUserId,
+          listing_id: listingId,
+          requested_card_id: cardId,
+          requested_card_name: cardName,
+          offered_card_id: offeredCardId,
+          offered_card_name: offeredCardName,
+        });
+        if (!error) {
+          await sb.from("notifications").insert({
+            user_id: toUserId,
+            type: "trade_request",
+            title: "Nueva solicitud de intercambio",
+            body: `Quieren intercambiar ${offeredCardName} por tu ${cardName}`,
+          });
+          fetchTrades();
+          return;
+        }
+      }
+      // Fallback to localStorage
       setLocalState((prev) => ({
         ...prev,
         trades: [
           ...prev.trades,
-          {
-            id: `trade-${Date.now()}`,
-            cardId, cardName, fromUser,
-            status: "pending",
-            date: new Date().toISOString(),
-            offeredCardId, offeredCardName,
-            direction: "sent",
-          },
+          { id: `trade-${Date.now()}`, cardId, cardName, fromUser: toUserId, status: "pending", date: new Date().toISOString(), offeredCardId, offeredCardName, direction: "sent" },
         ],
       }));
     },
-    [setLocalState]
+    [usingSupabase, user, fetchTrades, setLocalState]
   );
 
   const cancelTrade = useCallback(
-    (tradeId: string) => {
+    async (tradeId: string) => {
+      if (usingSupabase) {
+        const sb = getSupabase();
+        await sb.from("trade_offers").update({ status: "cancelled", updated_at: new Date().toISOString() }).eq("id", tradeId).eq("from_user_id", user!.id);
+        fetchTrades();
+        return;
+      }
       setLocalState((prev) => ({
         ...prev,
         trades: prev.trades.map((t) => (t.id === tradeId ? { ...t, status: "cancelled" as const } : t)),
       }));
     },
-    [setLocalState]
+    [usingSupabase, user, fetchTrades, setLocalState]
   );
 
   const completeTrade = useCallback(
-    (tradeId: string) => {
+    async (tradeId: string) => {
+      if (usingSupabase) {
+        const sb = getSupabase();
+        await sb.from("trade_offers").update({ status: "completed", completed_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", tradeId).eq("to_user_id", user!.id);
+        fetchTrades();
+        supabaseCollection.refresh();
+        return;
+      }
       setLocalState((prev) => ({
         ...prev,
         trades: prev.trades.map((t) => (t.id === tradeId ? { ...t, status: "completed" as const } : t)),
       }));
     },
-    [setLocalState]
+    [usingSupabase, user, fetchTrades, supabaseCollection, setLocalState]
   );
 
   const isCollected = useCallback(
