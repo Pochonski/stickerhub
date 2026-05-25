@@ -10,7 +10,7 @@ import { useGame } from "@/context/GameContext";
 import { getSupabase } from "@/lib/supabase/client";
 import { useToast } from "@/hooks/useToast";
 import { ALL_PLAYERS } from "@/data/players";
-import { Search, Send, Inbox } from "lucide-react";
+import { Search, Send, Inbox, Plus, Upload } from "lucide-react";
 
 interface ListingItem {
   id: string;
@@ -40,6 +40,29 @@ export default function TradingPage() {
   const [offerCardId, setOfferCardId] = useState("");
   const [listings, setListings] = useState<ListingItem[]>([]);
   const [loadingListings, setLoadingListings] = useState(false);
+  const [publishModal, setPublishModal] = useState(false);
+  const [publishCard, setPublishCard] = useState<{ id: string; name: string } | null>(null);
+  const [lookingFor, setLookingFor] = useState("");
+
+  const handlePublish = async () => {
+    if (!user || !publishCard) return;
+    const player = ALL_PLAYERS.find((p) => p.id === publishCard.id);
+    const teamName = player ? (await import("@/data/teams").then(m => m.TEAMS[player.teamId]?.name)) : "";
+    const teamNameStr = teamName || "";
+    const sb = getSupabase();
+    const { error } = await sb.from("trade_listings").insert({
+      user_id: user.id, card_id: publishCard.id, card_name: publishCard.name,
+      team_name: teamNameStr, looking_for: lookingFor || null,
+    });
+    if (!error) {
+      addToast(`¡${publishCard.name} publicada!`, "success");
+      setPublishModal(false);
+      setLookingFor("");
+      setPublishCard(null);
+    } else {
+      addToast("Error al publicar", "error");
+    }
+  };
 
   // Fetch real listings when authenticated
   useEffect(() => {
@@ -178,16 +201,24 @@ export default function TradingPage() {
 
         {/* Sidebar */}
         <aside className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-6 h-fit sticky top-6 max-lg:static">
-          <h3 className="text-[17px] font-bold font-[var(--font-display)] mb-4">Mis repetidas disponibles</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-[17px] font-bold font-[var(--font-display)]">Mis repetidas</h3>
+            <span className="text-xs text-[var(--color-muted)]">{duplicateNames.length}</span>
+          </div>
           {duplicateNames.length === 0 ? (
-            <p className="text-sm text-[var(--color-muted)]">No tienes postales repetidas para intercambiar.</p>
+            <p className="text-sm text-[var(--color-muted)]">No tenés repetidas para publicar.</p>
           ) : (
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-2">
               {duplicateNames.map((d) => (
-                <div key={d.id} className="flex items-center gap-3 py-2 border-b border-[var(--color-border)] last:border-b-0">
-                  <div className="w-10 h-[52px] rounded shrink-0" style={{ background: "linear-gradient(180deg, oklch(72% 0.1 250) 0%, oklch(58% 0.12 250) 50%, oklch(95% 0.02 250) 50%, oklch(90% 0.03 250) 100%)" }} />
-                  <div className="flex-1 text-[13px] font-semibold">{d.name}</div>
-                  <Pill variant="warning">Repetida</Pill>
+                <div key={d.id} className="flex items-center gap-2 py-2 border-b border-[var(--color-border)] last:border-b-0">
+                  <div className="w-10 h-[52px] rounded shrink-0 bg-[linear-gradient(180deg,oklch(72%_0.1_250),oklch(58%_0.12_250))]" />
+                  <div className="flex-1 text-[13px] font-semibold truncate">{d.name}</div>
+                  <button
+                    onClick={() => { setPublishCard({ id: d.id, name: d.name }); setLookingFor(""); setPublishModal(true); }}
+                    className="px-2.5 py-1.5 rounded-full bg-[var(--color-primary)] text-white text-[11px] font-semibold cursor-pointer border-none hover:bg-[var(--color-primary-hover)] shrink-0"
+                  >
+                    Publicar
+                  </button>
                 </div>
               ))}
             </div>
@@ -232,6 +263,36 @@ export default function TradingPage() {
             className="px-[22px] py-2.5 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-hover)]"
           >
             Enviar solicitud
+          </button>
+        </div>
+      </Modal>
+
+      {/* Publish modal */}
+      <Modal open={publishModal} onClose={() => setPublishModal(false)}>
+        <h3 className="text-xl font-bold font-[var(--font-display)] mb-2">Publicar para intercambiar</h3>
+        <p className="text-sm text-[var(--color-muted)] mb-5">
+          Estás publicando <strong>{publishCard?.name}</strong> en el marketplace.
+        </p>
+        <label className="text-[13px] font-semibold block mb-1.5">¿Qué buscás a cambio? (opcional)</label>
+        <input
+          type="text"
+          placeholder='Ej: "Cualquier carta de Argentina"'
+          value={lookingFor}
+          onChange={(e) => setLookingFor(e.target.value)}
+          className="w-full px-3.5 py-2.5 rounded-[var(--radius-md)] border-[1.5px] border-[var(--color-border)] text-sm bg-[var(--color-bg)] mb-5 outline-none focus:border-[var(--color-accent)]"
+        />
+        <div className="flex gap-2.5 justify-end">
+          <button
+            onClick={() => setPublishModal(false)}
+            className="px-[22px] py-2.5 rounded-full bg-transparent text-[var(--color-muted)] text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-soft)] hover:text-[var(--color-accent)]"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handlePublish}
+            className="px-[22px] py-2.5 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-primary-hover)]"
+          >
+            Publicar
           </button>
         </div>
       </Modal>

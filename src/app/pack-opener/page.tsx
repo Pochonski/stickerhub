@@ -86,7 +86,7 @@ function PackOpenerContent() {
     return (
       <AppShell>
         <h1 className="font-[var(--font-display)] text-[28px] font-bold tracking-tight mb-2">Abrir sobre</h1>
-        <p className="text-[var(--color-muted)] text-[15px] mb-8">Cada sobre contiene 6 stickers. Abrí el sobre para descubrir qué te tocó.</p>
+        <p className="text-[var(--color-muted)] text-[15px] mb-8">Cada sobre contiene 7 stickers aleatorios. Abrí el sobre para descubrir qué te tocó.</p>
         <EmptyState
           icon={<PackageOpen size={36} strokeWidth={1.5} />}
           title="Sin sobres disponibles"

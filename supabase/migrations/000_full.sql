@@ -2061,11 +2061,7 @@ INSERT INTO cards (id, name, card_type, team_id, bg) VALUES ('wem1', 'Vista exte
 INSERT INTO cards (id, name, card_type, team_id, bg) VALUES ('wem2', 'Interior del estadio', 'stadium', 'wembley', 'linear-gradient(180deg, oklch(70% 0.04 35), oklch(45% 0.05 35))');
 INSERT INTO cards (id, name, card_type, team_id, bg) VALUES ('wem3', 'Final de la Euro', 'stadium', 'wembley', 'linear-gradient(180deg, oklch(65% 0.04 35), oklch(40% 0.05 35))');
 INSERT INTO cards (id, name, card_type, team_id, bg) VALUES ('doh1', 'Panorama urbano', 'venue', 'doha', 'linear-gradient(180deg, oklch(80% 0.03 95), oklch(55% 0.04 95))');
-INSERT INTO cards (id, name, card_type, team_id, bg) VALUES ('doh2', 'Centro de convenciones', 'venue', 'doha', 'linear-gradient(180deg, oklch(75% 0.03 95), oklch(50% 0.04 95))');
 INSERT INTO cards (id, name, card_type, team_id, bg) VALUES ('cdm1', 'Centro histórico', 'venue', 'cdmx', 'linear-gradient(180deg, oklch(80% 0.03 155), oklch(55% 0.04 155))');
-INSERT INTO cards (id, name, card_type, team_id, bg) VALUES ('cdm2', 'Zona de estadios', 'venue', 'cdmx', 'linear-gradient(180deg, oklch(75% 0.03 155), oklch(50% 0.04 155))');
 INSERT INTO cards (id, name, card_type, team_id, bg) VALUES ('nyn1', 'Manhattan skyline', 'venue', 'nynj', 'linear-gradient(180deg, oklch(80% 0.03 355), oklch(55% 0.04 355))');
-INSERT INTO cards (id, name, card_type, team_id, bg) VALUES ('nyn2', 'MetLife Stadium', 'venue', 'nynj', 'linear-gradient(180deg, oklch(75% 0.03 355), oklch(50% 0.04 355))');
 INSERT INTO cards (id, name, card_type, team_id, bg) VALUES ('rio1', 'Panorama costero', 'venue', 'rio', 'linear-gradient(180deg, oklch(80% 0.03 285), oklch(55% 0.04 285))');
-INSERT INTO cards (id, name, card_type, team_id, bg) VALUES ('rio2', 'Cristo Redentor', 'venue', 'rio', 'linear-gradient(180deg, oklch(75% 0.03 285), oklch(50% 0.04 285))');
 

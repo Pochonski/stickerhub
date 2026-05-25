@@ -12,7 +12,7 @@ Ingresá con tu email y recibí un **link mágico** — sin contraseñas. Cada u
 
 ### 2. Abrir sobres
 
-Cada sobre contiene **6 stickers** aleatorios (4 jugadores + 1 estadio + 1 sede). La apertura tiene una animación al estilo **Pokémon TCG Pocket**: el sobre flota, lo rasgás, las cartas salen en cascada y las volteás una por una para descubrir qué te tocó.
+Cada sobre contiene **7 stickers** aleatorios mezclados del pool completo (jugadores, estadios y sedes). La apertura tiene una animación al estilo **Pokémon TCG Pocket**: el sobre flota, lo rasgás, las cartas salen en cascada y las volteás una por una para descubrir qué te tocó.
 
 Si una carta ya la tenías, se marca como **repetida** y queda disponible para intercambiar.
 
@@ -149,7 +149,7 @@ Habilitar Email provider (magic link).
 GET  /api/collections        Colección del usuario
 POST /api/collections        Agregar sticker
 GET  /api/packs              Sobres disponibles
-POST /api/packs              Abrir sobre (devuelve 6 cartas)
+POST /api/packs              Abrir sobre (devuelve 7 cartas)
 GET  /api/listings           Marketplace
 POST /api/listings           Publicar repetida
 GET  /api/trades             Historial de intercambios

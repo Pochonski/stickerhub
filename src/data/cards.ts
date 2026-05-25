@@ -26,19 +26,15 @@ export const STADIUM_CARDS: Record<string, CardItem[]> = {
 export const VENUE_CARDS: Record<string, CardItem[]> = {
   doha: [
     { id: "doh1", name: "Panorama urbano", collected: false, bg: "linear-gradient(180deg, oklch(80% 0.03 95), oklch(55% 0.04 95))", teamId: "doha", type: "venue" },
-    { id: "doh2", name: "Centro de convenciones", collected: false, bg: "linear-gradient(180deg, oklch(75% 0.03 95), oklch(50% 0.04 95))", teamId: "doha", type: "venue" },
   ],
   cdmx: [
     { id: "cdm1", name: "Centro histórico", collected: false, bg: "linear-gradient(180deg, oklch(80% 0.03 155), oklch(55% 0.04 155))", teamId: "cdmx", type: "venue" },
-    { id: "cdm2", name: "Zona de estadios", collected: false, bg: "linear-gradient(180deg, oklch(75% 0.03 155), oklch(50% 0.04 155))", teamId: "cdmx", type: "venue" },
   ],
   nynj: [
     { id: "nyn1", name: "Manhattan skyline", collected: false, bg: "linear-gradient(180deg, oklch(80% 0.03 355), oklch(55% 0.04 355))", teamId: "nynj", type: "venue" },
-    { id: "nyn2", name: "MetLife Stadium", collected: false, bg: "linear-gradient(180deg, oklch(75% 0.03 355), oklch(50% 0.04 355))", teamId: "nynj", type: "venue" },
   ],
   rio: [
     { id: "rio1", name: "Panorama costero", collected: false, bg: "linear-gradient(180deg, oklch(80% 0.03 285), oklch(55% 0.04 285))", teamId: "rio", type: "venue" },
-    { id: "rio2", name: "Cristo Redentor", collected: false, bg: "linear-gradient(180deg, oklch(75% 0.03 285), oklch(50% 0.04 285))", teamId: "rio", type: "venue" },
   ],
 };
 

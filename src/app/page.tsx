@@ -88,7 +88,7 @@ export default function Home() {
           <div className="p-4 flex flex-col flex-1">
             <h3 className="text-[17px] font-bold font-[var(--font-display)] mb-1">Abrir sobres</h3>
             <p className="text-sm text-[var(--color-muted)] leading-relaxed flex-1">
-              Abre un sobre y descubre 6 postales al azar. Voltea cada carta para ver qué jugador, estadio o sede te tocó. ({state.packs} disponibles)
+              Abre un sobre y descubre 7 postales al azar de jugadores, estadios o sedes. ({state.packs} disponibles)
             </p>
             <span className="inline-flex items-center gap-1.5 mt-3.5 text-sm font-semibold text-[var(--color-accent)]">Abrir sobre &rarr;</span>
           </div>
