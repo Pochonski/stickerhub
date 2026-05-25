@@ -1,12 +1,21 @@
-import { createBrowserClient } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
-function getSupabase() {
-  return createBrowserClient(
+let instance: SupabaseClient | null = null;
+
+export function getSupabase(): SupabaseClient {
+  if (instance) return instance;
+
+  instance = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+      },
+    }
   );
+  return instance;
 }
-
-// Export a factory - each call returns a fresh client
-// @supabase/ssr handles cookie sharing internally
-export { getSupabase };
