@@ -146,6 +146,26 @@ export default function TradingPage() {
     };
     fetchListings();
     fetchMyListings();
+
+    // Realtime: new listings appear automatically
+    const sb2 = getSupabase();
+    const channel = sb2
+      .channel(`trading:${user.id}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "trade_listings" },
+        (payload) => {
+          const listing = payload.new as ListingItem;
+          if (listing.user_id !== user.id) {
+            setListings((prev) => [listing, ...prev]);
+          } else {
+            // My own new listing
+            fetchMyListings();
+          }
+        })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "trade_listings", filter: `is_active=eq.false` },
+        () => { fetchListings(); fetchMyListings(); })
+      .subscribe();
+
+    return () => { sb2.removeChannel(channel); };
   }, [user]);
 
   const dupes = state.duplicates.map((id) => getDupeInfo(id)).filter(Boolean) as DupeInfo[];

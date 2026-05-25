@@ -1,14 +1,38 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { AppNav } from "./AppNav";
 import { useUser } from "@/hooks/useUser";
 import { Trophy, User, LogIn, Coins } from "lucide-react";
-import { useGame } from "@/context/GameContext";
+import { getSupabase } from "@/lib/supabase/client";
 
 export function AppHeader() {
   const { user, loading } = useUser();
-  const { coins } = useGame();
+  const [coins, setCoins] = useState(0);
+  const [packs, setPacks] = useState(0);
+
+  // Fetch initial + subscribe to realtime
+  useEffect(() => {
+    if (!user) return;
+    const sb = getSupabase();
+
+    // Initial fetch
+    sb.from("user_packs").select("coins, quantity").eq("user_id", user.id).maybeSingle().then(({ data }) => {
+      if (data) { setCoins(data.coins ?? 0); setPacks(data.quantity ?? 0); }
+    });
+
+    // Realtime subscription
+    const channel = sb
+      .channel(`header-packs:${user.id}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "user_packs", filter: `user_id=eq.${user.id}` },
+        (payload) => { const d = payload.new as Record<string, unknown>; setCoins((d.coins as number) ?? 0); setPacks((d.quantity as number) ?? 0); })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "user_packs", filter: `user_id=eq.${user.id}` },
+        (payload) => { const d = payload.new as Record<string, unknown>; setCoins((d.coins as number) ?? 0); setPacks((d.quantity as number) ?? 0); })
+      .subscribe();
+
+    return () => { sb.removeChannel(channel); };
+  }, [user]);
 
   return (
     <header className="flex items-center justify-between py-3 border-b border-[var(--color-border)] mb-6 md:mb-8 md:py-4">
