@@ -130,17 +130,18 @@ export function FlipbookViewer() {
             onInit={onInit}
           >
             {/* Cover */}
-            <div className="h-full bg-[linear-gradient(160deg,var(--color-accent),oklch(55%_0.14_68),oklch(42%_0.12_68))] flex flex-col items-center justify-center text-white">
-              <div className="text-center p-6">
-                <span className="text-[64px] block mb-3 drop-shadow-lg">🏆</span>
-                <h1 className="font-[var(--font-display)] text-[24px] font-extrabold tracking-tight mb-1.5">
+            <div className="h-full relative overflow-hidden" style={{ background: "linear-gradient(160deg, var(--color-accent), oklch(55% 0.14 68), oklch(42% 0.12 68))" }}>
+              <img src="/portada.jpeg" alt="StickerHub Portada" className="absolute inset-0 w-full h-full object-cover opacity-80 mix-blend-overlay" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center p-6">
+                <span className="text-5xl block mb-3 drop-shadow-lg">🏆</span>
+                <h1 className="font-[var(--font-display)] text-[24px] font-extrabold tracking-tight mb-1.5 drop-shadow-md">
                   StickerHub
                 </h1>
-                <p className="font-[var(--font-display)] text-[15px] font-bold tracking-[0.2em] uppercase opacity-80">
-                  FIFA World Cup
+                <p className="font-[var(--font-display)] text-[15px] font-bold tracking-[0.2em] uppercase opacity-90 drop-shadow-sm">
+                  Mundial FIFA
                 </p>
-                <p className="text-xs opacity-50 mt-3">2026</p>
-                <p className="text-[10px] opacity-30 mt-4">{TEAM_LIST.length} selecciones</p>
+                <p className="text-xs opacity-60 mt-2 drop-shadow-sm">2026</p>
+                <p className="text-[10px] opacity-40 mt-3 drop-shadow-sm">{TEAM_LIST.length} selecciones</p>
               </div>
             </div>
 
@@ -238,12 +239,15 @@ export function FlipbookViewer() {
             })}
 
             {/* Back cover */}
-            <div className="h-full bg-[linear-gradient(160deg,oklch(42%_0.12_68),oklch(55%_0.14_68),var(--color-accent))] flex items-center justify-center text-white">
-              <div className="text-center p-6">
-                <span className="text-[40px] block mb-2 opacity-40">🏆</span>
-                <p className="font-[var(--font-display)] text-xs font-bold tracking-[0.2em] uppercase opacity-50">
-                  Mundial FIFA 2026
-                </p>
+            <div className="h-full relative overflow-hidden" style={{ background: "linear-gradient(160deg, oklch(42% 0.12 68), oklch(55% 0.14 68), var(--color-accent))" }}>
+              <img src="/portada.jpeg" alt="" className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay" />
+              <div className="absolute inset-0 flex items-center justify-center text-white text-center">
+                <div>
+                  <span className="text-[40px] block mb-2 opacity-40">🏆</span>
+                  <p className="font-[var(--font-display)] text-xs font-bold tracking-[0.2em] uppercase opacity-50">
+                    StickerHub
+                  </p>
+                </div>
               </div>
             </div>
           </HTMLFlipBook>
