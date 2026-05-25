@@ -15,7 +15,7 @@ import { generateMixedPack, type PackCard } from "@/lib/pack-generator";
 import { TEAMS } from "@/data/teams";
 import { PackageOpen, Sparkles } from "lucide-react";
 
-const QUANTITY_OPTIONS = [1, 2, 3, 5, 10];
+const QUANTITY_OPTIONS = [1, 2, 3, 5, 10, 15, 20, 25, 50];
 
 function PackOpenerContent() {
   const searchParams = useSearchParams();
