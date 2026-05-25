@@ -81,7 +81,7 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
     );
   }
 
-  const { name, num, pos, teamName, teamColor, teamColorDark, type, bg, player, isDetailed } = info;
+  const { name, num, pos, teamName, teamColor, teamColorDark, teamId, type, bg, player, isDetailed } = info;
   const collected = isCollected(id);
   const gradient = bg || `linear-gradient(180deg, ${teamColor} 0%, ${teamColorDark} 45%, oklch(97% 0.02 ${teamColorDark.includes("250") ? "250" : "5"}) 45%, oklch(92% 0.03 ${teamColorDark.includes("250") ? "250" : "5"}) 100%)`;
 
@@ -115,7 +115,7 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
                     src={`/${type === "estadio" ? "estadio" : "sede"}-${teamId}.jpg`}
                     alt={name}
                     className="w-[70%] h-[75%] object-contain mx-auto mb-2"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                   />
                 )}
                 <span className="font-[var(--font-display)] font-extrabold text-[40px] text-white/80 text-center tracking-tight drop-shadow-md block">
