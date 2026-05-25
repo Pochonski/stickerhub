@@ -8,7 +8,8 @@ import { useToast } from "@/hooks/useToast";
 import { getSupabase } from "@/lib/supabase/client";
 import { ALL_PLAYERS } from "@/data/players";
 import { TEAMS } from "@/data/teams";
-import { Check, X, Send, Inbox, Clock, Loader2 } from "lucide-react";
+import { Check, X, Send, Inbox, Loader2 } from "lucide-react";
+import { TradeCelebration } from "@/components/trade/TradeCelebration";
 
 interface TradeItem {
   id: string;
@@ -30,6 +31,7 @@ export default function InboxPage() {
   const [tab, setTab] = useState<"received" | "sent">("received");
   const [trades, setTrades] = useState<TradeItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [celebration, setCelebration] = useState<{ receivedCard: { name: string; faceUrl?: string; teamColor?: string; teamColorDark?: string; num?: number; teamName?: string }; givenCard: { name: string } } | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -59,8 +61,26 @@ export default function InboxPage() {
       addToast("Error al aceptar: " + error.message, "error");
       return;
     }
+
+    // Build celebration data from the received card
+    const player = ALL_PLAYERS.find((p) => p.id === trade.offered_card_id);
+    const team = player ? TEAMS[player.teamId] : null;
+
     setTrades((prev) => prev.map((t) => t.id === trade.id ? { ...t, status: "completed" } : t));
     addToast("¡Intercambio aceptado! Cartas transferidas.", "success");
+
+    // Show celebration
+    setCelebration({
+      receivedCard: {
+        name: trade.offered_card_name,
+        faceUrl: player?.faceUrl,
+        teamColor: team?.color,
+        teamColorDark: team?.colorDark,
+        num: player?.num,
+        teamName: team?.name,
+      },
+      givenCard: { name: trade.requested_card_name },
+    });
   };
 
   const handleReject = async (trade: TradeItem) => {
@@ -157,6 +177,12 @@ export default function InboxPage() {
           ))}
         </div>
       )}
+      <TradeCelebration
+        show={!!celebration}
+        receivedCard={celebration?.receivedCard || { name: "", faceUrl: "" }}
+        givenCard={celebration?.givenCard || { name: "" }}
+        onClose={() => setCelebration(null)}
+      />
     </AppShell>
   );
 }
