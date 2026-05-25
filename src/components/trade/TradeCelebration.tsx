@@ -5,7 +5,7 @@ import { Trophy, Star, Sparkles } from "lucide-react";
 
 interface TradeCelebrationProps {
   show: boolean;
-  receivedCard: { name: string; faceUrl?: string; teamColor?: string; teamColorDark?: string; num?: number; pos?: string; teamName?: string };
+  receivedCard: { name: string; faceUrl?: string; teamColor?: string; teamColorDark?: string; num?: number; pos?: string; teamName?: string; flag?: string };
   givenCard: { name: string };
   onClose: () => void;
 }
@@ -102,6 +102,7 @@ export function TradeCelebration({ show, receivedCard, givenCard, onClose }: Tra
 
             {/* Info */}
             <div className="h-[45%] bg-white/95 p-3 flex flex-col items-center justify-center text-center">
+              {receivedCard.flag && <span className="text-base leading-none mb-0.5">{receivedCard.flag}</span>}
               <span className="text-sm font-bold text-[var(--color-fg)] leading-tight">{receivedCard.name}</span>
               {receivedCard.teamName && <span className="text-[10px] text-[var(--color-muted)] uppercase tracking-wider mt-0.5">{receivedCard.teamName}{receivedCard.num ? ` · #${receivedCard.num}` : ""}</span>}
             </div>

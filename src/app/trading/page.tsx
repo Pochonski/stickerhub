@@ -39,13 +39,14 @@ interface DupeInfo {
   overall?: number;
   pos?: string;
   num?: number;
+  flag?: string;
 }
 
 function getDupeInfo(id: string): DupeInfo | null {
   const p = ALL_PLAYERS.find((pl) => pl.id === id);
   if (p) {
     const t = TEAMS[p.teamId];
-    return { id: p.id, name: p.name, teamId: p.teamId, teamName: t?.name, teamColor: t?.color, teamColorDark: t?.colorDark, faceUrl: p.faceUrl, overall: p.overall, pos: p.pos, num: p.num };
+    return { id: p.id, name: p.name, teamId: p.teamId, teamName: t?.name, teamColor: t?.color, teamColorDark: t?.colorDark, faceUrl: p.faceUrl, overall: p.overall, pos: p.pos, num: p.num, flag: t?.flag };
   }
   const s = ALL_STADIUM_CARDS.find((c) => c.id === id);
   if (s) {
@@ -287,6 +288,7 @@ export default function TradingPage() {
                     )}
                   </div>
                   <div className="h-[42%] bg-white/90 p-2 flex flex-col justify-center text-center">
+                    {d.flag && <span className="text-xs leading-none mb-0.5">{d.flag}</span>}
                     <span className="text-[12px] font-bold leading-tight">{d.name}</span>
                     {d.teamName && <span className="text-[10px] text-[var(--color-muted)] mt-0.5 truncate">{d.teamName}{d.num ? ` · #${d.num}` : ""}</span>}
                   </div>
@@ -397,7 +399,7 @@ export default function TradingPage() {
                   </div>
                   <div className="flex-1 max-sm:w-full">
                     <div className="font-bold text-[15px]">{listing.card_name}</div>
-                    <div className="text-[13px] text-[var(--color-muted)]">{listing.team_name || info?.teamName || "—"}</div>
+                    <div className="text-[13px] text-[var(--color-muted)]">{info?.flag && <span className="mr-1">{info.flag}</span>}{listing.team_name || info?.teamName || "—"}</div>
                     {listing.looking_for && <div className="text-xs text-[var(--color-muted)] mt-0.5">Busca: {listing.looking_for}</div>}
                     <div className="text-xs text-[var(--color-muted)] mt-1">
                       {listing.profiles?.[0]?.display_name || "Anónimo"} · {listing.profiles?.[0]?.reputation || 100}% rep

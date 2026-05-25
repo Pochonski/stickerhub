@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Trophy, PackageOpen } from "lucide-react";
 import type { PackCard } from "@/lib/pack-generator";
+import { TEAMS } from "@/data/teams";
 
 interface PackSummaryProps {
   show: boolean;
@@ -35,7 +36,10 @@ export function PackSummary({ show, cards, teamFlag, teamName, onOpenAnother }: 
                 <span className="text-2xl font-extrabold text-white/25 font-[var(--font-display)]">{card.num}</span>
               ) : null}
             </div>
-            <div className="text-[10px] font-bold p-1.5 bg-[var(--color-surface)] text-center">{card.name}</div>
+            <div className="text-[10px] font-bold p-1.5 bg-[var(--color-surface)] text-center">
+              {TEAMS[card.teamId]?.flag && <span className="text-[9px] block leading-none mb-0.5">{TEAMS[card.teamId].flag}</span>}
+              {card.name}
+            </div>
             <span
               className={`absolute top-1 right-1 px-1.5 py-0.5 rounded-md font-bold text-[9px] tracking-wide ${
                 card.isNew ? "bg-[oklch(58%_0.16_156_/_0.9)] text-white" : "bg-[oklch(70%_0.14_72_/_0.9)] text-gray-900"

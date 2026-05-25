@@ -31,7 +31,7 @@ export default function InboxPage() {
   const [tab, setTab] = useState<"received" | "sent">("received");
   const [trades, setTrades] = useState<TradeItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [celebration, setCelebration] = useState<{ receivedCard: { name: string; faceUrl?: string; teamColor?: string; teamColorDark?: string; num?: number; teamName?: string }; givenCard: { name: string } } | null>(null);
+  const [celebration, setCelebration] = useState<{ receivedCard: { name: string; faceUrl?: string; teamColor?: string; teamColorDark?: string; num?: number; teamName?: string; flag?: string }; givenCard: { name: string } } | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -83,6 +83,7 @@ export default function InboxPage() {
         teamColorDark: team?.colorDark,
         num: player?.num,
         teamName: team?.name,
+        flag: team?.flag,
       },
       givenCard: { name: trade.requested_card_name },
     });
