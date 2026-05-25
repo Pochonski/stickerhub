@@ -13,7 +13,9 @@ import { useGame } from "@/context/GameContext";
 import { useToast } from "@/hooks/useToast";
 import { generateMixedPack, type PackCard } from "@/lib/pack-generator";
 import { TEAMS } from "@/data/teams";
-import { PackageOpen, Sparkles } from "lucide-react";
+import { PackageOpen, Sparkles, Trophy } from "lucide-react";
+import { ALL_PLAYERS } from "@/data/players";
+import { coinValue } from "@/hooks/useSupabasePacks";
 
 const QUANTITY_OPTIONS = [1, 2, 3, 5, 10, 15, 20, 25, 50];
 
@@ -198,41 +200,120 @@ function PackOpenerContent() {
           </>
         )}
 
-        {stage === "summary" && currentPack.length > 0 && (
-          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-6 shadow-md">
-            <h3 className="font-[var(--font-display)] text-xl font-bold mb-4">
-              {openedCount > 1 ? `${currentPack.length} stickers de ${openedCount} sobres` : "¡Sobre abierto!"}
-            </h3>
-            <div className="flex gap-3 justify-center flex-wrap mb-6 max-h-[400px] overflow-y-auto p-2">
-              {currentPack.map((card, i) => (
-                <div key={i} className="w-[72px] aspect-[3/4] rounded-lg relative overflow-hidden border border-[var(--color-border)] shrink-0">
-                  <div className="w-full h-[55%] flex items-center justify-center" style={{ background: `${card.gradient}, url('/card-bg.png') center/cover`, backgroundBlendMode: "overlay" }}>
-                    {card.faceUrl ? (
-                      <img src={card.faceUrl} alt={card.name} className="w-[60%] aspect-square object-contain" referrerPolicy="no-referrer" />
-                    ) : card.num ? (
-                      <span className="text-xl font-extrabold text-white/25">{card.num}</span>
-                    ) : null}
+        {stage === "summary" && currentPack.length > 0 && (() => {
+          const newCount = currentPack.filter((c) => c.isNew).length;
+          const dupeCount = currentPack.filter((c) => !c.isNew).length;
+
+          const teamGroups = new Map<string, typeof currentPack>();
+          for (const card of currentPack) {
+            const list = teamGroups.get(card.teamId) ?? [];
+            list.push(card);
+            teamGroups.set(card.teamId, list);
+          }
+
+          const ratingLookup = new Map(ALL_PLAYERS.map((p) => [p.id, p.overall]));
+          let dupeCoins = 0;
+          for (const card of currentPack) {
+            if (!card.isNew) dupeCoins += coinValue(ratingLookup.get(card.id) ?? 70, card.id);
+          }
+
+          return (
+            <div className="animate-summary-in">
+              {/* Stats Banner */}
+              <div className="relative overflow-hidden rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-md p-6 md:p-8 mb-6">
+                <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-accent)]/6 via-[var(--color-accent)]/2 to-transparent pointer-events-none" />
+                <div className="absolute top-0 right-0 w-48 h-48 bg-[var(--color-accent)]/4 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                <div className="relative">
+                  <h3 className="font-[var(--font-display)] text-[22px] md:text-[26px] font-bold text-center flex items-center justify-center gap-2 mb-6">
+                    <Trophy size={26} strokeWidth={1.5} className="text-[var(--color-accent)]" />
+                    ¡{openedCount} {openedCount === 1 ? "sobre abierto" : "sobres abiertos"}!
+                  </h3>
+
+                  <div className="flex gap-3 justify-center flex-wrap">
+                    <div className="bg-[var(--color-success)]/10 rounded-[var(--radius-lg)] px-5 py-3.5 text-center min-w-[110px] animate-celebration-enter" style={{ animationDelay: "100ms", animationFillMode: "both" }}>
+                      <span className="block font-[var(--font-display)] text-[32px] md:text-[36px] font-bold text-[var(--color-success)] leading-none">{newCount}</span>
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-[var(--color-success)] mt-1 block">Nuevas</span>
+                    </div>
+                    <div className="bg-[var(--color-warning)]/10 rounded-[var(--radius-lg)] px-5 py-3.5 text-center min-w-[110px] animate-celebration-enter" style={{ animationDelay: "200ms", animationFillMode: "both" }}>
+                      <span className="block font-[var(--font-display)] text-[32px] md:text-[36px] font-bold text-[var(--color-warning)] leading-none">{dupeCount}</span>
+                      <span className="text-[10px] uppercase tracking-widest font-bold text-[var(--color-warning)] mt-1 block">Repetidas</span>
+                    </div>
                   </div>
-                  <div className="text-[9px] font-bold p-1 bg-white/90 text-center leading-tight">{card.name}</div>
-                  <span
-                    className={`absolute top-1 right-1 px-1.5 py-0.5 rounded-md font-bold text-[8px] tracking-wide ${
-                      card.isNew ? "bg-[oklch(58%_0.16_156_/_0.9)] text-white" : "bg-[oklch(70%_0.14_72_/_0.9)] text-gray-900"
-                    }`}
-                  >
-                    {card.isNew ? "NUEVA" : "REPETIDA"}
-                  </span>
+
+                  {dupeCount > 0 && (
+                    <p className="mt-5 text-sm text-[var(--color-muted)] text-center animate-celebration-enter" style={{ animationDelay: "300ms", animationFillMode: "both" }}>
+                      Valor estimado al descartar repetidas: <span className="font-bold text-[var(--color-accent)]">🪙 +{dupeCoins.toLocaleString()} monedas</span>
+                    </p>
+                  )}
                 </div>
-              ))}
+              </div>
+
+              {/* Cards grouped by team */}
+              <div className="max-h-[50vh] overflow-y-auto pr-1 space-y-5 mb-6">
+                {Array.from(teamGroups.entries()).map(([teamId, cards]) => {
+                  const teamData = TEAMS[teamId];
+                  return (
+                    <div key={teamId} className="animate-celebration-enter" style={{ animationFillMode: "both" }}>
+                      <div className="flex items-center gap-2 mb-3 px-1">
+                        <span className="text-base">{teamData?.flag}</span>
+                        <h4 className="font-[var(--font-display)] text-sm font-semibold text-[var(--color-fg)]">{teamData?.name ?? teamId}</h4>
+                        <span className="text-[11px] text-[var(--color-muted)] font-medium">{cards.length}</span>
+                      </div>
+                      <div className="flex gap-2.5 justify-center flex-wrap">
+                        {cards.map((card, i) => (
+                          <div
+                            key={`${card.id}-${i}`}
+                            className="card-cascade-item"
+                            style={{ animationDelay: `${(i % 8) * 50}ms` }}
+                          >
+                            <div className="w-[84px] aspect-[3/4] rounded-[var(--radius-md)] relative overflow-hidden border border-[var(--color-border)] shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 cursor-default">
+                              <div className="w-full h-[55%] flex items-center justify-center" style={{ background: `${card.gradient}, url('/card-bg.png') center/cover`, backgroundBlendMode: "overlay" }}>
+                                {card.faceUrl ? (
+                                  <img src={card.faceUrl} alt={card.name} className="w-[62%] aspect-square object-contain" referrerPolicy="no-referrer" />
+                                ) : card.num ? (
+                                  <span className="text-lg font-extrabold text-white/25 font-[var(--font-display)]">{card.num}</span>
+                                ) : null}
+                              </div>
+                              <div className="text-[8px] font-bold p-1 bg-[var(--color-surface)] text-center leading-tight">
+                                {teamData?.flag && <span className="text-[7px] block leading-none mb-0.5">{teamData.flag}</span>}
+                                {card.name}
+                              </div>
+                              <span
+                                className={`absolute top-1 right-1 px-1.5 py-0.5 rounded-md font-bold text-[7.5px] tracking-wide ${
+                                  card.isNew ? "bg-[var(--color-success)] text-white" : "bg-[var(--color-warning)] text-gray-900"
+                                }`}
+                              >
+                                {card.isNew ? "NUEVA" : "REPETIDA"}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 justify-center flex-wrap pt-2">
+                <button
+                  onClick={handleOpenAnother}
+                  disabled={state.packs <= 0}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-hover)] disabled:opacity-40"
+                >
+                  <PackageOpen size={16} strokeWidth={2} />
+                  {state.packs > 0 ? `Abrir otro${openedCount > 1 ? "s" : ""} (${state.packs} disponible${state.packs !== 1 ? "s" : ""})` : "Sin sobres"}
+                </button>
+                <Link
+                  href="/album"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full border-[1.5px] border-[var(--color-border)] text-[var(--color-fg)] text-sm font-semibold no-underline transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+                >
+                  Volver al album
+                </Link>
+              </div>
             </div>
-            <button
-              onClick={handleOpenAnother}
-              disabled={state.packs <= 0}
-              className="px-6 py-3 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-hover)] disabled:opacity-40"
-            >
-              {state.packs > 0 ? `Abrir otro${openedCount > 1 ? "s" : ""} (${state.packs} disponible${state.packs !== 1 ? "s" : ""})` : "Sin sobres"}
-            </button>
-          </div>
-        )}
+          );
+        })()}
 
         {stage === "summary" && currentPack.length === 0 && (
           <PackSummary
