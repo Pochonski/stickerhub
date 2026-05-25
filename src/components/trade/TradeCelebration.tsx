@@ -82,8 +82,9 @@ export function TradeCelebration({ show, receivedCard, givenCard, onClose }: Tra
             className="w-[180px] aspect-[3/4] rounded-xl overflow-hidden shadow-2xl relative"
             style={{
               background: receivedCard.teamColor
-                ? `linear-gradient(180deg, ${receivedCard.teamColor} 0%, ${receivedCard.teamColorDark} 50%, white 50%, #f8f8f8 100%)`
-                : "linear-gradient(180deg, oklch(72% 0.1 250) 0%, oklch(58% 0.12 250) 50%, white 50%, #f8f8f8 100%)",
+                ? `linear-gradient(180deg, ${receivedCard.teamColor} 0%, ${receivedCard.teamColorDark} 50%, white 50%, #f8f8f8 100%), url('/card-bg.png') center/cover`
+                : `linear-gradient(180deg, oklch(72% 0.1 250) 0%, oklch(58% 0.12 250) 50%, white 50%, #f8f8f8 100%), url('/card-bg.png') center/cover`,
+              backgroundBlendMode: "overlay",
             }}
           >
             {/* Glow */}
