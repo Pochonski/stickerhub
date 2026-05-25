@@ -92,13 +92,8 @@ export default function TradingPage() {
     if (!user || !publishCard) return;
     // Check if already published
     const alreadyPublished = myListings.some((l) => l.card_id === publishCard.id);
-    if (alreadyPublished) {
-      addToast("Esta carta ya está publicada", "warning");
-      setPublishModal(false); setPublishCard(null);
-      return;
-    }
-    if (pendingOfferedIds.has(publishCard.id)) {
-      addToast("Ya tenés esta carta en un intercambio pendiente", "warning");
+    if (!isCardAvailable(publishCard.id)) {
+      addToast("Ya no tenés copias disponibles de esta carta", "warning");
       setPublishModal(false); setPublishCard(null);
       return;
     }
@@ -193,13 +188,33 @@ export default function TradingPage() {
   }, [user]);
 
   const dupes = state.duplicates.map((id) => getDupeInfo(id)).filter(Boolean) as DupeInfo[];
+  
+  // Count total duplicates per card + how many are already in use
+  const totalPerCard = new Map<string, number>();
+  const usedPerCard = new Map<string, number>();
+  for (const d of dupes) {
+    totalPerCard.set(d.id, (totalPerCard.get(d.id) || 0) + 1);
+  }
+  for (const l of myListings) {
+    usedPerCard.set(l.card_id, (usedPerCard.get(l.card_id) || 0) + 1);
+  }
+  for (const cid of pendingOfferedIds) {
+    usedPerCard.set(cid, (usedPerCard.get(cid) || 0) + 1);
+  }
+  // Card is "available" if total duplicates > used count
+  const isCardAvailable = (cardId: string) => {
+    const total = totalPerCard.get(cardId) || 0;
+    const used = usedPerCard.get(cardId) || 0;
+    return total > used;
+  };
+  
   const publishedIds = new Set(myListings.map((l) => l.card_id));
   const filteredDupes = sideSearch ? dupes.filter((d) => d.name.toLowerCase().includes(sideSearch.toLowerCase()) || d.teamName?.toLowerCase().includes(sideSearch.toLowerCase())) : dupes;
 
   const duplicateNames = dupes.map((d) => ({ id: d.id, name: d.name }));
-  // Filter out cards already in use (published or in pending trades)
+  // Filter out cards already in use
   const availableForExchange = duplicateNames.filter(
-    (d) => !publishedIds.has(d.id) && !pendingOfferedIds.has(d.id)
+    (d) => isCardAvailable(d.id)
   );
 
   const filtered = listings.filter((t) => {
@@ -300,9 +315,7 @@ export default function TradingPage() {
                     {d.teamName && <span className="text-[10px] text-[var(--color-muted)] mt-0.5 truncate">{d.teamName}{d.num ? ` · #${d.num}` : ""}</span>}
                   </div>
                 </div>
-                {publishedIds.has(d.id) ? (
-                  <div className="absolute top-1.5 right-1.5 bg-[var(--color-success)]/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-sm">Publicada</div>
-                ) : pendingOfferedIds.has(d.id) ? (
+                {!isCardAvailable(d.id) ? (
                   <div className="absolute top-1.5 right-1.5 bg-[var(--color-warning)]/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-sm">En uso</div>
                 ) : (
                   <button
