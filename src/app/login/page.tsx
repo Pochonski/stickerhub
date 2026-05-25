@@ -6,9 +6,11 @@ import { useEffect, useState } from "react";
 import { Mail, Trophy } from "lucide-react";
 
 export default function LoginPage() {
-  const { user, loading, signIn } = useAuth();
+  const { user, loading, signIn, signInWithPassword } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
@@ -23,32 +25,36 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     if (!email || sending || cooldown > 0) return;
+    if (showPassword && !password) return;
     setSending(true);
     setError("");
 
-    // Safety timeout: force reset if stuck > 8s
     const timeout = setTimeout(() => {
       setSending(false);
-      setError("El servidor no responde. Revisá tu conexión e intentá de nuevo.");
+      setError("El servidor no responde. Intentá de nuevo.");
       setCooldown(15);
     }, 8000);
 
     try {
-      await signIn(email);
+      if (showPassword) {
+        await signInWithPassword(email, password);
+      } else {
+        await signIn(email);
+      }
       clearTimeout(timeout);
       setSent(true);
     } catch (e: unknown) {
       clearTimeout(timeout);
       const msg = e instanceof Error ? e.message : String(e);
-      if (msg.includes("429") || msg.includes("rate") || msg.includes("Too Many") || msg.includes("limit")) {
-        setError("Demasiados intentos. Esperá 2 minutos y probá de nuevo.");
+      if (msg.includes("Invalid login") || msg.includes("credentials")) {
+        setError("Email o contraseña incorrectos.");
+        setCooldown(5);
+      } else if (msg.includes("429") || msg.includes("rate") || msg.includes("limit")) {
+        setError("Demasiados intentos. Esperá 2 minutos.");
         setCooldown(120);
-      } else if (msg.includes("400") || msg.includes("Bad Request")) {
-        setError("Email inválido o servicio no disponible. Revisá el email.");
-        setCooldown(10);
       } else {
-        setError(`Error: ${msg.slice(0, 60)}`);
-        setCooldown(30);
+        setError(showPassword ? "Error al ingresar." : "Error al enviar. Revisá el email.");
+        setCooldown(15);
       }
     }
     setSending(false);
@@ -94,6 +100,24 @@ export default function LoginPage() {
 
             {error && (
               <p className="text-xs text-[var(--color-danger)] mt-3">{error}</p>
+            )}
+
+            <button
+              onClick={() => { setShowPassword(!showPassword); setError(""); }}
+              className="mt-4 text-[11px] text-[var(--color-muted)]/50 hover:text-[var(--color-muted)] cursor-pointer bg-transparent border-none"
+            >
+              {showPassword ? "Usar link mágico" : "¿Tenés contraseña?"}
+            </button>
+
+            {showPassword && (
+              <input
+                type="password"
+                placeholder="Contraseña"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 rounded-full border-[1.5px] border-[var(--color-border)] bg-[var(--color-bg)] text-sm text-[var(--color-fg)] outline-none mt-3 text-center transition-colors focus:border-[var(--color-accent)]"
+                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
+              />
             )}
           </>
         )}

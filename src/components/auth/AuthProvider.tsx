@@ -9,6 +9,7 @@ interface AuthState {
   session: Session | null;
   loading: boolean;
   signIn: (email: string) => Promise<void>;
+  signInWithPassword: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthState>({
   session: null,
   loading: true,
   signIn: async () => {},
+  signInWithPassword: async () => {},
   signOut: async () => {},
 });
 
@@ -42,10 +44,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const sb = getSupabase();
     const { error } = await sb.auth.signInWithOtp({
       email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/album`,
-      },
+      options: { emailRedirectTo: `${window.location.origin}/album` },
     });
+    if (error) throw error;
+  };
+
+  const signInWithPassword = async (email: string, password: string) => {
+    const sb = getSupabase();
+    const { error } = await sb.auth.signInWithPassword({ email, password });
     if (error) throw error;
   };
 
@@ -56,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, signIn, signInWithPassword, signOut }}>
       {children}
     </AuthContext.Provider>
   );
