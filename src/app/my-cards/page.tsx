@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/useToast";
 import { getSupabase } from "@/lib/supabase/client";
 import { coinValue } from "@/hooks/useSupabasePacks";
 import { Search, WalletCards, Send, Inbox, Trash2, Filter } from "lucide-react";
+import { StatCard } from "@/components/ui/StatCard";
 
 interface CardInfo {
   name: string;
@@ -391,11 +392,4 @@ export default function MyCardsPage() {
   );
 }
 
-function StatCard({ num, label }: { num: number | string; label: string }) {
-  return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-6 text-center">
-      <div className="font-[var(--font-display)] text-[36px] font-bold text-[var(--color-accent)] tracking-tight">{num}</div>
-      <div className="text-[13px] text-[var(--color-muted)] uppercase tracking-widest mt-1.5">{label}</div>
-    </div>
-  );
-}
+

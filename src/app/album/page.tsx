@@ -4,6 +4,7 @@ import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { TeamCard } from "@/components/album/TeamCard";
 import { useGame } from "@/context/GameContext";
+import { StatCard } from "@/components/ui/StatCard";
 import { TEAM_LIST } from "@/data/teams";
 import { PLAYERS } from "@/data/players";
 import { PackageOpen, BookOpen } from "lucide-react";
@@ -67,11 +68,4 @@ export default function AlbumPage() {
   );
 }
 
-function StatCard({ num, label }: { num: number | string; label: string }) {
-  return (
-    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-5 text-center">
-      <div className="font-[var(--font-display)] text-[28px] font-bold text-[var(--color-accent)] tracking-tight">{num}</div>
-      <div className="text-xs text-[var(--color-muted)] uppercase tracking-widest mt-1">{label}</div>
-    </div>
-  );
-}
+

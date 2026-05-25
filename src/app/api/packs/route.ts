@@ -58,12 +58,12 @@ export async function POST(req: NextRequest) {
 
   const { data: allCards } = await query;
 
-  if (!allCards || allCards.length < 7) {
+  if (!allCards || allCards.length < 6) {
     return NextResponse.json({ error: "Not enough cards available" }, { status: 400 });
   }
 
   const shuffled = [...allCards].sort(() => Math.random() - 0.5);
-  const selected = shuffled.slice(0, 7);
+  const selected = shuffled.slice(0, 6);
 
   // Decrement pack count
   const { error: updateError } = await supabase
