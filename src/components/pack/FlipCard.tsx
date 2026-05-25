@@ -10,9 +10,10 @@ interface FlipCardProps {
   num?: number;
   pos?: string;
   faceUrl?: string;
+  flag?: string;
 }
 
-export function FlipCard({ isFlipped, onFlip, gradient, teamColor, teamColorDark, name, num, pos, faceUrl }: FlipCardProps) {
+export function FlipCard({ isFlipped, onFlip, gradient, teamColor, teamColorDark, name, num, pos, faceUrl, flag }: FlipCardProps) {
   const cardGradient = gradient || `linear-gradient(180deg, ${teamColor || "oklch(72% 0.1 250)"} 0%, ${teamColorDark || "oklch(58% 0.12 250)"} 100%)`;
 
   return (
@@ -44,6 +45,7 @@ export function FlipCard({ isFlipped, onFlip, gradient, teamColor, teamColorDark
             ) : null}
           </div>
           <div className="w-full p-3 text-center bg-[var(--color-surface)] border-t border-[var(--color-border)]">
+            {flag && <span className="text-lg block leading-none mb-0.5">{flag}</span>}
             <div className="text-sm font-bold text-[var(--color-fg)]">{name}</div>
             {pos && <div className="text-[11px] text-[var(--color-muted)] uppercase tracking-wider mt-0.5">{pos}</div>}
           </div>

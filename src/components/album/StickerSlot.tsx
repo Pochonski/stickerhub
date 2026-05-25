@@ -14,6 +14,7 @@ interface StickerSlotProps {
   teamName?: string;
   isSpecial?: boolean;
   faceUrl?: string;
+  flag?: string;
 }
 
 export function StickerSlot({
@@ -27,6 +28,7 @@ export function StickerSlot({
   teamName,
   isSpecial,
   faceUrl,
+  flag,
 }: StickerSlotProps) {
   if (collected && name) {
     return (
@@ -93,7 +95,7 @@ export function StickerSlot({
             )}
             {teamName && (
               <span className="text-[9px] text-[var(--color-muted)]/70 uppercase tracking-widest leading-none mt-0.5">
-                {teamName}
+                {flag && <span className="mr-1">{flag}</span>}{teamName}
               </span>
             )}
           </div>

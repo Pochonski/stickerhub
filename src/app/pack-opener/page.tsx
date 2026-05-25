@@ -188,6 +188,7 @@ function PackOpenerContent() {
                     num={card.num}
                     pos={card.pos}
                     faceUrl={card.faceUrl}
+                    flag={TEAMS[card.teamId]?.flag}
                   />
                 </div>
               ))}

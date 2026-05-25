@@ -180,6 +180,7 @@ export default function TeamAlbumPage({ params }: { params: Promise<{ team: stri
             teamName={type === "jugadores" ? teamData.name : undefined}
             isSpecial={card.isSpecial}
             faceUrl={card.faceUrl}
+            flag={type === "jugadores" ? teamData.flag : undefined}
           />
         ))}
       </div>

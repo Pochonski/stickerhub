@@ -211,6 +211,7 @@ export function FlipbookViewer() {
                               teamName={team.name}
                               isSpecial={SPECIAL_PLAYERS.has(p.id)}
                               faceUrl={p.faceUrl}
+                              flag={team.flag}
                             />
                           );
                         })}

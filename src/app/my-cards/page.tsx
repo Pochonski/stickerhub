@@ -22,6 +22,7 @@ interface CardInfo {
   pos?: string;
   faceUrl?: string;
   overall?: number;
+  flag?: string;
 }
 
 function getCardInfo(id: string): CardInfo | null {
@@ -35,6 +36,7 @@ function getCardInfo(id: string): CardInfo | null {
       type: "Jugador",
       teamId: player.teamId,
       pos: player.pos,
+      flag: team?.flag,
       faceUrl: player.faceUrl,
       overall: player.overall ?? 0,
     };
@@ -297,6 +299,7 @@ export default function MyCardsPage() {
                         )}
                       </div>
                       <div className="w-full h-[40%] bg-[var(--color-surface)] border-t border-[var(--color-border)] p-2 flex flex-col justify-center">
+                        {info.flag && <span className="text-sm leading-none mb-0.5">{info.flag}</span>}
                         <span className="text-sm font-bold text-center leading-tight text-[var(--color-fg)]">{info.name}</span>
                         {info.sub && <span className="text-[10px] text-[var(--color-muted)] text-center">{info.sub}</span>}
                       </div>
