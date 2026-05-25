@@ -135,9 +135,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const openPacks = useCallback(
     (count: number) => {
       if (usingSupabase) {
-        for (let i = 0; i < count; i++) {
-          supabasePacks.decrementPack();
-        }
+        supabasePacks.decrementPacks(count);
         return;
       }
       setLocalState((prev) => ({

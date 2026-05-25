@@ -69,10 +69,11 @@ export function usePacks() {
 
   useEffect(() => { fetchPacks(); }, [fetchPacks]);
 
-  const decrementPack = useCallback(async () => {
-    if (quantity <= 0 || !user) return false;
-    const newQty = quantity - 1;
-    const newOpened = totalOpened + 1;
+  const decrementPacks = useCallback(async (count: number) => {
+    if (quantity <= 0 || count <= 0 || !user) return false;
+    const actualCount = Math.min(count, quantity);
+    const newQty = quantity - actualCount;
+    const newOpened = totalOpened + actualCount;
     setQuantity(newQty);
     setTotalOpened(newOpened);
     try {
@@ -88,6 +89,10 @@ export function usePacks() {
     }
     return true;
   }, [quantity, totalOpened, user]);
+
+  const decrementPack = useCallback(async () => {
+    return decrementPacks(1);
+  }, [decrementPacks]);
 
   const spendCoins = useCallback(async (amount: number): Promise<boolean> => {
     if (coins < amount || !user) return false;
@@ -140,5 +145,5 @@ export function usePacks() {
     }
   }, [coins, quantity, user]);
 
-  return { quantity, totalOpened, coins, loading, decrementPack, spendCoins, addCoins, buyPacks, refresh: fetchPacks };
+  return { quantity, totalOpened, coins, loading, decrementPack, decrementPacks, spendCoins, addCoins, buyPacks, refresh: fetchPacks };
 }
