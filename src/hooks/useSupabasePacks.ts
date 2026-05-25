@@ -17,7 +17,10 @@ export const PACK_BUNDLES: PackBundle[] = [
   { quantity: 5, price: 2000, label: "5 sobres", savings: "ahorrá 500" },
 ];
 
-export function coinValue(rating: number): number {
+const SPECIAL_STARS = new Set(["arg4", "por5", "fra1", "bra2", "cro2", "eng1", "esp1", "mar1", "esp3", "eng2", "col1", "uru1", "ned1", "ger1"]);
+
+export function coinValue(rating: number, cardId?: string): number {
+  if (cardId && SPECIAL_STARS.has(cardId)) return 1300;
   if (rating >= 90) return 900;
   if (rating >= 85) return 700;
   if (rating >= 80) return 500;

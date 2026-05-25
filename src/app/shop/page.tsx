@@ -3,7 +3,7 @@
 import { AppShell } from "@/components/layout/AppShell";
 import { useGame } from "@/context/GameContext";
 import { useToast } from "@/hooks/useToast";
-import { PACK_BUNDLES, coinValue } from "@/hooks/useSupabasePacks";
+import { PACK_BUNDLES } from "@/hooks/useSupabasePacks";
 import { PackageOpen, Coins, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { getSupabase } from "@/lib/supabase/client";

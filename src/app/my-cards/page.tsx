@@ -54,7 +54,7 @@ const filteredCollected = collectedIds.filter((id) => {
   const handleDiscard = async (cardId: string) => {
     const info = getCardInfo(cardId);
     if (!info) return;
-    const value = info.overall ? coinValue(info.overall) : 150;
+    const value = info.overall ? coinValue(info.overall, cardId) : 150;
 
     const sb = getSupabase();
     const { data: { user } } = await sb.auth.getUser();
@@ -177,7 +177,7 @@ const filteredCollected = collectedIds.filter((id) => {
                       onClick={() => handleDiscard(id)}
                       className="flex items-center gap-1 px-2 py-1.5 rounded-full bg-[var(--color-danger)]/10 border border-[var(--color-danger)]/20 text-xs font-semibold text-[var(--color-danger)] cursor-pointer transition-colors hover:bg-[var(--color-danger)]/20"
                     >
-                      <Trash2 size={12} /> {info.overall ? `+${coinValue(info.overall)}` : "+150"}
+                      <Trash2 size={12} /> {info.overall ? `+${coinValue(info.overall, id)}` : "+150"}
                     </button>
                   </div>
                 </div>
