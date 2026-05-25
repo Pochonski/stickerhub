@@ -1,0 +1,12 @@
+import { createBrowserClient } from "@supabase/ssr";
+
+function getSupabase() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+}
+
+// Export a factory - each call returns a fresh client
+// @supabase/ssr handles cookie sharing internally
+export { getSupabase };
