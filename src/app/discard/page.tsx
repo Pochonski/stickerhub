@@ -65,9 +65,11 @@ export default function DiscardPage() {
   const [typeFilter, setTypeFilter] = useState("todos");
   const [posFilter, setPosFilter] = useState("");
   const [overallFilter, setOverallFilter] = useState<{ min: number; max: number } | null>(null);
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc" | "">("desc");
 
   const allDuplicates = state.duplicates.filter((id) => !discardedIds.has(id));
-  const duplicates = allDuplicates.filter((id) => {
+  const duplicates = allDuplicates
+    .filter((id) => {
     const info = getCardInfo(id);
     if (!info) return false;
     if (search && !info.name.toLowerCase().includes(search.toLowerCase())) return false;
@@ -78,6 +80,11 @@ export default function DiscardPage() {
     if (posFilter && info.pos !== posFilter) return false;
     if (overallFilter && (info.overall === undefined || info.overall < overallFilter.min || info.overall > overallFilter.max)) return false;
     return true;
+  }).sort((a, b) => {
+    if (!sortOrder) return 0;
+    const va = getCardInfo(a)?.overall ? coinValue(getCardInfo(a)!.overall!, a) : 150;
+    const vb = getCardInfo(b)?.overall ? coinValue(getCardInfo(b)!.overall!, b) : 150;
+    return sortOrder === "desc" ? vb - va : va - vb;
   });
   const totalCoins = duplicates.reduce((sum, id) => {
     const info = getCardInfo(id);
@@ -165,6 +172,15 @@ export default function DiscardPage() {
             ))}
           </select>
           <span className="text-xs text-[var(--color-muted)] shrink-0">{duplicates.length} de {allDuplicates.length}</span>
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value as typeof sortOrder)}
+            className="px-3 py-1.5 rounded-full text-xs border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)] cursor-pointer outline-none focus:border-[var(--color-accent)]"
+          >
+            <option value="desc">Mayor valor</option>
+            <option value="asc">Menor valor</option>
+            <option value="">Sin ordenar</option>
+          </select>
         </div>
 
         <div className="flex gap-1.5 flex-wrap mb-2">

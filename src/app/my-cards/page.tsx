@@ -72,6 +72,7 @@ export default function MyCardsPage() {
   const [teamFilter, setTeamFilter] = useState("");
   const [posFilter, setPosFilter] = useState("");
   const [overallFilter, setOverallFilter] = useState<{ min: number; max: number } | null>(null);
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc" | "">("desc");
   const [discardedIds, setDiscardedIds] = useState<Set<string>>(new Set());
   const [localCoins, setLocalCoins] = useState(coins);
   const [localDupeCount, setLocalDupeCount] = useState<number | null>(null);
@@ -88,7 +89,7 @@ export default function MyCardsPage() {
   }, []);
 
   const filteredCollected = useMemo(() => {
-    return collectedIds.filter((id) => {
+    const filtered = collectedIds.filter((id) => {
       const info = getCardInfo(id);
       if (!info) return false;
       if (cardTypeFilter === "jugadores" && info.type !== "Jugador") return false;
@@ -98,7 +99,13 @@ export default function MyCardsPage() {
       if (search && !info.name.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [collectedIds, cardTypeFilter, teamFilter, posFilter, overallFilter, search]);
+    if (!sortOrder) return filtered;
+    return [...filtered].sort((a, b) => {
+      const va = (() => { const info = getCardInfo(a); return info?.overall ? coinValue(info.overall, a) : 150; })();
+      const vb = (() => { const info = getCardInfo(b); return info?.overall ? coinValue(info.overall, b) : 150; })();
+      return sortOrder === "desc" ? vb - va : va - vb;
+    });
+  }, [collectedIds, cardTypeFilter, teamFilter, posFilter, overallFilter, search, sortOrder]);
 
   const handleDiscard = async (cardId: string) => {
     const info = getCardInfo(cardId);
@@ -140,9 +147,10 @@ export default function MyCardsPage() {
     setTeamFilter("");
     setPosFilter("");
     setOverallFilter(null);
+    setSortOrder("desc");
   };
 
-  const hasActiveFilters = search || cardTypeFilter !== "todos" || teamFilter || posFilter || overallFilter !== null;
+  const hasActiveFilters = search || cardTypeFilter !== "todos" || teamFilter || posFilter || overallFilter !== null;  
 
   return (
     <AppShell>
@@ -272,6 +280,18 @@ export default function MyCardsPage() {
                 })}
               </div>
             )}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] text-[var(--color-muted)] font-medium">Orden:</span>
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as typeof sortOrder)}
+                className="px-2.5 py-1 rounded-full text-[11px] font-medium border-[1.5px] border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)] cursor-pointer outline-none focus:border-[var(--color-accent)]"
+              >
+                <option value="desc">Mayor valor</option>
+                <option value="asc">Menor valor</option>
+                <option value="">Sin ordenar</option>
+              </select>
+            </div>
           </div>
         </div>
 

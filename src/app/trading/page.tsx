@@ -77,6 +77,7 @@ export default function TradingPage() {
   const [nationFilter, setNationFilter] = useState("");
   const [sideSearch, setSideSearch] = useState("");
   const [sideNationFilter, setSideNationFilter] = useState("");
+  const [marketSort, setMarketSort] = useState<"desc" | "asc" | "">("desc");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTrade, setSelectedTrade] = useState<{ name: string; owner: string; userId: string; listingId: string } | null>(null);
   const [offerCardId, setOfferCardId] = useState("");
@@ -242,6 +243,11 @@ export default function TradingPage() {
     if (filter === "sedes" && (!ALL_VENUE_CARDS.some((c) => c.id === t.card_id))) return false;
     if (nationFilter && info?.teamId !== nationFilter) return false;
     return true;
+  }).sort((a, b) => {
+    if (!marketSort) return 0;
+    const va = (getDupeInfo(a.card_id)?.overall ?? 0);
+    const vb = (getDupeInfo(b.card_id)?.overall ?? 0);
+    return marketSort === "desc" ? vb - va : va - vb;
   });
 
   const openExchange = (listing: ListingItem) => {
@@ -423,6 +429,15 @@ export default function TradingPage() {
             {TEAM_LIST.map((t) => (
               <option key={t.id} value={t.id}>{t.flag} {t.name}</option>
             ))}
+          </select>
+          <select
+            value={marketSort}
+            onChange={(e) => setMarketSort(e.target.value as typeof marketSort)}
+            className="px-3 py-1.5 rounded-full text-[13px] font-medium border-[1.5px] border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)] cursor-pointer outline-none focus:border-[var(--color-accent)]"
+          >
+            <option value="desc">Mayor valor</option>
+            <option value="asc">Menor valor</option>
+            <option value="">Sin ordenar</option>
           </select>
         </div>
 
