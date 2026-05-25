@@ -8,6 +8,7 @@ import { Modal } from "@/components/ui/Modal";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useGame } from "@/context/GameContext";
 import { getSupabase } from "@/lib/supabase/client";
+import { useToast } from "@/hooks/useToast";
 import { ALL_PLAYERS } from "@/data/players";
 import { Search, Send, Inbox } from "lucide-react";
 
@@ -31,6 +32,7 @@ interface ListingItem {
 export default function TradingPage() {
   const { user } = useAuth();
   const { state, requestTrade } = useGame();
+  const { addToast } = useToast();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("todos");
   const [modalOpen, setModalOpen] = useState(false);
