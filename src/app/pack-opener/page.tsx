@@ -15,6 +15,8 @@ import { generateMixedPack, type PackCard } from "@/lib/pack-generator";
 import { TEAMS } from "@/data/teams";
 import { PackageOpen, Sparkles } from "lucide-react";
 
+const QUANTITY_OPTIONS = [1, 2, 3, 5, 10];
+
 function PackOpenerContent() {
   const searchParams = useSearchParams();
   const teamParam = searchParams.get("team") || "argentina";
@@ -24,18 +26,34 @@ function PackOpenerContent() {
   const [stage, setStage] = useState<"idle" | "torn" | "reveal" | "summary">("idle");
   const [currentPack, setCurrentPack] = useState<PackCard[]>([]);
   const [flipped, setFlipped] = useState(0);
+  const [quantity, setQuantity] = useState(1);
 
   const team = TEAMS[teamParam] || TEAMS.argentina;
 
   const handleTearComplete = useCallback(() => {
     if (state.packs <= 0) return;
-    openPack(teamParam);
-
-    const cards = generateMixedPack(state.collected);
-    setCurrentPack(cards);
+    
+    // Generate cards for all packs
+    const allCards: PackCard[] = [];
+    for (let i = 0; i < Math.min(quantity, state.packs); i++) {
+      openPack(teamParam);
+      allCards.push(...generateMixedPack(state.collected));
+    }
+    
+    setCurrentPack(allCards);
     setFlipped(0);
-    setStage("reveal");
-  }, [state.packs, state.collected, openPack, teamParam]);
+
+    // If opening multiple packs, skip flip animation and collect immediately
+    if (quantity > 1) {
+      allCards.forEach((card) => collectCard(card.id));
+      const newCards = allCards.filter((c) => c.isNew).length;
+      const dupeCards = allCards.filter((c) => !c.isNew).length;
+      addToast(`¡${quantity} sobres abiertos! ${newCards} nuevas, ${dupeCards} repetidas`, "success");
+      setStage("summary");
+    } else {
+      setStage("reveal");
+    }
+  }, [state.packs, state.collected, openPack, teamParam, quantity, collectCard, addToast]);
 
   const handleFlipCard = useCallback(
     (_idx: number) => {
@@ -51,7 +69,7 @@ function PackOpenerContent() {
         return next;
       });
     },
-    [currentPack, collectCard]
+    [currentPack, collectCard, addToast]
   );
 
   const handleOpenAnother = useCallback(() => {
@@ -66,7 +84,7 @@ function PackOpenerContent() {
     return (
       <AppShell>
         <h1 className="font-[var(--font-display)] text-[28px] font-bold tracking-tight mb-2">Abrir sobre</h1>
-        <p className="text-[var(--color-muted)] text-[15px] mb-8">Cada sobre contiene 6 postales. Abrí el sobre para descubrir qué postales te tocaron.</p>
+        <p className="text-[var(--color-muted)] text-[15px] mb-8">Cada sobre contiene 6 stickers. Abrí el sobre para descubrir qué te tocó.</p>
         <EmptyState
           icon={<PackageOpen size={36} strokeWidth={1.5} />}
           title="Sin sobres disponibles"
@@ -81,7 +99,7 @@ function PackOpenerContent() {
               </Link>
               <Link
                 href="/shop"
-                className="inline-flex items-center gap-2 px-[22px] py-2.5 rounded-full border-[1.5px] border-[var(--color-border)] text-[var(--color-fg)] text-sm font-semibold cursor-pointer transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+                className="inline-flex items-center gap-2 px-[22px] py-2.5 rounded-full border-[1.5px] border-[var(--color-border)] text-[var(--color-fg)] text-sm font-semibold no-underline transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
               >
                 🛒 Ir a la tienda
               </Link>
@@ -92,20 +110,48 @@ function PackOpenerContent() {
     );
   }
 
+  const maxCanOpen = Math.min(quantity, state.packs);
+
   return (
     <AppShell>
       <h1 className="font-[var(--font-display)] text-[28px] font-bold tracking-tight mb-2">
-        {stage === "idle" && "Abrir sobre"}
-        {stage === "reveal" && "Revelá tus postales"}
-        {stage === "summary" && "Resultado del sobre"}
+        {stage === "idle" && "Abrir sobres"}
+        {stage === "reveal" && "Revelá tus stickers"}
+        {stage === "summary" && `Resultado de ${quantity > 1 ? `${quantity} sobres` : "sobre"}`}
       </h1>
       <p className="text-[var(--color-muted)] text-[15px] mb-8">
-        {stage === "idle" && "Tocá el sobre para rasgarlo y descubrir 6 postales al azar."}
-        {stage === "reveal" && `Tocá cada postal para voltearla. ${currentPack.length - flipped} restante${currentPack.length - flipped !== 1 ? "s" : ""}.`}
-        {stage === "summary" && "¡Sobre abierto! Mirá lo que te tocó."}
+        {stage === "idle" && `Tocá el sobre para rasgarlo. Tenés ${state.packs} disponible${state.packs !== 1 ? "s" : ""}.`}
+        {stage === "reveal" && `Tocá cada sticker para voltearlo. ${currentPack.length - flipped} restante${currentPack.length - flipped !== 1 ? "s" : ""}.`}
+        {stage === "summary" && "¡Sobres abiertos! Mirá lo que te tocó."}
       </p>
 
-      <div className="max-w-[640px] mx-auto text-center">
+      <div className="max-w-[720px] mx-auto text-center">
+        {/* Quantity selector */}
+        {stage === "idle" && state.packs > 0 && (
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <span className="text-sm text-[var(--color-muted)]">Abrir:</span>
+            {QUANTITY_OPTIONS.map((q) => (
+              <button
+                key={q}
+                onClick={() => setQuantity(q)}
+                disabled={q > state.packs}
+                className={`px-4 py-2 rounded-full text-sm font-semibold cursor-pointer border-none transition-colors ${
+                  quantity === q
+                    ? "bg-[var(--color-accent)] text-white"
+                    : q > state.packs
+                    ? "bg-[var(--color-border)] text-[var(--color-muted)]/40 cursor-not-allowed"
+                    : "bg-[var(--color-border)] text-[var(--color-muted)] hover:bg-[var(--color-accent-soft)] hover:text-[var(--color-accent)]"
+                }`}
+              >
+                {q}
+              </button>
+            ))}
+            {state.packs > 10 && (
+              <span className="text-xs text-[var(--color-muted)] ml-2">máx {state.packs}</span>
+            )}
+          </div>
+        )}
+
         {/* Stage: Pack display & tear */}
         {(stage === "idle" || stage === "torn") && (
           <BoosterPack
@@ -118,11 +164,11 @@ function PackOpenerContent() {
           />
         )}
 
-        {/* Stage: Card reveal with cascade */}
+        {/* Stage: Card reveal with cascade (only for single pack) */}
         {stage === "reveal" && (
           <>
             <p className="text-[var(--color-muted)] text-[15px] mb-8">
-              Tocá cada postal para revelarla
+              Tocá cada sticker para revelarlo
             </p>
             <div className="flex gap-4 justify-center flex-wrap mx-auto mb-10">
               {currentPack.map((card, i) => (
@@ -146,13 +192,51 @@ function PackOpenerContent() {
           </>
         )}
 
-        <PackSummary
-          show={stage === "summary"}
-          cards={currentPack}
-          teamFlag={team.flag}
-          teamName={team.name}
-          onOpenAnother={handleOpenAnother}
-        />
+        {stage === "summary" && currentPack.length > 0 && (
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-6 shadow-md">
+            <h3 className="font-[var(--font-display)] text-xl font-bold mb-4">
+              {quantity > 1 ? `${currentPack.length} stickers de ${quantity} sobres` : "¡Sobre abierto!"}
+            </h3>
+            <div className="flex gap-3 justify-center flex-wrap mb-6 max-h-[400px] overflow-y-auto p-2">
+              {currentPack.map((card, i) => (
+                <div key={i} className="w-[72px] aspect-[3/4] rounded-lg relative overflow-hidden border border-[var(--color-border)] shrink-0">
+                  <div className="w-full h-[55%] flex items-center justify-center" style={{ background: card.gradient }}>
+                    {card.faceUrl ? (
+                      <img src={card.faceUrl} alt={card.name} className="w-[60%] aspect-square object-contain" referrerPolicy="no-referrer" />
+                    ) : card.num ? (
+                      <span className="text-xl font-extrabold text-white/25">{card.num}</span>
+                    ) : null}
+                  </div>
+                  <div className="text-[9px] font-bold p-1 bg-white/90 text-center leading-tight">{card.name}</div>
+                  <span
+                    className={`absolute top-1 right-1 px-1.5 py-0.5 rounded-md font-bold text-[8px] tracking-wide ${
+                      card.isNew ? "bg-[oklch(58%_0.16_156_/_0.9)] text-white" : "bg-[oklch(70%_0.14_72_/_0.9)] text-gray-900"
+                    }`}
+                  >
+                    {card.isNew ? "NUEVA" : "REPETIDA"}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={handleOpenAnother}
+              disabled={state.packs <= 0}
+              className="px-6 py-3 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-hover)] disabled:opacity-40"
+            >
+              {state.packs > 0 ? `Abrir otro${quantity > 1 ? "s" : ""} (${state.packs} disponible${state.packs !== 1 ? "s" : ""})` : "Sin sobres"}
+            </button>
+          </div>
+        )}
+
+        {stage === "summary" && currentPack.length === 0 && (
+          <PackSummary
+            show={true}
+            cards={currentPack}
+            teamFlag={team.flag}
+            teamName={team.name}
+            onOpenAnother={handleOpenAnother}
+          />
+        )}
       </div>
     </AppShell>
   );
