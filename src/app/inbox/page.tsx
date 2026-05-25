@@ -21,8 +21,6 @@ interface TradeItem {
   offered_card_name: string;
   status: string;
   created_at: string;
-  from_user?: { display_name: string }[];
-  to_user?: { display_name: string }[];
 }
 
 export default function InboxPage() {
@@ -40,7 +38,7 @@ export default function InboxPage() {
       try {
         const sb = getSupabase();
         const { data } = await sb.from("trade_offers")
-          .select("*, from_user:profiles!trade_offers_from_user_id_fkey(display_name), to_user:profiles!trade_offers_to_user_id_fkey(display_name)")
+          .select("*")
           .or(`from_user_id.eq.${user.id},to_user_id.eq.${user.id}`)
           .order("created_at", { ascending: false });
         if (data) setTrades(data as TradeItem[]);
@@ -150,8 +148,8 @@ export default function InboxPage() {
                 <div className="flex-1">
                   <div className="font-semibold text-sm">
                     {trade.to_user_id === user?.id
-                      ? `${trade.from_user?.[0]?.display_name || "Alguien"} te ofrece ${trade.offered_card_name}`
-                      : `Ofreciste ${trade.offered_card_name} a ${trade.to_user?.[0]?.display_name || "Alguien"}`}
+                      ? `Usuario te ofrece ${trade.offered_card_name}`
+                      : `Ofreciste ${trade.offered_card_name} a Usuario`}
                   </div>
                   <div className="text-xs text-[var(--color-muted)] mt-0.5">
                     {trade.to_user_id === user?.id ? `A cambio de: ${trade.requested_card_name}` : `Por: ${trade.requested_card_name}`} · {new Date(trade.created_at).toLocaleDateString("es-CR")}
