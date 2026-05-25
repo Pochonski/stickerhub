@@ -103,7 +103,7 @@ export default function MyCardsPage() {
       if (cardTypeFilter === "sedes" && info.type !== "Sede") return false;
       if (teamFilter && info.teamId !== teamFilter) return false;
       if (posFilter && info.pos !== posFilter) return false;
-      if (overallFilter && info.overall !== undefined && (info.overall < overallFilter.min || info.overall > overallFilter.max)) return false;
+      if (overallFilter && (info.overall === undefined || info.overall < overallFilter.min || info.overall > overallFilter.max)) return false;
       if (search && !info.name.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
