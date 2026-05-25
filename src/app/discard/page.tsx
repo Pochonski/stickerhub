@@ -9,9 +9,9 @@ import { ALL_PLAYERS } from "@/data/players";
 import { ALL_STADIUM_CARDS, ALL_VENUE_CARDS } from "@/data/cards";
 import { TEAMS, TEAM_LIST } from "@/data/teams";
 import { coinValue } from "@/hooks/useSupabasePacks";
-import { Trash2, Coins, Sparkles, Search } from "lucide-react";
+import { Trash2, Coins, Sparkles, Search, Filter } from "lucide-react";
 
-function getCardInfo(id: string): { name: string; gradient: string; sub?: string; type: string; faceUrl?: string; overall?: number; teamId?: string } | null {
+function getCardInfo(id: string): { name: string; gradient: string; sub?: string; type: string; faceUrl?: string; overall?: number; teamId?: string; pos?: string } | null {
   const player = ALL_PLAYERS.find((p) => p.id === id);
   if (player) {
     const team = TEAMS[player.teamId];
@@ -21,6 +21,7 @@ function getCardInfo(id: string): { name: string; gradient: string; sub?: string
       sub: `${player.pos} · #${player.num}`,
       faceUrl: player.faceUrl,
       overall: player.overall ?? 0,
+      pos: player.pos,
     };
   }
   const stadium = ALL_STADIUM_CARDS.find((c) => c.id === id);
@@ -30,6 +31,30 @@ function getCardInfo(id: string): { name: string; gradient: string; sub?: string
   return null;
 }
 
+const TYPE_TABS = [
+  { id: "todos", label: "Todos" },
+  { id: "jugadores", label: "Jugadores" },
+  { id: "estadios", label: "Estadios" },
+  { id: "sedes", label: "Sedes" },
+] as const;
+
+const POS_OPTIONS = [
+  { id: "", label: "Todos" },
+  { id: "Arquero", label: "Arqueros" },
+  { id: "Defensa", label: "Defensas" },
+  { id: "Mediocampista", label: "Mediocampistas" },
+  { id: "Delantero", label: "Delanteros" },
+];
+
+const OVERALL_OPTIONS = [
+  { min: 90, max: 99, label: "90+" },
+  { min: 85, max: 89, label: "85-89" },
+  { min: 80, max: 84, label: "80-84" },
+  { min: 75, max: 79, label: "75-79" },
+  { min: 70, max: 74, label: "70-74" },
+  { min: 0, max: 69, label: "<70" },
+];
+
 export default function DiscardPage() {
   const { state, coins } = useGame();
   const { addToast } = useToast();
@@ -37,6 +62,9 @@ export default function DiscardPage() {
   const [localCoins, setLocalCoins] = useState(coins);
   const [search, setSearch] = useState("");
   const [nationFilter, setNationFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("todos");
+  const [posFilter, setPosFilter] = useState("");
+  const [overallFilter, setOverallFilter] = useState<{ min: number; max: number } | null>(null);
 
   const allDuplicates = state.duplicates.filter((id) => !discardedIds.has(id));
   const duplicates = allDuplicates.filter((id) => {
@@ -44,6 +72,11 @@ export default function DiscardPage() {
     if (!info) return false;
     if (search && !info.name.toLowerCase().includes(search.toLowerCase())) return false;
     if (nationFilter && info.teamId !== nationFilter) return false;
+    if (typeFilter === "jugadores" && info.type !== "Jugador") return false;
+    if (typeFilter === "estadios" && info.type !== "Estadio") return false;
+    if (typeFilter === "sedes" && info.type !== "Sede") return false;
+    if (posFilter && info.pos !== posFilter) return false;
+    if (overallFilter && (info.overall === undefined || info.overall < overallFilter.min || info.overall > overallFilter.max)) return false;
     return true;
   });
   const totalCoins = duplicates.reduce((sum, id) => {
@@ -111,7 +144,8 @@ export default function DiscardPage() {
       </div>
 
       {allDuplicates.length > 0 && (
-        <div className="flex items-center gap-3 mb-5 max-sm:flex-col max-sm:items-stretch">
+        <>
+        <div className="flex items-center gap-3 mb-3 max-sm:flex-col max-sm:items-stretch">
           <div className="relative flex-1 max-w-[300px]">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" />
             <input
@@ -130,8 +164,52 @@ export default function DiscardPage() {
               <option key={t.id} value={t.id}>{t.flag} {t.name}</option>
             ))}
           </select>
-          <span className="text-xs text-[var(--color-muted)]">{duplicates.length} de {allDuplicates.length}</span>
+          <span className="text-xs text-[var(--color-muted)] shrink-0">{duplicates.length} de {allDuplicates.length}</span>
         </div>
+
+        <div className="flex gap-1.5 flex-wrap mb-2">
+          {TYPE_TABS.map((t) => (
+            <button
+              key={t.id} onClick={() => setTypeFilter(t.id)}
+              className={`px-3.5 py-1.5 rounded-full text-[12px] font-semibold cursor-pointer border transition-colors ${
+                typeFilter === t.id ? "bg-[var(--color-accent)] border-[var(--color-accent)] text-white" : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-accent)]"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {(typeFilter === "jugadores" || typeFilter === "todos") && (
+          <div className="flex gap-1.5 flex-wrap mb-2">
+            {POS_OPTIONS.map((p) => (
+              <button
+                key={p.id} onClick={() => setPosFilter(p.id)}
+                className={`px-3 py-1 rounded-full text-[11px] font-medium cursor-pointer border transition-colors ${
+                  posFilter === p.id ? "bg-[var(--color-field)] border-[var(--color-field)] text-white" : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-field)]"
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {(typeFilter === "jugadores" || typeFilter === "todos") && (
+          <div className="flex gap-1 flex-wrap mb-5">
+            {OVERALL_OPTIONS.map((o) => (
+              <button
+                key={o.label} onClick={() => setOverallFilter(overallFilter?.min === o.min && overallFilter?.max === o.max ? null : { min: o.min, max: o.max })}
+                className={`px-2.5 py-1 rounded-full text-[11px] font-medium cursor-pointer border transition-colors ${
+                  overallFilter?.min === o.min && overallFilter?.max === o.max ? "bg-[var(--color-field)] border-[var(--color-field)] text-white" : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-field)]"
+                }`}
+              >
+                {o.label}
+              </button>
+            ))}
+          </div>
+        )}
+        </>
       )}
 
       {duplicates.length === 0 ? (
