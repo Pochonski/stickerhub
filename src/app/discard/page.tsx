@@ -7,11 +7,11 @@ import { useToast } from "@/hooks/useToast";
 import { getSupabase } from "@/lib/supabase/client";
 import { ALL_PLAYERS } from "@/data/players";
 import { ALL_STADIUM_CARDS, ALL_VENUE_CARDS } from "@/data/cards";
-import { TEAMS, TEAM_LIST } from "@/data/teams";
+import { TEAMS, TEAM_LIST, STADIUMS, VENUES } from "@/data/teams";
 import { coinValue } from "@/hooks/useSupabasePacks";
 import { Trash2, Coins, Sparkles, Search, Filter } from "lucide-react";
 
-function getCardInfo(id: string): { name: string; gradient: string; sub?: string; type: string; faceUrl?: string; overall?: number; teamId?: string; pos?: string } | null {
+function getCardInfo(id: string): { name: string; gradient: string; sub?: string; type: string; faceUrl?: string; overall?: number; teamId?: string; pos?: string; flag?: string } | null {
   const player = ALL_PLAYERS.find((p) => p.id === id);
   if (player) {
     const team = TEAMS[player.teamId];
@@ -22,12 +22,19 @@ function getCardInfo(id: string): { name: string; gradient: string; sub?: string
       faceUrl: player.faceUrl,
       overall: player.overall ?? 0,
       pos: player.pos,
+      flag: team?.flag,
     };
   }
   const stadium = ALL_STADIUM_CARDS.find((c) => c.id === id);
-  if (stadium) return { name: stadium.name, gradient: stadium.bg, type: "Estadio" };
+  if (stadium) {
+    const t = STADIUMS[stadium.teamId];
+    return { name: stadium.name, gradient: stadium.bg, type: "Estadio", flag: t?.flag };
+  }
   const venue = ALL_VENUE_CARDS.find((c) => c.id === id);
-  if (venue) return { name: venue.name, gradient: venue.bg, type: "Sede" };
+  if (venue) {
+    const t = VENUES[venue.teamId];
+    return { name: venue.name, gradient: venue.bg, type: "Sede", flag: t?.flag };
+  }
   return null;
 }
 
@@ -245,6 +252,7 @@ export default function DiscardPage() {
                     )}
                   </div>
                   <div className="h-[40%] bg-white/90 p-3 flex flex-col justify-center text-center border-t border-[var(--color-border)]/30">
+                    {info.flag && <span className="text-sm leading-none mb-0.5">{info.flag}</span>}
                     <span className="text-sm font-bold leading-tight">{info.name}</span>
                     {info.sub && <span className="text-[10px] text-[var(--color-muted)] mt-0.5">{info.sub}</span>}
                   </div>

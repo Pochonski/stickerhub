@@ -20,6 +20,7 @@ interface CardInfo {
   bg?: string;
   player?: PlayerDetail;
   isDetailed: boolean;
+  flag?: string;
 }
 
 function resolveTeam(teamId: string): Team | undefined {
@@ -42,6 +43,7 @@ function getCardInfo(id: string): CardInfo | null {
       type: "jugador",
       player: detailed,
       isDetailed: true,
+      flag: team?.flag,
     };
   }
 
@@ -60,6 +62,7 @@ function getCardInfo(id: string): CardInfo | null {
       type: "jugador",
       player: player as PlayerDetail,
       isDetailed: false,
+      flag: team?.flag,
     };
   }
 
@@ -81,7 +84,7 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
     );
   }
 
-  const { name, num, pos, teamName, teamColor, teamColorDark, teamId, type, bg, player, isDetailed } = info;
+  const { name, num, pos, teamName, teamColor, teamColorDark, teamId, type, bg, player, isDetailed, flag } = info;
   const collected = isCollected(id);
   const gradient = bg || `linear-gradient(180deg, ${teamColor} 0%, ${teamColorDark} 45%, oklch(97% 0.02 ${teamColorDark.includes("250") ? "250" : "5"}) 45%, oklch(92% 0.03 ${teamColorDark.includes("250") ? "250" : "5"}) 100%)`;
 
@@ -133,7 +136,7 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
               {name}
             </span>
             <span className="text-[11px] text-[var(--color-muted)] uppercase tracking-[0.15em] font-semibold mt-0.5 block">
-              {teamName}{type === "jugador" && num > 0 ? ` · #${num}` : ""}
+              {flag && <span className="mr-1">{flag}</span>}{teamName}{type === "jugador" && num > 0 ? ` · #${num}` : ""}
             </span>
           </div>
         </div>
@@ -142,7 +145,7 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
         <div>
           <h1 className="font-[var(--font-display)] text-[36px] font-bold tracking-tight">{name}</h1>
           <p className="text-lg text-[var(--color-muted)] mt-1 mb-4">
-            {type === "jugador" ? `${pos} · ${teamName}${num > 0 ? ` · #${num}` : ""}` : `${pos} · ${teamName}`}
+            {flag && <span className="mr-1">{flag}</span>}{type === "jugador" ? `${pos} · ${teamName}${num > 0 ? ` · #${num}` : ""}` : `${pos} · ${teamName}`}
           </p>
 
           {type === "jugador" && isDetailed && player && "height" in player && (

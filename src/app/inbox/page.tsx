@@ -7,6 +7,7 @@ import { useGame } from "@/context/GameContext";
 import { useToast } from "@/hooks/useToast";
 import { getSupabase } from "@/lib/supabase/client";
 import { ALL_PLAYERS } from "@/data/players";
+import { ALL_STADIUM_CARDS, ALL_VENUE_CARDS } from "@/data/cards";
 import { TEAMS, TEAM_LIST } from "@/data/teams";
 import { Check, X, Send, Inbox, Loader2, Search } from "lucide-react";
 import { TradeCelebration } from "@/components/trade/TradeCelebration";
@@ -121,6 +122,16 @@ export default function InboxPage() {
     return p?.teamId;
   };
 
+  const getCardFlag = (cardId: string): string | undefined => {
+    const p = ALL_PLAYERS.find((pl) => pl.id === cardId);
+    if (p) return TEAMS[p.teamId]?.flag;
+    const s = ALL_STADIUM_CARDS.find((c) => c.id === cardId);
+    if (s) return TEAMS[s.teamId]?.flag;
+    const v = ALL_VENUE_CARDS.find((c) => c.id === cardId);
+    if (v) return TEAMS[v.teamId]?.flag;
+    return undefined;
+  };
+
   const filteredTrades = trades.filter((t) => {
     const direction = tab === "received" ? t.to_user_id === user?.id : t.from_user_id === user?.id;
     if (!direction) return false;
@@ -195,11 +206,11 @@ export default function InboxPage() {
                 <div className="flex-1">
                   <div className="font-semibold text-sm">
                     {trade.to_user_id === user?.id
-                      ? `Usuario te ofrece ${trade.offered_card_name}`
-                      : `Ofreciste ${trade.offered_card_name} a Usuario`}
+                      ? <>Usuario te ofrece {getCardFlag(trade.offered_card_id) && <span className="mr-0.5">{getCardFlag(trade.offered_card_id)}</span>}{trade.offered_card_name}</>
+                      : <>Ofreciste {getCardFlag(trade.offered_card_id) && <span className="mr-0.5">{getCardFlag(trade.offered_card_id)}</span>}{trade.offered_card_name} a Usuario</>}
                   </div>
                   <div className="text-xs text-[var(--color-muted)] mt-0.5">
-                    {trade.to_user_id === user?.id ? `A cambio de: ${trade.requested_card_name}` : `Por: ${trade.requested_card_name}`} · {new Date(trade.created_at).toLocaleDateString("es-CR")}
+                    {trade.to_user_id === user?.id ? <>A cambio de: {getCardFlag(trade.requested_card_id) && <span className="mr-0.5">{getCardFlag(trade.requested_card_id)}</span>}{trade.requested_card_name}</> : <>Por: {getCardFlag(trade.requested_card_id) && <span className="mr-0.5">{getCardFlag(trade.requested_card_id)}</span>}{trade.requested_card_name}</>} · {new Date(trade.created_at).toLocaleDateString("es-CR")}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

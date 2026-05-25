@@ -335,6 +335,7 @@ export default function MyCardsPage() {
                   <div className="aspect-[3/4] rounded-[var(--radius-md)] border border-[var(--color-border)] overflow-hidden relative">
                     <div className="w-full h-full" style={{ background: `${info.gradient}, url('/card-bg.png') center/cover`, backgroundBlendMode: "overlay" }} />
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8">
+                      {info.flag && <span className="mr-1 text-xs">{info.flag}</span>}
                       <span className="text-xs font-semibold text-white">{info.name} · Repetida</span>
                     </div>
                   </div>

@@ -51,12 +51,12 @@ function getDupeInfo(id: string): DupeInfo | null {
   const s = ALL_STADIUM_CARDS.find((c) => c.id === id);
   if (s) {
     const t = STADIUMS[s.teamId];
-    return { id: s.id, name: s.name, teamId: s.teamId, teamName: t?.name, teamColor: t?.color, teamColorDark: t?.colorDark };
+    return { id: s.id, name: s.name, teamId: s.teamId, teamName: t?.name, teamColor: t?.color, teamColorDark: t?.colorDark, flag: t?.flag };
   }
   const v = ALL_VENUE_CARDS.find((c) => c.id === id);
   if (v) {
     const t = VENUES[v.teamId];
-    return { id: v.id, name: v.name, teamId: v.teamId, teamName: t?.name, teamColor: t?.color, teamColorDark: t?.colorDark };
+    return { id: v.id, name: v.name, teamId: v.teamId, teamName: t?.name, teamColor: t?.color, teamColorDark: t?.colorDark, flag: t?.flag };
   }
   return null;
 }
@@ -390,6 +390,7 @@ export default function TradingPage() {
                       )}
                     </div>
                     <div className="flex-1">
+                      {info?.flag && <span className="mr-1">{info.flag}</span>}
                       <span className="font-semibold text-sm">{ml.card_name}</span>
                       {ml.looking_for && <span className="text-xs text-[var(--color-muted)] ml-2">Busca: {ml.looking_for}</span>}
                     </div>
