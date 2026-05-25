@@ -10,6 +10,7 @@ import { PackSummary } from "@/components/pack/PackSummary";
 import { BoosterPack } from "@/components/pack/BoosterPack";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useGame } from "@/context/GameContext";
+import { useToast } from "@/hooks/useToast";
 import { generateMixedPack, type PackCard } from "@/lib/pack-generator";
 import { TEAMS } from "@/data/teams";
 import { PackageOpen, Sparkles } from "lucide-react";
@@ -18,6 +19,7 @@ function PackOpenerContent() {
   const searchParams = useSearchParams();
   const teamParam = searchParams.get("team") || "argentina";
   const { state, openPack, collectCard, addPacks } = useGame();
+  const { addToast } = useToast();
 
   const [stage, setStage] = useState<"idle" | "torn" | "reveal" | "summary">("idle");
   const [currentPack, setCurrentPack] = useState<PackCard[]>([]);
@@ -41,6 +43,9 @@ function PackOpenerContent() {
         const next = prev + 1;
         if (next >= currentPack.length) {
           currentPack.forEach((card) => collectCard(card.id));
+          const newCards = currentPack.filter((c) => c.isNew).length;
+          const dupeCards = currentPack.filter((c) => !c.isNew).length;
+          addToast(`¡Sobre abierto! ${newCards} nuevas, ${dupeCards} repetidas`, "success");
           setTimeout(() => setStage("summary"), 700);
         }
         return next;

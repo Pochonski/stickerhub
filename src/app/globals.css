@@ -1,15 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Barlow:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme inline {
   --color-bg: oklch(98% 0.004 240);
   --color-surface: oklch(100% 0 0);
   --color-fg: oklch(20% 0.02 240);
-  --color-muted: oklch(42% 0.02 240);
+  --color-muted: oklch(38% 0.02 240);
   --color-border: oklch(90% 0.006 240);
   --color-accent: oklch(62% 0.16 68);
   --color-accent-hover: oklch(58% 0.17 68);
   --color-accent-soft: oklch(95% 0.04 68);
+  --color-primary: oklch(55% 0.22 22);
+  --color-primary-hover: oklch(50% 0.24 22);
+  --color-primary-soft: oklch(95% 0.03 22);
   --color-field: oklch(52% 0.14 142);
   --color-field-soft: oklch(94% 0.06 142);
   --color-success: oklch(58% 0.16 156);
@@ -17,8 +20,8 @@
   --color-danger: oklch(54% 0.22 22);
   --color-dark: oklch(20% 0.03 260);
 
-  --font-sans: 'Nunito', 'Fredoka', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-display: 'Fredoka', 'Nunito', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-sans: 'Barlow', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-display: 'Barlow Condensed', 'Barlow', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
 
   --radius-sm: 8px;
@@ -61,6 +64,21 @@
 
 @keyframes pack-fade-out {
   to { opacity: 0; transform: scale(0.9); pointer-events: none; }
+}
+
+@keyframes confetti-fall {
+  0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(60px) rotate(720deg); opacity: 0; }
+}
+
+@keyframes badge-pop {
+  0% { transform: scale(0); }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.badge-new {
+  animation: badge-pop 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 @keyframes booster-float {
@@ -183,6 +201,14 @@
   .flipbook-wrapper {
     --page-width: 180px;
     --page-height: 252px;
+  }
+}
+
+/* Touch-friendly minimum sizes */
+@media (pointer: coarse) {
+  .sticker-slot-btn, .nav-link-btn {
+    min-height: 44px;
+    min-width: 44px;
   }
 }
 

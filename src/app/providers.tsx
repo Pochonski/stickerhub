@@ -3,6 +3,7 @@
 import { useState, useEffect, type ReactNode } from "react";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { GameProvider } from "@/context/GameContext";
+import { WelcomeOverlay } from "@/components/onboarding/WelcomeOverlay";
 
 function LoadingSkeleton() {
   return (
@@ -24,6 +25,7 @@ export function Providers({ children }: { children: ReactNode }) {
     <AuthProvider>
       <GameProvider>
         {mounted ? children : <LoadingSkeleton />}
+        <WelcomeOverlay />
       </GameProvider>
     </AuthProvider>
   );

@@ -137,7 +137,7 @@ export default function TradingPage() {
               <p className="text-sm text-[var(--color-muted)] text-center py-8">Cargando publicaciones...</p>
             ) : filtered.length === 0 ? (
               <p className="text-sm text-[var(--color-muted)] text-center py-8">
-                {user ? "No hay publicaciones disponibles. ¡Sé el primero en publicar una repetida!" : "Iniciá sesión para ver publicaciones de intercambio."}
+                {user ? "Nadie ha publicado stickers todavía. ¡Sé el primero!" : "Iniciá sesión para ver publicaciones de intercambio."}
               </p>
             ) : (
               filtered.map((listing) => (
