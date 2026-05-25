@@ -119,7 +119,14 @@ export default function TradingPage() {
 
   const handleUnpublish = async (listingId: string) => {
     const sb = getSupabase();
-    await sb.from("trade_listings").update({ is_active: false, updated_at: new Date().toISOString() }).eq("id", listingId).eq("user_id", user!.id);
+    const { error } = await sb.rpc("unpublish_listing", {
+      listing_id: listingId,
+      owner_id: user!.id,
+    });
+    if (error) {
+      addToast("Error al quitar", "error");
+      return;
+    }
     setMyListings((prev) => prev.filter((l) => l.id !== listingId));
     addToast("Publicación eliminada", "success");
   };
