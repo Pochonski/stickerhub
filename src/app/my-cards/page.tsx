@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { Pill } from "@/components/ui/Pill";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -297,7 +298,7 @@ export default function MyCardsPage() {
                 const info = getCardInfo(id);
                 if (!info) return null;
                 return (
-                  <div key={id} className="aspect-[3/4] rounded-[var(--radius-md)] border border-[var(--color-border)] overflow-hidden relative">
+                  <Link key={id} href={`/card/${id}`} className="block aspect-[3/4] rounded-[var(--radius-md)] border border-[var(--color-border)] overflow-hidden relative no-underline transition-shadow hover:shadow-md cursor-pointer">
                     <div className="w-full h-full" style={{ background: `${info.gradient}, url('/card-bg.png') center/cover`, backgroundBlendMode: "overlay" }}>
                       <div className="w-full h-[60%] flex items-center justify-center">
                         {info.faceUrl && (
@@ -307,11 +308,11 @@ export default function MyCardsPage() {
                         )}
                       </div>
                       <div className="w-full h-[40%] bg-[var(--color-surface)] border-t border-[var(--color-border)] p-2 flex flex-col justify-center">
-                        <span className="text-sm font-bold text-center leading-tight">{info.name}</span>
+                        <span className="text-sm font-bold text-center leading-tight text-[var(--color-fg)]">{info.name}</span>
                         {info.sub && <span className="text-[10px] text-[var(--color-muted)] text-center">{info.sub}</span>}
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
