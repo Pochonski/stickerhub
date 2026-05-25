@@ -83,6 +83,7 @@ export default function TradingPage() {
   const [loadingListings, setLoadingListings] = useState(false);
   const [loadingMyListings, setLoadingMyListings] = useState(false);
   const [pendingOfferedIds, setPendingOfferedIds] = useState<Set<string>>(new Set());
+  const [myPendingRequests, setMyPendingRequests] = useState<Set<string>>(new Set());
   const [publishModal, setPublishModal] = useState(false);
   const [publishCard, setPublishCard] = useState<{ id: string; name: string } | null>(null);
   const [lookingFor, setLookingFor] = useState("");
@@ -165,6 +166,16 @@ export default function TradingPage() {
       if (data) setPendingOfferedIds(new Set(data.map((t: { offered_card_id: string }) => t.offered_card_id)));
     };
     fetchPending();
+
+    // Fetch listings I've already requested (visibility of system status)
+    const fetchMyRequests = async () => {
+      const sb = getSupabase();
+      const { data } = await sb.from("trade_offers")
+        .select("listing_id")
+        .eq("from_user_id", user.id).eq("status", "pending");
+      if (data) setMyPendingRequests(new Set(data.map((t: { listing_id: string }) => t.listing_id).filter(Boolean)));
+    };
+    fetchMyRequests();
 
     // Realtime: new listings appear automatically
     const sb2 = getSupabase();
@@ -425,9 +436,15 @@ export default function TradingPage() {
                       {listing.profiles?.[0]?.display_name || "Anónimo"} · {listing.profiles?.[0]?.reputation || 100}% rep
                     </div>
                   </div>
-                  <button onClick={() => openExchange(listing)} className="px-5 py-2.5 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-hover)] max-sm:w-full">
-                    Solicitar
-                  </button>
+                  {myPendingRequests.has(listing.id) ? (
+                    <span className="inline-flex px-5 py-2.5 rounded-full bg-[var(--color-warning)]/20 text-[var(--color-warning)] text-sm font-semibold border border-[var(--color-warning)]/30 max-sm:w-full justify-center">
+                      Solicitado
+                    </span>
+                  ) : (
+                    <button onClick={() => openExchange(listing)} className="px-5 py-2.5 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-hover)] max-sm:w-full">
+                      Solicitar
+                    </button>
+                  )}
                 </div>
               );
             })
