@@ -17,18 +17,24 @@ export function useCollection() {
   const [loading, setLoading] = useState(false);
 
   const fetchCollection = useCallback(async () => {
-    if (!user) {
-      setCollected([]);
-      setLoading(false);
-      return;
-    }
     setLoading(true);
     try {
       const supabase = getSupabase();
+      // Try getting user directly if AuthProvider hasn't loaded yet
+      let userId = user?.id;
+      if (!userId) {
+        const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+        userId = supabaseUser?.id;
+      }
+      if (!userId) {
+        setCollected([]);
+        setLoading(false);
+        return;
+      }
       const { data } = await supabase
         .from("user_collections")
         .select("card_id, is_duplicate, collected_at, source")
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .order("collected_at", { ascending: false });
       setCollected(data ?? []);
     } catch {}
