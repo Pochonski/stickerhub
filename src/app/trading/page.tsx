@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Send, Inbox, Plus, Upload } from "lucide-react";
+import { Search, Send, Inbox, Upload, X, Tag, Users } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
-import { Pill } from "@/components/ui/Pill";
 import { Modal } from "@/components/ui/Modal";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useGame } from "@/context/GameContext";
@@ -29,6 +28,44 @@ interface ListingItem {
   }> | null;
 }
 
+interface DupeInfo {
+  id: string;
+  name: string;
+  teamId?: string;
+  teamName?: string;
+  teamColor?: string;
+  teamColorDark?: string;
+  faceUrl?: string;
+  overall?: number;
+  pos?: string;
+  num?: number;
+}
+
+function getDupeInfo(id: string): DupeInfo | null {
+  const p = ALL_PLAYERS.find((pl) => pl.id === id);
+  if (p) {
+    const t = TEAMS[p.teamId];
+    return { id: p.id, name: p.name, teamId: p.teamId, teamName: t?.name, teamColor: t?.color, teamColorDark: t?.colorDark, faceUrl: p.faceUrl, overall: p.overall, pos: p.pos, num: p.num };
+  }
+  const s = ALL_STADIUM_CARDS.find((c) => c.id === id);
+  if (s) {
+    const t = STADIUMS[s.teamId];
+    return { id: s.id, name: s.name, teamId: s.teamId, teamName: t?.name, teamColor: t?.color, teamColorDark: t?.colorDark };
+  }
+  const v = ALL_VENUE_CARDS.find((c) => c.id === id);
+  if (v) {
+    const t = VENUES[v.teamId];
+    return { id: v.id, name: v.name, teamId: v.teamId, teamName: t?.name, teamColor: t?.color, teamColorDark: t?.colorDark };
+  }
+  return null;
+}
+
+const FILTER_TABS = [
+  { id: "todos", label: "Todos" },
+  { id: "jugadores", label: "Jugadores" },
+  { id: "estadios", label: "Estadios" },
+  { id: "sedes", label: "Sedes" },
+];
 
 export default function TradingPage() {
   const { user } = useAuth();
@@ -36,6 +73,7 @@ export default function TradingPage() {
   const { addToast } = useToast();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("todos");
+  const [sideSearch, setSideSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTrade, setSelectedTrade] = useState<{ name: string; owner: string; userId: string; listingId: string } | null>(null);
   const [offerCardId, setOfferCardId] = useState("");
@@ -47,29 +85,20 @@ export default function TradingPage() {
 
   const handlePublish = async () => {
     if (!user || !publishCard) return;
-    const player = ALL_PLAYERS.find((p) => p.id === publishCard.id);
-    const stadium = ALL_STADIUM_CARDS.find((c) => c.id === publishCard.id);
-    const venue = ALL_VENUE_CARDS.find((c) => c.id === publishCard.id);
-    let teamNameStr = "";
-    if (player) teamNameStr = TEAMS[player.teamId]?.name || "";
-    else if (stadium) teamNameStr = STADIUMS[stadium.teamId]?.name || "";
-    else if (venue) teamNameStr = VENUES[venue.teamId]?.name || "";
+    const info = getDupeInfo(publishCard.id);
     const sb = getSupabase();
     const { error } = await sb.from("trade_listings").insert({
       user_id: user.id, card_id: publishCard.id, card_name: publishCard.name,
-      team_name: teamNameStr, looking_for: lookingFor || null,
+      team_name: info?.teamName || "", looking_for: lookingFor || null,
     });
     if (!error) {
       addToast(`¡${publishCard.name} publicada!`, "success");
-      setPublishModal(false);
-      setLookingFor("");
-      setPublishCard(null);
+      setPublishModal(false); setLookingFor(""); setPublishCard(null);
     } else {
       addToast("Error al publicar", "error");
     }
   };
 
-  // Fetch real listings when authenticated
   useEffect(() => {
     if (!user) return;
     setLoadingListings(true);
@@ -79,42 +108,27 @@ export default function TradingPage() {
         const { data } = await sb
           .from("trade_listings")
           .select("id, card_id, card_name, team_name, looking_for, created_at, user_id, profiles!inner(display_name, avatar_url, reputation, badge_tier)")
-          .eq("is_active", true)
-          .neq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(20);
+          .eq("is_active", true).neq("user_id", user.id)
+          .order("created_at", { ascending: false }).limit(20);
         if (data) setListings(data as ListingItem[]);
-      } catch {
-        // Auth not ready or network error
-      } finally {
-        setLoadingListings(false);
-      }
+      } catch {}
+      finally { setLoadingListings(false); }
     };
     fetchListings();
   }, [user]);
 
-  const duplicates = state.duplicates;
-  const duplicateNames = duplicates.map((id) => {
-    const p = ALL_PLAYERS.find((pl) => pl.id === id);
-    if (p) return { id: p.id, name: `${p.name} (${p.teamId.toUpperCase()})` };
-    const s = ALL_STADIUM_CARDS.find((c) => c.id === id);
-    if (s) return { id: s.id, name: `${s.name} (${STADIUMS[s.teamId]?.name || s.teamId})` };
-    const v = ALL_VENUE_CARDS.find((c) => c.id === id);
-    if (v) return { id: v.id, name: `${v.name} (${VENUES[v.teamId]?.name || v.teamId})` };
-    return { id, name: id };
+  const dupes = state.duplicates.map((id) => getDupeInfo(id)).filter(Boolean) as DupeInfo[];
+  const filteredDupes = sideSearch ? dupes.filter((d) => d.name.toLowerCase().includes(sideSearch.toLowerCase()) || d.teamName?.toLowerCase().includes(sideSearch.toLowerCase())) : dupes;
+
+  const duplicateNames = dupes.map((d) => ({ id: d.id, name: d.name }));
+
+  const filtered = listings.filter((t) => {
+    if (search && !t.card_name.toLowerCase().includes(search.toLowerCase()) && !t.team_name?.toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
   });
 
-  const filtered = listings.filter((t) =>
-    search ? t.card_name.toLowerCase().includes(search.toLowerCase()) || t.team_name?.toLowerCase().includes(search.toLowerCase()) : true
-  );
-
   const openExchange = (listing: ListingItem) => {
-    setSelectedTrade({
-      name: listing.card_name,
-      owner: listing.profiles?.[0]?.display_name || "Anónimo",
-      userId: listing.user_id,
-      listingId: listing.id,
-    });
+    setSelectedTrade({ name: listing.card_name, owner: listing.profiles?.[0]?.display_name || "Anónimo", userId: listing.user_id, listingId: listing.id });
     setOfferCardId(duplicateNames[0]?.id || "");
     setModalOpen(true);
   };
@@ -122,188 +136,169 @@ export default function TradingPage() {
   const confirmExchange = () => {
     if (!selectedTrade || !offerCardId) return;
     const offered = duplicateNames.find((d) => d.id === offerCardId);
-    requestTrade(
-      selectedTrade.listingId,
-      selectedTrade.name,
-      selectedTrade.userId,
-      offerCardId,
-      offered?.name || offerCardId,
-      selectedTrade.listingId
-    );
+    requestTrade(selectedTrade.listingId, selectedTrade.name, selectedTrade.userId, offerCardId, offered?.name || offerCardId, selectedTrade.listingId);
     addToast("Solicitud enviada", "success");
     setModalOpen(false);
   };
 
   return (
     <AppShell>
-      <h1 className="font-[var(--font-display)] text-[28px] font-bold tracking-tight mb-2">Intercambios</h1>
-      <p className="text-[var(--color-muted)] text-[15px] mb-8">Encuentra las postales que te faltan y ofrece tus repetidas a otros coleccionistas.</p>
+      <div className="flex items-center justify-between mb-2">
+        <h1 className="font-[var(--font-display)] text-[28px] font-bold tracking-tight">Intercambios</h1>
+        <div className="flex items-center gap-3 text-sm text-[var(--color-muted)]">
+          <span className="flex items-center gap-1"><Tag size={14} /> {dupes.length} repetidas</span>
+          <span className="flex items-center gap-1"><Users size={14} /> {state.trades.filter((t) => t.status === "pending").length} activos</span>
+        </div>
+      </div>
+      <p className="text-[var(--color-muted)] text-[15px] mb-8">Publicá tus repetidas y encontrá las que te faltan.</p>
 
-      <div className="grid grid-cols-[1fr_340px] gap-8 mb-16 max-lg:grid-cols-1">
-        {/* Main list */}
-        <div>
-          <div className="flex gap-2.5 flex-wrap mb-5">
-            {["todos", "jugadores", "estadios", "recientes"].map((f) => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`px-4 py-2 rounded-full text-[13px] font-medium cursor-pointer border-[1.5px] transition-colors ${
-                  filter === f
-                    ? "bg-[var(--color-accent)] border-[var(--color-accent)] text-white"
-                    : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
-                }`}
-              >
-                {f === "todos" ? "Todos" : f === "jugadores" ? "Jugadores" : f === "estadios" ? "Estadios" : "Más recientes"}
-              </button>
-            ))}
-          </div>
-
-          <div className="relative max-w-full mb-6">
-            <label className="sr-only" htmlFor="trading-search">Buscar postal</label>
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" aria-hidden="true">
-              <Search size={16} strokeWidth={2} />
-            </span>
-            <input
-              id="trading-search"
-              type="text"
-              placeholder="Buscar por nombre, equipo o país..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-3.5 py-2.5 rounded-full border-[1.5px] border-[var(--color-border)] bg-[var(--color-surface)] text-sm text-[var(--color-fg)] transition-colors focus:border-[var(--color-accent)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-accent)]"
-            />
-          </div>
-
-          <div className="flex flex-col gap-3.5">
-            {loadingListings ? (
-              <p className="text-sm text-[var(--color-muted)] text-center py-8">Cargando publicaciones...</p>
-            ) : filtered.length === 0 ? (
-              <p className="text-sm text-[var(--color-muted)] text-center py-8">
-                {user ? "Nadie ha publicado stickers todavía. ¡Sé el primero!" : "Iniciá sesión para ver publicaciones de intercambio."}
-              </p>
-            ) : (
-              filtered.map((listing) => (
-                <div key={listing.id} className="flex items-center gap-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-4 px-5 transition-shadow hover:shadow-md max-sm:flex-col max-sm:items-start max-sm:gap-3">
-                  <div className="w-16 h-[84px] rounded-lg overflow-hidden shrink-0 bg-[linear-gradient(180deg,oklch(72%_0.1_250),oklch(58%_0.12_250))] flex items-center justify-center text-white text-xs font-bold">
-                    {listing.card_name.slice(0, 2)}
-                  </div>
-                  <div className="flex-1 max-sm:w-full">
-                    <div className="font-bold text-[15px] mb-0.5">{listing.card_name}</div>
-                    <div className="text-[13px] text-[var(--color-muted)]">{listing.team_name || "—"}</div>
-                    {listing.looking_for && (
-                      <div className="text-xs text-[var(--color-muted)] mt-0.5">Busca: {listing.looking_for}</div>
-                    )}
-                    <div className="text-xs text-[var(--color-muted)] flex items-center gap-1.5 mt-1">
-                      <span className="w-5 h-5 rounded-full bg-[var(--color-border)]" />
-                      {listing.profiles?.[0]?.display_name || "Anónimo"} · {listing.profiles?.[0]?.reputation || 100}%
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => openExchange(listing)}
-                    className="px-[22px] py-2.5 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-hover)] max-sm:w-full"
-                  >
-                    Solicitar intercambio
-                  </button>
-                </div>
-              ))
-            )}
+      {/* PUBLICAR MIS REPETIDAS - Top section */}
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-5 mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-[var(--font-display)] text-lg font-bold flex items-center gap-2"><Upload size={18} className="text-[var(--color-primary)]" /> Publicar mis repetidas</h2>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" />
+              <input
+                type="text" placeholder="Filtrar mis repetidas..." value={sideSearch}
+                onChange={(e) => setSideSearch(e.target.value)}
+                className="w-[200px] pl-8 pr-3 py-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-bg)] text-xs outline-none focus:border-[var(--color-accent)]"
+              />
+            </div>
+            <span className="text-xs text-[var(--color-muted)]">{filteredDupes.length} / {dupes.length}</span>
           </div>
         </div>
 
-        {/* Sidebar */}
-        <aside className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-6 h-fit sticky top-6 max-lg:static">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-[17px] font-bold font-[var(--font-display)]">Mis repetidas</h3>
-            <span className="text-xs text-[var(--color-muted)]">{duplicateNames.length}</span>
-          </div>
-          {duplicateNames.length === 0 ? (
-            <p className="text-sm text-[var(--color-muted)]">No tenés repetidas para publicar.</p>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {duplicateNames.map((d) => (
-                <div key={d.id} className="flex items-center gap-2 py-2 border-b border-[var(--color-border)] last:border-b-0">
-                  <div className="w-10 h-[52px] rounded shrink-0 bg-[linear-gradient(180deg,oklch(72%_0.1_250),oklch(58%_0.12_250))]" />
-                  <div className="flex-1 text-[13px] font-semibold truncate">{d.name}</div>
-                  <button
-                    onClick={() => { setPublishCard({ id: d.id, name: d.name }); setLookingFor(""); setPublishModal(true); }}
-                    className="px-2.5 py-1.5 rounded-full bg-[var(--color-primary)] text-white text-[11px] font-semibold cursor-pointer border-none hover:bg-[var(--color-primary-hover)] shrink-0"
-                  >
-                    Publicar
-                  </button>
+        {dupes.length === 0 ? (
+          <p className="text-sm text-[var(--color-muted)] text-center py-6">No tenés repetidas. ¡Abrí sobres para conseguir!</p>
+        ) : filteredDupes.length === 0 ? (
+          <p className="text-sm text-[var(--color-muted)] text-center py-6">Ninguna repetida coincide con el filtro.</p>
+        ) : (
+          <div className="grid grid-cols-4 gap-3 max-lg:grid-cols-3 max-sm:grid-cols-2">
+            {filteredDupes.map((d) => (
+              <div key={d.id} className="group relative bg-[var(--color-bg)] rounded-lg overflow-hidden border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 transition-all">
+                <div className="aspect-[3/4] relative">
+                  <div className="w-full h-[58%] flex items-center justify-center relative" style={{ background: d.teamColor ? `linear-gradient(180deg, ${d.teamColor} 0%, ${d.teamColorDark} 100%)` : "oklch(72% 0.1 250)" }}>
+                    {d.faceUrl ? (
+                      <img src={d.faceUrl} alt={d.name} className="w-[60%] h-[70%] object-contain" referrerPolicy="no-referrer" />
+                    ) : (
+                      <span className="text-lg font-extrabold text-white/20">{d.name.slice(0, 2).toUpperCase()}</span>
+                    )}
+                    {d.overall && (
+                      <span className="absolute top-1.5 right-1.5 bg-[var(--color-accent)] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm leading-none">{d.overall}</span>
+                    )}
+                  </div>
+                  <div className="h-[42%] bg-white/90 p-2 flex flex-col justify-center text-center">
+                    <span className="text-[12px] font-bold leading-tight">{d.name}</span>
+                    {d.teamName && <span className="text-[10px] text-[var(--color-muted)] mt-0.5 truncate">{d.teamName}{d.num ? ` · #${d.num}` : ""}</span>}
+                  </div>
                 </div>
-              ))}
-            </div>
-          )}
-          <div className="mt-4 space-y-2.5">
-            <div className="flex justify-between py-2.5 border-b border-[var(--color-border)] text-sm">
-              <span className="text-[var(--color-muted)]">Repetidas</span>
-              <span className="font-semibold">{duplicates.length}</span>
-            </div>
-            <div className="flex justify-between py-2.5 text-sm">
-              <span className="text-[var(--color-muted)]">Intercambios activos</span>
-              <span className="font-semibold">{state.trades.filter((t) => t.status === "pending").length}</span>
-            </div>
+                <button
+                  onClick={() => { setPublishCard({ id: d.id, name: d.name }); setLookingFor(""); setPublishModal(true); }}
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center bg-black/40"
+                >
+                  <span className="px-4 py-2 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold">Publicar</span>
+                </button>
+              </div>
+            ))}
           </div>
-        </aside>
+        )}
       </div>
 
+      {/* MARKETPLACE - Bottom section */}
+      <div>
+        <h2 className="font-[var(--font-display)] text-lg font-bold mb-4">Marketplace</h2>
+        <div className="flex gap-2 flex-wrap mb-5">
+          {FILTER_TABS.map((f) => (
+            <button
+              key={f.id} onClick={() => setFilter(f.id)}
+              className={`px-4 py-1.5 rounded-full text-[13px] font-medium cursor-pointer border-[1.5px] transition-colors ${
+                filter === f.id ? "bg-[var(--color-accent)] border-[var(--color-accent)] text-white" : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="relative max-w-full mb-6">
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" />
+          <input
+            type="text" placeholder="Buscar por nombre, equipo..." value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-3.5 py-2.5 rounded-full border-[1.5px] border-[var(--color-border)] bg-[var(--color-surface)] text-sm outline-none transition-colors focus:border-[var(--color-accent)]"
+          />
+        </div>
+
+        <div className="flex flex-col gap-3">
+          {loadingListings ? (
+            <div className="grid grid-cols-3 gap-3 max-sm:grid-cols-1">
+              {[1,2,3].map((i) => (
+                <div key={i} className="h-[100px] rounded-lg bg-[var(--color-border)] animate-pulse" />
+              ))}
+            </div>
+          ) : filtered.length === 0 ? (
+            <p className="text-sm text-[var(--color-muted)] text-center py-8">{user ? "No hay publicaciones. ¡Publicá vos la primera!" : "Iniciá sesión para ver publicaciones."}</p>
+          ) : (
+            filtered.map((listing) => {
+              const info = getDupeInfo(listing.card_id);
+              return (
+                <div key={listing.id} className="flex items-center gap-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-4 transition-shadow hover:shadow-md max-sm:flex-col max-sm:items-start max-sm:gap-3">
+                  <div className="w-[60px] h-[80px] rounded-lg overflow-hidden shrink-0 flex items-center justify-center relative" style={{ background: info?.teamColor ? `linear-gradient(180deg, ${info.teamColor} 0%, ${info.teamColorDark} 100%)` : "oklch(72% 0.1 250)" }}>
+                    {info?.faceUrl ? (
+                      <img src={info.faceUrl} alt={listing.card_name} className="w-[65%] h-[65%] object-contain" referrerPolicy="no-referrer" />
+                    ) : (
+                      <span className="text-sm font-extrabold text-white/25">{listing.card_name.slice(0, 2).toUpperCase()}</span>
+                    )}
+                    {info?.overall && (
+                      <span className="absolute bottom-1 right-1 bg-[var(--color-accent)] text-white text-[9px] font-bold px-1 rounded-sm">{info.overall}</span>
+                    )}
+                  </div>
+                  <div className="flex-1 max-sm:w-full">
+                    <div className="font-bold text-[15px]">{listing.card_name}</div>
+                    <div className="text-[13px] text-[var(--color-muted)]">{listing.team_name || info?.teamName || "—"}</div>
+                    {listing.looking_for && <div className="text-xs text-[var(--color-muted)] mt-0.5">Busca: {listing.looking_for}</div>}
+                    <div className="text-xs text-[var(--color-muted)] mt-1">
+                      {listing.profiles?.[0]?.display_name || "Anónimo"} · {listing.profiles?.[0]?.reputation || 100}% rep
+                    </div>
+                  </div>
+                  <button onClick={() => openExchange(listing)} className="px-5 py-2.5 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-hover)] max-sm:w-full">
+                    Solicitar
+                  </button>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* Trade request modal */}
       <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
         <h3 className="text-xl font-bold font-[var(--font-display)] mb-2">Solicitar intercambio</h3>
-        <p className="text-sm text-[var(--color-muted)] mb-5">
-          Estás solicitando un intercambio por la postal de <strong>{selectedTrade?.name}</strong> de <strong>{selectedTrade?.owner}</strong>.
-        </p>
+        <p className="text-sm text-[var(--color-muted)] mb-5">Estás solicitando <strong>{selectedTrade?.name}</strong> de <strong>{selectedTrade?.owner}</strong>.</p>
         <label className="text-[13px] font-semibold block mb-1.5">Ofrecer a cambio:</label>
-        <select
-          value={offerCardId}
-          onChange={(e) => setOfferCardId(e.target.value)}
-          className="w-full px-3.5 py-2.5 rounded-[var(--radius-md)] border-[1.5px] border-[var(--color-border)] text-sm bg-[var(--color-bg)] mb-5"
-        >
-          {duplicateNames.map((d) => (
-            <option key={d.id} value={d.id}>{d.name} — Repetida</option>
-          ))}
+        <select value={offerCardId} onChange={(e) => setOfferCardId(e.target.value)} className="w-full px-3.5 py-2.5 rounded-[var(--radius-md)] border-[1.5px] border-[var(--color-border)] text-sm bg-[var(--color-bg)] mb-5">
+          {duplicateNames.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
         </select>
         <div className="flex gap-2.5 justify-end">
-          <button
-            onClick={() => setModalOpen(false)}
-            className="px-[22px] py-2.5 rounded-full bg-transparent text-[var(--color-muted)] text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-soft)] hover:text-[var(--color-accent)]"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={confirmExchange}
-            className="px-[22px] py-2.5 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-hover)]"
-          >
-            Enviar solicitud
-          </button>
+          <button onClick={() => setModalOpen(false)} className="px-5 py-2.5 rounded-full bg-transparent text-[var(--color-muted)] text-sm font-semibold cursor-pointer border-none hover:bg-[var(--color-accent-soft)]">Cancelar</button>
+          <button onClick={confirmExchange} className="px-5 py-2.5 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none hover:bg-[var(--color-accent-hover)]">Enviar solicitud</button>
         </div>
       </Modal>
 
       {/* Publish modal */}
       <Modal open={publishModal} onClose={() => setPublishModal(false)}>
         <h3 className="text-xl font-bold font-[var(--font-display)] mb-2">Publicar para intercambiar</h3>
-        <p className="text-sm text-[var(--color-muted)] mb-5">
-          Estás publicando <strong>{publishCard?.name}</strong> en el marketplace.
-        </p>
+        <p className="text-sm text-[var(--color-muted)] mb-4">Estás publicando <strong>{publishCard?.name}</strong> para que otros te puedan solicitar un intercambio.</p>
         <label className="text-[13px] font-semibold block mb-1.5">¿Qué buscás a cambio? (opcional)</label>
         <input
-          type="text"
-          placeholder='Ej: "Cualquier carta de Argentina"'
-          value={lookingFor}
+          type="text" placeholder='Ej: "Cualquier carta de Argentina"' value={lookingFor}
           onChange={(e) => setLookingFor(e.target.value)}
           className="w-full px-3.5 py-2.5 rounded-[var(--radius-md)] border-[1.5px] border-[var(--color-border)] text-sm bg-[var(--color-bg)] mb-5 outline-none focus:border-[var(--color-accent)]"
         />
         <div className="flex gap-2.5 justify-end">
-          <button
-            onClick={() => setPublishModal(false)}
-            className="px-[22px] py-2.5 rounded-full bg-transparent text-[var(--color-muted)] text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-soft)] hover:text-[var(--color-accent)]"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handlePublish}
-            className="px-[22px] py-2.5 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-primary-hover)]"
-          >
-            Publicar
-          </button>
+          <button onClick={() => setPublishModal(false)} className="px-5 py-2.5 rounded-full bg-transparent text-[var(--color-muted)] text-sm font-semibold cursor-pointer border-none hover:bg-[var(--color-accent-soft)]">Cancelar</button>
+          <button onClick={handlePublish} className="px-5 py-2.5 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold cursor-pointer border-none hover:bg-[var(--color-primary-hover)]">Publicar</button>
         </div>
       </Modal>
     </AppShell>
