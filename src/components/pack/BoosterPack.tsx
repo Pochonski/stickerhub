@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Trophy, Sparkles } from "lucide-react";
 
 interface BoosterPackProps {
   teamFlag: string;
@@ -169,15 +168,15 @@ export function BoosterPack({
         })()}
         onClick={handleTear}
       >
-        {/* Pack front design */}
+        {/* Pack front design - just the image */}
         <div
           className="absolute inset-0"
           style={{
-            background: `linear-gradient(160deg, ${teamColor} 0%, ${teamColorDark} 30%, oklch(20% 0.03 260) 50%, ${teamColorDark} 70%, ${teamColor} 100%), url('/sobre.png') center/cover`,
+            background: `linear-gradient(160deg, ${teamColor} 0%, ${teamColorDark} 30%, oklch(20% 0.03 260) 50%, ${teamColorDark} 70%, ${teamColor} 100%), url('/sobre.png') center/contain no-repeat`,
             backgroundBlendMode: "overlay",
           }}
         >
-          {/* Foil shimmer */}
+          {/* Subtle foil shimmer */}
           <div className="absolute inset-0">
             <div
               className="absolute inset-0"
@@ -185,66 +184,6 @@ export function BoosterPack({
                 background: `linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.04) 40%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 60%, transparent 70%)`,
                 animation: "sticker-shine-sweep 3s ease-in-out infinite",
               }}
-            />
-          </div>
-
-          {/* Diagonal foil stripes */}
-          <div
-            className="absolute inset-0 opacity-[0.04]"
-            style={{
-              backgroundImage: "repeating-linear-gradient(-30deg, transparent, transparent 8px, rgba(255,255,255,0.6) 8px, rgba(255,255,255,0.6) 9px)",
-            }}
-          />
-
-          {/* Gold border frame */}
-          <div
-            className="absolute inset-3 rounded-2xl border-[1.5px] pointer-events-none"
-            style={{ borderColor: "var(--color-accent)", opacity: 0.6 }}
-          />
-          <div
-            className="absolute inset-[14px] rounded-xl border pointer-events-none"
-            style={{ borderColor: "var(--color-accent)", opacity: 0.3 }}
-          />
-
-          {/* Content */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6">
-            {/* Sparkles top */}
-            <Sparkles
-              size={16}
-              className="text-[var(--color-accent)]/60 animate-shimmer"
-              strokeWidth={1.5}
-            />
-
-            {/* Trophy */}
-            <div className="relative">
-              <div
-                className="absolute inset-0 rounded-full blur-md"
-                style={{ background: "var(--color-accent)", opacity: 0.3 }}
-              />
-              <Trophy
-                size={52}
-                strokeWidth={1.5}
-                className="text-[var(--color-accent)] drop-shadow-lg relative max-sm:size-[40px]"
-              />
-            </div>
-
-            {/* Title */}
-            <div className="text-center">
-              <span className="font-[var(--font-display)] text-lg font-extrabold tracking-[0.15em] uppercase text-white drop-shadow-md max-sm:text-sm">
-                Mundial
-              </span>
-              <br />
-              <span className="font-[var(--font-display)] text-[13px] font-bold tracking-[0.3em] uppercase text-[var(--color-accent)] drop-shadow-sm max-sm:text-[11px]">
-                FIFA 2026
-              </span>
-            </div>
-
-
-            {/* Sparkles bottom */}
-            <Sparkles
-              size={14}
-              className="text-[var(--color-accent)]/50 animate-shimmer"
-              strokeWidth={1.5}
             />
           </div>
         </div>
@@ -259,9 +198,8 @@ export function BoosterPack({
 
       {/* Packs left indicator */}
       {stage === "idle" && (
-        <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-1.5 text-xs text-[var(--color-muted)]">
-          <Sparkles size={12} strokeWidth={1.5} className="text-[var(--color-accent)]/50" />
-          <span>{packsLeft} sobre{packsLeft !== 1 ? "s" : ""} disponible{packsLeft !== 1 ? "s" : ""}</span>
+        <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 text-xs text-[var(--color-muted)]">
+          {packsLeft} sobre{packsLeft !== 1 ? "s" : ""} disponible{packsLeft !== 1 ? "s" : ""}
         </div>
       )}
     </div>
