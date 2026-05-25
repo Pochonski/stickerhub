@@ -115,7 +115,7 @@ export default function TeamAlbumPage({ params }: { params: Promise<{ team: stri
         </div>
 
         {/* Progress ring */}
-        <div className="bg-[var(--color-bg)]/70 rounded-xl p-5 mb-6">
+        <div className="bg-white/30 backdrop-blur-[2px] rounded-xl p-5 mb-6">
           <div className="flex items-center gap-4">
             <div
               className="relative w-[72px] h-[72px] shrink-0"
@@ -227,7 +227,7 @@ export default function TeamAlbumPage({ params }: { params: Promise<{ team: stri
 
 function MiniStat({ value, total, label }: { value: number; total: number; label: string }) {
   return (
-    <div className="bg-[var(--color-bg)]/70 rounded-lg p-3">
+    <div className="bg-white/30 backdrop-blur-[2px] rounded-lg p-3">
       <div className="flex items-baseline gap-1.5 mb-0.5">
         <span className="font-[var(--font-display)] text-lg font-extrabold text-[var(--color-fg)]">
           {value}/{total}

@@ -77,7 +77,7 @@ export function StickerSlot({
           </div>
 
           {/* Lower half: player info */}
-          <div className="h-[42%] bg-[var(--color-surface)] flex flex-col items-center justify-center gap-0.5 px-2 border-t border-[var(--color-border)]/60">
+          <div className="h-[42%] bg-white/85 backdrop-blur-[1px] flex flex-col items-center justify-center gap-0.5 px-2 border-t border-[var(--color-border)]/40">
             {num && (
               <span className="text-[11px] font-extrabold text-[var(--color-muted)] leading-none tracking-tight">
                 {num}

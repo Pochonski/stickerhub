@@ -143,8 +143,9 @@ export function FlipbookViewer() {
               const isComplete = pct === 100;
 
               return (
-                <div key={team.id} className="flipbook-page">
-                  <div className="flex flex-col h-full bg-[var(--color-surface)]">
+                <div key={team.id} className="flipbook-page relative">
+                  <img src={`/fondo-${TEAM_LIST.indexOf(team) % 2 === 0 ? 'izq' : 'der'}.jpeg`} alt="" className="absolute inset-0 w-full h-full object-cover opacity-50 pointer-events-none z-0" />
+                  <div className="relative z-[1] flex flex-col h-full">
                     {/* Team header */}
                     <div
                       className="shrink-0 px-5 py-4 relative overflow-hidden"
