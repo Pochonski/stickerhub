@@ -62,7 +62,7 @@ export function AppHeader() {
       </Link>
 
       <div className="flex items-center gap-2 md:gap-4">
-        <AppNav />
+        <AppNav pendingTrades={pendingTrades} />
         {!loading && (
           user ? (
             <>
@@ -72,17 +72,6 @@ export function AppHeader() {
               >
                 <Coins size={12} className="md:size-3.5" />
                 {coins.toLocaleString()}
-              </Link>
-              <Link
-                href="/inbox"
-                className="flex items-center gap-1 md:gap-1.5 px-2.5 md:px-3 py-1 md:py-1.5 rounded-full bg-[var(--color-accent-soft)] text-[var(--color-accent)] text-[11px] md:text-xs font-semibold no-underline relative"
-              >
-                📨
-                {pendingTrades > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-[var(--color-danger)] text-white text-[9px] font-bold w-4 h-4 rounded-full grid place-items-center">
-                    {pendingTrades > 9 ? "9+" : pendingTrades}
-                  </span>
-                )}
               </Link>
               <Link
                 href="/profile"

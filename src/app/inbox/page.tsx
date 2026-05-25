@@ -36,11 +36,15 @@ export default function InboxPage() {
   useEffect(() => {
     if (!user) return;
     setLoading(true);
-    const fetchTrades = async () => { /* same */ };
-    fetchTrades();
+    const sb = getSupabase();
+    sb.from("trade_offers")
+      .select("*")
+      .or(`from_user_id.eq.${user.id},to_user_id.eq.${user.id}`)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => { if (data) setTrades(data as TradeItem[]); setLoading(false); },
+            () => setLoading(false));
 
     // Realtime: subscribe to new/updated trades
-    const sb = getSupabase();
     const channel = sb
       .channel(`inbox:${user.id}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "trade_offers", filter: `to_user_id=eq.${user.id}` },
