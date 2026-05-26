@@ -8,23 +8,27 @@ import { AppShell } from "@/components/layout/AppShell";
 import { FlipCard } from "@/components/pack/FlipCard";
 import { PackSummary } from "@/components/pack/PackSummary";
 import { BoosterPack } from "@/components/pack/BoosterPack";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { useGame } from "@/context/GameContext";
 import { useToast } from "@/hooks/useToast";
 import { generateMixedPack, type PackCard } from "@/lib/pack-generator";
 import { TEAMS } from "@/data/teams";
-import { PackageOpen, Sparkles, Trophy, ShoppingCart, Coins } from "lucide-react";
+import { PackageOpen, Sparkles, ShoppingCart, Coins } from "lucide-react";
 import { ALL_PLAYERS } from "@/data/players";
 import { coinValue } from "@/hooks/useSupabasePacks";
 import { TeamCompleteCelebration } from "@/components/celebration/TeamCompleteCelebration";
+import { ProgressBar } from "@/components/ui/ProgressBar";
 
 const QUANTITY_OPTIONS = [1, 2, 3, 5, 10, 15, 20, 25, 50];
 
 function PackOpenerContent() {
   const searchParams = useSearchParams();
   const teamParam = searchParams.get("team") || "argentina";
-  const { state, openPacks, collectCard, refreshCollection, checkTeamCompletions, completedTeams } = useGame();
+  const { state, openPacks, collectCard, refreshCollection, checkTeamCompletions, completedTeams, coins } = useGame();
   const { addToast } = useToast();
+
+  const totalCollected = Object.keys(state.collected).length;
+  const totalAll = ALL_PLAYERS.length;
+  const pct = totalAll > 0 ? Math.round((totalCollected / totalAll) * 100) : 0;
 
   const [stage, setStage] = useState<"idle" | "torn" | "reveal" | "summary">("idle");
   const [currentPack, setCurrentPack] = useState<PackCard[]>([]);
@@ -108,29 +112,52 @@ function PackOpenerContent() {
   if (state.packs <= 0 && stage === "idle") {
     return (
       <AppShell>
-        <h1 className="font-[var(--font-display)] text-[28px] font-bold tracking-tight mb-2">Abrir sobre</h1>
-        <p className="text-[var(--color-muted)] text-[15px] mb-8">Cada sobre contiene 7 stickers aleatorios. Abrí el sobre para descubrir qué te tocó.</p>
-        <EmptyState
-          icon={<PackageOpen size={36} strokeWidth={1.5} />}
-          title="Sin sobres disponibles"
-          description="Ganá monedas descartando repetidas o completando equipos. ¡Visita la tienda para comprar más sobres!"
-          action={
-            <div className="flex gap-3 justify-center">
-              <Link
-                href="/album"
-                className="inline-flex items-center gap-2 px-[22px] py-2.5 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold no-underline transition-colors hover:bg-[var(--color-accent-hover)]"
-              >
-                Ir a la colección
-              </Link>
-              <Link
-                href="/shop"
-                className="inline-flex items-center gap-2 px-[22px] py-2.5 rounded-full border-[1.5px] border-[var(--color-border)] text-[var(--color-fg)] text-sm font-semibold no-underline transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
-              >
-                <ShoppingCart size={14} className="mr-1 inline" /> Ir a la tienda
-              </Link>
+        <div className="flex items-center justify-between mb-2 max-sm:flex-col max-sm:items-start max-sm:gap-2">
+          <div>
+            <h1 className="font-[var(--font-display)] text-[28px] font-bold tracking-tight mb-1">Abrir sobres</h1>
+            <p className="text-[var(--color-muted)] text-[15px]">Conseguí más sobres para seguir coleccionando.</p>
+          </div>
+          <div className="flex items-center gap-2 bg-[var(--color-accent-soft)] rounded-full px-4 py-2 shrink-0">
+            <Coins size={18} className="text-[var(--color-accent)]" />
+            <span className="font-[var(--font-display)] text-lg font-bold text-[var(--color-accent)]">{coins.toLocaleString()}</span>
+          </div>
+        </div>
+
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-xl)] p-6 md:p-8 mb-6 shadow-sm">
+          <div className="flex items-center gap-4 mb-5 max-sm:flex-col max-sm:text-center">
+            <div className="w-16 h-16 rounded-full bg-[var(--color-accent-soft)] grid place-items-center shrink-0">
+              <PackageOpen size={28} className="text-[var(--color-accent)]" strokeWidth={1.5} />
             </div>
-          }
-        />
+            <div className="flex-1 max-sm:w-full">
+              <h2 className="font-[var(--font-display)] text-lg font-bold mb-1">Sin sobres disponibles</h2>
+              <p className="text-sm text-[var(--color-muted)] mb-3">Ganá monedas descartando repetidas o completando equipos para comprar más.</p>
+              <div className="flex items-center gap-3 max-sm:flex-col max-sm:items-stretch">
+                <span className="text-xs text-[var(--color-muted)]">Progreso: {pct}%</span>
+                <div className="flex-1 max-w-[200px]"><ProgressBar pct={pct} /></div>
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-3 max-sm:flex-col">
+            <Link
+              href="/shop"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold no-underline transition-colors hover:bg-[var(--color-accent-hover)]"
+            >
+              <ShoppingCart size={16} /> Comprar sobres
+            </Link>
+            <Link
+              href="/discard"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full border-[1.5px] border-[var(--color-border)] text-[var(--color-fg)] text-sm font-semibold no-underline transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+            >
+              <Coins size={16} /> Descartar repetidas
+            </Link>
+            <Link
+              href="/album"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full border-[1.5px] border-[var(--color-border)] text-[var(--color-fg)] text-sm font-semibold no-underline transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+            >
+              Ver colección
+            </Link>
+          </div>
+        </div>
       {teamCelebration && (
         <TeamCompleteCelebration
           show={!!teamCelebration}
@@ -148,40 +175,61 @@ function PackOpenerContent() {
 
   return (
     <AppShell>
-      <h1 className="font-[var(--font-display)] text-[28px] font-bold tracking-tight mb-2">
-        {stage === "idle" && "Abrir sobres"}
-        {stage === "reveal" && "Revelá tus stickers"}
-        {stage === "summary" && `Resultado de ${openedCount > 1 ? `${openedCount} sobres` : "sobre"}`}
-      </h1>
-      <p className="text-[var(--color-muted)] text-[15px] mb-8">
-        {stage === "idle" && `Tocá el sobre para rasgarlo. Tenés ${state.packs} disponible${state.packs !== 1 ? "s" : ""}.`}
-        {stage === "reveal" && `Tocá cada sticker para voltearlo. ${currentPack.length - flipped} restante${currentPack.length - flipped !== 1 ? "s" : ""}.`}
-        {stage === "summary" && "¡Sobres abiertos! Mirá lo que te tocó."}
-      </p>
+      <div className="flex items-center justify-between mb-2 max-sm:flex-col max-sm:items-start max-sm:gap-2">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            {stage !== "summary" && <span className="text-xl">{team.flag}</span>}
+            <h1 className="font-[var(--font-display)] text-[28px] font-bold tracking-tight">
+              {stage === "idle" && `Abrir sobres${teamParam !== "argentina" ? ` · ${team.name}` : ""}`}
+              {stage === "torn" && "Abriendo..."}
+              {stage === "reveal" && "Revelá tus stickers"}
+              {stage === "summary" && `Resultado de ${openedCount} ${openedCount === 1 ? "sobre" : "sobres"}`}
+            </h1>
+          </div>
+          <p className="text-[var(--color-muted)] text-[15px]">
+            {stage === "idle" && `Tenés ${state.packs} sobre${state.packs !== 1 ? "s" : ""}. Tocá para rasgar.${state.packs > 1 ? ` Elegí cuántos abrir.` : ""}`}
+            {stage === "torn" && "Rasgando el sobre..."}
+            {stage === "reveal" && `Tocá cada sticker para voltearlo. ${flipped} de ${currentPack.length} revelados.`}
+            {stage === "summary" && "¡Sobres abiertos! Mirá lo que te tocó."}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 bg-[var(--color-accent-soft)] rounded-full px-4 py-2 shrink-0">
+          <Coins size={18} className="text-[var(--color-accent)]" />
+          <span className="font-[var(--font-display)] text-lg font-bold text-[var(--color-accent)]">{coins.toLocaleString()}</span>
+        </div>
+      </div>
 
-      <div className="max-w-[720px] mx-auto text-center">
+      <div className="max-w-[720px] mx-auto text-center mt-6">
         {/* Quantity selector */}
         {stage === "idle" && state.packs > 0 && (
-          <div className="flex items-center justify-center gap-2 mb-6 flex-wrap">
-            <span className="text-sm text-[var(--color-muted)]">Abrir:</span>
-            {QUANTITY_OPTIONS.map((q) => (
-              <button
-                key={q}
-                onClick={() => setQuantity(q)}
-                disabled={q > state.packs}
-                className={`px-3 md:px-4 py-2 rounded-full text-sm font-semibold cursor-pointer border-none transition-colors ${
-                  quantity === q
-                    ? "bg-[var(--color-accent)] text-white"
-                    : q > state.packs
-                    ? "bg-[var(--color-border)] text-[var(--color-muted)]/40 cursor-not-allowed"
-                    : "bg-[var(--color-border)] text-[var(--color-muted)] hover:bg-[var(--color-accent-soft)] hover:text-[var(--color-accent)]"
-                }`}
-              >
-                {q}
-              </button>
-            ))}
-            {state.packs > 10 && (
-              <span className="text-xs text-[var(--color-muted)] ml-2">máx {state.packs}</span>
+          <div className="mb-6">
+            <p className="text-xs text-[var(--color-muted)] mb-3 uppercase tracking-wider">Cantidad a abrir</p>
+            <div className="flex items-center justify-center gap-1.5 flex-wrap">
+              {QUANTITY_OPTIONS.filter(q => q <= state.packs || q <= 10).map((q) => {
+                const disabled = q > state.packs;
+                return (
+                  <button
+                    key={q}
+                    onClick={() => !disabled && setQuantity(q)}
+                    disabled={disabled}
+                    className={`px-3 py-2 rounded-full text-sm font-semibold cursor-pointer border-none transition-all ${
+                      quantity === q
+                        ? "bg-[var(--color-accent)] text-white shadow-md scale-105"
+                        : disabled
+                        ? "bg-[var(--color-border)]/50 text-[var(--color-muted)]/30 cursor-not-allowed"
+                        : "bg-[var(--color-border)] text-[var(--color-muted)] hover:bg-[var(--color-accent-soft)] hover:text-[var(--color-accent)]"
+                    }`}
+                  >
+                    {q}{q <= 5 && ` sobre${q !== 1 ? "s" : ""}`}
+                  </button>
+                );
+              })}
+              {state.packs > 10 && (
+                <span className="text-xs text-[var(--color-muted)] ml-2">máx {state.packs}</span>
+              )}
+            </div>
+            {quantity > 1 && (
+              <p className="text-xs text-[var(--color-muted)] mt-2">{quantity * 6} stickers en total</p>
             )}
           </div>
         )}
@@ -201,8 +249,8 @@ function PackOpenerContent() {
         {/* Stage: Card reveal with cascade (only for single pack) */}
         {stage === "reveal" && (
           <>
-            <p className="text-[var(--color-muted)] text-[15px] mb-8">
-              Tocá cada sticker para revelarlo
+            <p className="text-sm text-[var(--color-muted)] mb-6">
+              <span className="font-semibold text-[var(--color-accent)]">{flipped}</span> de <span className="font-semibold">{currentPack.length}</span> revelados
             </p>
             <div className="flex gap-4 justify-center flex-wrap mx-auto mb-10">
               {currentPack.map((card, i) => (
@@ -244,39 +292,42 @@ function PackOpenerContent() {
             if (!card.isNew) dupeCoins += coinValue(ratingLookup.get(card.id) ?? 70, card.id);
           }
 
-          return (
+            return (
             <div className="animate-summary-in">
               {/* Stats Banner */}
               <div className="relative overflow-hidden rounded-[var(--radius-xl)] bg-[var(--color-surface)] border border-[var(--color-border)] shadow-md p-6 md:p-8 mb-6">
                 <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-accent)]/6 via-[var(--color-accent)]/2 to-transparent pointer-events-none" />
                 <div className="absolute top-0 right-0 w-48 h-48 bg-[var(--color-accent)]/4 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                 <div className="relative">
-                  <h3 className="font-[var(--font-display)] text-[22px] md:text-[26px] font-bold text-center flex items-center justify-center gap-2 mb-6">
-                    <Trophy size={26} strokeWidth={1.5} className="text-[var(--color-accent)]" />
-                    ¡{openedCount} {openedCount === 1 ? "sobre abierto" : "sobres abiertos"}!
-                  </h3>
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    <span className="text-xl">{team.flag}</span>
+                    <h3 className="font-[var(--font-display)] text-[20px] md:text-[24px] font-bold text-center">
+                      ¡{openedCount} {openedCount === 1 ? "sobre abierto" : "sobres abiertos"}!
+                    </h3>
+                  </div>
 
-                  <div className="flex gap-3 justify-center flex-wrap">
-                    <div className="bg-[var(--color-success)]/10 rounded-[var(--radius-lg)] px-5 py-3.5 text-center min-w-[110px] animate-celebration-enter" style={{ animationDelay: "100ms", animationFillMode: "both" }}>
-                      <span className="block font-[var(--font-display)] text-[32px] md:text-[36px] font-bold text-[var(--color-success)] leading-none">{newCount}</span>
+                  <div className="flex gap-3 justify-center flex-wrap mb-4">
+                    <div className="bg-[var(--color-success)]/10 rounded-[var(--radius-lg)] px-5 py-3.5 text-center min-w-[100px] animate-celebration-enter" style={{ animationDelay: "100ms", animationFillMode: "both" }}>
+                      <span className="block font-[var(--font-display)] text-[32px] md:text-[40px] font-bold text-[var(--color-success)] leading-none">{newCount}</span>
                       <span className="text-[10px] uppercase tracking-widest font-bold text-[var(--color-success)] mt-1 block">Nuevas</span>
                     </div>
-                    <div className="bg-[var(--color-warning)]/10 rounded-[var(--radius-lg)] px-5 py-3.5 text-center min-w-[110px] animate-celebration-enter" style={{ animationDelay: "200ms", animationFillMode: "both" }}>
-                      <span className="block font-[var(--font-display)] text-[32px] md:text-[36px] font-bold text-[var(--color-warning)] leading-none">{dupeCount}</span>
+                    <div className="bg-[var(--color-warning)]/10 rounded-[var(--radius-lg)] px-5 py-3.5 text-center min-w-[100px] animate-celebration-enter" style={{ animationDelay: "200ms", animationFillMode: "both" }}>
+                      <span className="block font-[var(--font-display)] text-[32px] md:text-[40px] font-bold text-[var(--color-warning)] leading-none">{dupeCount}</span>
                       <span className="text-[10px] uppercase tracking-widest font-bold text-[var(--color-warning)] mt-1 block">Repetidas</span>
                     </div>
                   </div>
 
                   {dupeCount > 0 && (
-                    <p className="mt-5 text-sm text-[var(--color-muted)] text-center animate-celebration-enter" style={{ animationDelay: "300ms", animationFillMode: "both" }}>
-                      Valor estimado al descartar repetidas: <span className="font-bold text-[var(--color-accent)]"><Coins size={14} className="inline" /> +{dupeCoins.toLocaleString()} monedas</span>
-                    </p>
+                    <div className="inline-flex items-center gap-1.5 bg-[var(--color-accent)]/10 rounded-full px-4 py-1.5 mx-auto block text-center animate-celebration-enter" style={{ animationDelay: "300ms", animationFillMode: "both" }}>
+                      <Coins size={14} className="text-[var(--color-accent)]" />
+                      <span className="text-xs text-[var(--color-muted)]">Valor estimado: <span className="font-bold text-[var(--color-accent)]">+{dupeCoins.toLocaleString()}</span></span>
+                    </div>
                   )}
                 </div>
               </div>
 
               {/* Cards grouped by team */}
-              <div className="max-h-[50vh] overflow-y-auto pr-1 space-y-5 mb-6">
+              <div className="space-y-5 mb-6">
                 {Array.from(teamGroups.entries()).map(([teamId, cards]) => {
                   const teamData = TEAMS[teamId];
                   return (
@@ -293,7 +344,7 @@ function PackOpenerContent() {
                             className="card-cascade-item"
                             style={{ animationDelay: `${(i % 8) * 50}ms` }}
                           >
-                            <div className="w-[84px] aspect-[3/4] rounded-[var(--radius-md)] relative overflow-hidden border border-[var(--color-border)] shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 cursor-default">
+                            <div className="w-[100px] max-sm:w-[84px] aspect-[3/4] rounded-[var(--radius-md)] relative overflow-hidden border border-[var(--color-border)] shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200 cursor-default">
                               <div className="w-full h-[55%] flex items-center justify-center" style={{ background: `${card.gradient}, url('/card-bg.png') center/cover`, backgroundBlendMode: "overlay" }}>
                                 {card.faceUrl ? (
                                   <img src={card.faceUrl} alt={card.name} className="w-[62%] aspect-square object-contain" referrerPolicy="no-referrer" />
@@ -301,7 +352,7 @@ function PackOpenerContent() {
                                   <span className="text-lg font-extrabold text-white/25 font-[var(--font-display)]">{card.num}</span>
                                 ) : null}
                               </div>
-                              <div className="text-[8px] font-bold p-1 bg-[var(--color-surface)] text-center leading-tight">
+                              <div className="text-[9px] font-bold p-1.5 bg-[var(--color-surface)] text-center leading-tight">
                                 {teamData?.flag && <span className="text-[7px] block leading-none mb-0.5">{teamData.flag}</span>}
                                 {card.name}
                               </div>
@@ -326,16 +377,24 @@ function PackOpenerContent() {
                 <button
                   onClick={handleOpenAnother}
                   disabled={state.packs <= 0}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-hover)] disabled:opacity-40"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold cursor-pointer border-none transition-colors hover:bg-[var(--color-accent-hover)] disabled:opacity-40 min-h-[44px]"
                 >
                   <PackageOpen size={16} strokeWidth={2} />
                   {state.packs > 0 ? `Abrir otro${openedCount > 1 ? "s" : ""} (${state.packs} disponible${state.packs !== 1 ? "s" : ""})` : "Sin sobres"}
                 </button>
+                {state.packs <= 0 && (
+                  <Link
+                    href="/shop"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold no-underline transition-colors hover:bg-[var(--color-primary-hover)] min-h-[44px]"
+                  >
+                    <ShoppingCart size={16} /> Comprar sobres
+                  </Link>
+                )}
                 <Link
                   href="/album"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full border-[1.5px] border-[var(--color-border)] text-[var(--color-fg)] text-sm font-semibold no-underline transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-full border-[1.5px] border-[var(--color-border)] text-[var(--color-fg)] text-sm font-semibold no-underline transition-colors hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] min-h-[44px]"
                 >
-                  Volver al album
+                  Ver colección
                 </Link>
               </div>
             </div>
