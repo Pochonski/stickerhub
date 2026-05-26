@@ -158,7 +158,7 @@ export default function DiscardPage() {
 
       {state.duplicates.length > 0 && (
         <>
-        <div className="flex items-center gap-3 mb-3 max-sm:flex-col max-sm:items-stretch">
+        <div className="flex flex-wrap items-center gap-3 mb-3 max-sm:flex-col max-sm:items-stretch">
           <div className="relative flex-1 max-w-[300px]">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-muted)]" />
             <input

@@ -20,6 +20,14 @@ export function FlipbookViewer() {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [isReady, setIsReady] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const onFlip = useCallback((e: { data: number }) => {
     setCurrentPage(e.data);
@@ -100,7 +108,7 @@ export function FlipbookViewer() {
       {/* Flipbook */}
       <div className="flipbook-wrapper">
         {!isReady && (
-          <div className="flex items-center justify-center w-[360px] sm:w-[800px] h-[500px] sm:h-[560px] text-[var(--color-muted)]">
+          <div className="flex items-center justify-center w-full max-w-[360px] sm:max-w-[800px] h-[500px] sm:h-[560px] text-[var(--color-muted)]">
             Cargando...
           </div>
         )}
@@ -108,8 +116,8 @@ export function FlipbookViewer() {
         <div style={{ opacity: isReady ? 1 : 0, transition: "opacity 0.3s" }}>
           <HTMLFlipBook
             ref={flipRef}
-            width={400}
-            height={560}
+            width={isMobile ? 260 : 400}
+            height={isMobile ? 365 : 560}
             size="fixed"
             minWidth={180}
             maxWidth={400}

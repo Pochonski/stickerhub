@@ -21,7 +21,7 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-6 pb-16">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-6 pb-16 max-sm:grid-cols-1">
         <Link
           href="/album"
           className="flex flex-col no-underline text-[var(--color-fg)] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] overflow-hidden transition-all duration-150 hover:shadow-lg hover:border-[var(--color-accent)]/30"

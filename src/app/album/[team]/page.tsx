@@ -146,9 +146,9 @@ export default function TeamAlbumPage({ params }: { params: Promise<{ team: stri
       {/* CTA */}
       <Link
         href={`/pack-opener?team=${team}&type=${type}`}
-        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--color-accent)] text-white text-sm font-semibold no-underline transition-colors hover:bg-[var(--color-accent-hover)] w-fit"
+        className="inline-flex items-center gap-2 px-5 max-sm:px-3 py-2.5 rounded-full bg-[var(--color-accent)] text-white text-sm max-sm:text-xs font-semibold no-underline transition-colors hover:bg-[var(--color-accent-hover)] max-w-full"
       >
-        <PackageOpen size={16} strokeWidth={2} /> Abrir sobre de {teamData.name}
+        <PackageOpen size={16} strokeWidth={2} /> <span className="max-sm:max-w-[160px] max-sm:truncate">Abrir sobre de {teamData.name}</span>
       </Link>
     </div>
   );

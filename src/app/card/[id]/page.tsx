@@ -95,7 +95,7 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
         <ArrowLeft size={14} /> Volver
       </button>
 
-      <div className="grid grid-cols-[340px_1fr] gap-10 mb-12 max-lg:grid-cols-1 max-lg:max-w-[340px]">
+      <div className="grid grid-cols-[340px_1fr] gap-6 max-sm:gap-4 mb-12 max-lg:grid-cols-1 max-lg:max-w-full">
         {/* Card visual */}
         <div
           className="aspect-[3/4] rounded-[var(--radius-lg)] overflow-hidden flex flex-col relative shadow-lg"
@@ -144,8 +144,8 @@ export default function CardDetailPage({ params }: { params: Promise<{ id: strin
 
         {/* Card info */}
         <div>
-          <h1 className="font-[var(--font-display)] text-[36px] font-bold tracking-tight">{name}</h1>
-          <p className="text-lg text-[var(--color-muted)] mt-1 mb-4">
+          <h1 className="font-[var(--font-display)] text-[28px] max-sm:text-[22px] font-bold tracking-tight break-words">{name}</h1>
+          <p className="text-lg max-sm:text-sm text-[var(--color-muted)] mt-1 mb-4 break-words">
             {flag && <span className="mr-1">{flag}</span>}{type === "jugador" ? `${pos} · ${teamName}${num > 0 ? ` · #${num}` : ""}` : `${pos} · ${teamName}`}
           </p>
 
