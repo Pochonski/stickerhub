@@ -28,6 +28,7 @@ interface GameContextValue {
   refreshCollection: () => Promise<void>;
   addCoins: (amount: number) => Promise<void>;
   spendCoins: (amount: number) => Promise<boolean>;
+  grantPacks: (count: number) => Promise<void>;
   completedTeams: string[];
   checkTeamCompletions: () => Promise<string[]>;
   usingSupabase: boolean;
@@ -314,6 +315,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         refreshCollection: supabaseCollection.refresh,
         addCoins: supabasePacks.addCoins,
         spendCoins: supabasePacks.spendCoins,
+        grantPacks: supabasePacks.grantPacks,
         completedTeams,
         checkTeamCompletions,
         usingSupabase,

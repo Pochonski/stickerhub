@@ -190,5 +190,19 @@ export function usePacks() {
     }
   }, [user]);
 
-  return { quantity, totalOpened, coins, loading, decrementPack, decrementPacks, spendCoins, addCoins, buyPacks, refresh: fetchPacks };
+  const grantPacks = useCallback(async (count: number) => {
+    if (!user || count <= 0) return;
+    const qty = quantityRef.current;
+    const newQty = qty + count;
+    setQuantity(newQty);
+    try {
+      const supabase = getSupabase();
+      await supabase.from("user_packs").upsert(
+        { user_id: user.id, quantity: newQty, updated_at: new Date().toISOString() },
+        { onConflict: "user_id" }
+      );
+    } catch { setQuantity(qty); }
+  }, [user]);
+
+  return { quantity, totalOpened, coins, loading, decrementPack, decrementPacks, spendCoins, addCoins, buyPacks, grantPacks, refresh: fetchPacks };
 }
