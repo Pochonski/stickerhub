@@ -267,7 +267,7 @@ export default function InboxPage() {
           teamName={teamCelebration.teamName}
           teamFlag={teamCelebration.teamFlag}
           teamColor={teamCelebration.teamColor}
-          reward={500}
+          reward={2000}
           totalCompleted={completedTeams.length}
           onClose={() => setTeamCelebration(null)}
         />

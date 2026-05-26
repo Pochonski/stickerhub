@@ -10,7 +10,7 @@ import { useGame } from "@/context/GameContext";
 import { getTeam } from "@/data/teams";
 import { PLAYERS } from "@/data/players";
 import type { CardType } from "@/data/types";
-import { PackageOpen, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 const SPECIAL_PLAYERS = new Set(["arg4", "por5", "fra1", "bra2", "cro2", "eng1", "esp1", "mar1", "esp3", "eng2", "col1", "uru1", "ned1", "ger1"]);
 
@@ -142,14 +142,6 @@ export default function TeamAlbumPage({ params }: { params: Promise<{ team: stri
           </div>
         )}
       </div>
-
-      {/* CTA */}
-      <Link
-        href={`/pack-opener?team=${team}&type=${type}`}
-        className="inline-flex items-center gap-2 px-5 max-sm:px-3 py-2.5 rounded-full bg-[var(--color-accent)] text-white text-sm max-sm:text-xs font-semibold no-underline transition-colors hover:bg-[var(--color-accent-hover)] max-w-full"
-      >
-        <PackageOpen size={16} strokeWidth={2} /> <span className="max-sm:max-w-[160px] max-sm:truncate">Abrir sobre de {teamData.name}</span>
-      </Link>
     </div>
   );
 

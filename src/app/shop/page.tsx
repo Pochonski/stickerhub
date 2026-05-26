@@ -168,7 +168,7 @@ export default function ShopPage() {
           <div className="bg-[var(--color-bg)]/70 rounded-xl p-4">
             <h3 className="font-semibold mb-2"><Trophy size={14} className="inline mr-1" /> Completar equipos</h3>
             <p className="text-xs text-[var(--color-muted)] mb-3">Al completar todas las cartas de una selección:</p>
-            <span className="font-[var(--font-display)] text-lg font-bold text-[var(--color-success)]"><Coins size={14} className="inline mr-1" />+500</span>
+            <span className="font-[var(--font-display)] text-lg font-bold text-[var(--color-success)]"><Coins size={14} className="inline mr-1" />+2,000</span>
           </div>
         </div>
       </div>
@@ -193,7 +193,7 @@ export default function ShopPage() {
           teamName={teamCelebration.teamName}
           teamFlag={teamCelebration.teamFlag}
           teamColor={teamCelebration.teamColor}
-          reward={500}
+          reward={2000}
           totalCompleted={completedTeams.length}
           onClose={() => setTeamCelebration(null)}
         />

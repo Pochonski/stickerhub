@@ -74,7 +74,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const updated = [...prev, ...newlyCompleted];
       setCompletedTeams(updated);
       for (const _ of newlyCompleted) {
-        await supabasePacks.addCoins(500);
+        await supabasePacks.addCoins(2000);
       }
     }
     return newlyCompleted;
