@@ -74,7 +74,7 @@ function ProfileContent() {
         </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-8 mb-12 max-sm:grid-cols-1">
+      <div className="grid grid-cols-1 gap-8 mb-12">
         {/* Album summary */}
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-6 shadow-sm">
           <h3 className="text-[17px] font-bold font-[var(--font-display)] mb-4">Resumen</h3>
@@ -117,7 +117,7 @@ function ProfileContent() {
         </div>
 
         {/* Insignias */}
-        <div className="col-span-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-6 shadow-sm">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-6 shadow-sm">
           <h3 className="text-[17px] font-bold font-[var(--font-display)] mb-4">Insignias</h3>
           <div className="flex gap-3 flex-wrap">
             {insignias.map((ins) => (
@@ -137,7 +137,7 @@ function ProfileContent() {
         </div>
 
         {/* Trade history */}
-        <div className="col-span-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-6 shadow-sm">
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-6 shadow-sm">
           <h3 className="text-[17px] font-bold font-[var(--font-display)] mb-4">Historial de intercambios</h3>
           {state.trades.length === 0 ? (
             <p className="text-sm text-[var(--color-muted)]">Aún no has realizado intercambios.</p>
