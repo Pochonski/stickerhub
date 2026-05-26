@@ -58,9 +58,9 @@ function ProfileContent() {
             initials
           )}
         </div>
-        <div className="max-sm:flex max-sm:flex-col max-sm:items-center">
-          <h1 className="font-[var(--font-display)] text-[26px] font-bold">{displayName}</h1>
-          <p className="text-sm text-[var(--color-muted)] mt-0.5">{userEmail}</p>
+        <div className="max-sm:flex max-sm:flex-col max-sm:items-center max-sm:w-full">
+          <h1 className="font-[var(--font-display)] text-[26px] max-sm:text-[22px] font-bold break-words">{displayName}</h1>
+          <p className="text-sm max-sm:text-xs text-[var(--color-muted)] mt-0.5 break-all">{userEmail}</p>
           <div className="flex gap-3 mt-2 max-sm:justify-center">
             <Pill variant="accent">{badgeTier}</Pill>
             {user && <Pill variant="field">Online</Pill>}
@@ -79,12 +79,12 @@ function ProfileContent() {
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-6 shadow-sm">
           <h3 className="text-[17px] font-bold font-[var(--font-display)] mb-4">Resumen</h3>
           <div className="flex flex-col gap-3">
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-sm max-sm:text-xs max-sm:flex-col max-sm:gap-0.5">
               <span className="text-[var(--color-muted)]">Progreso total</span>
               <span className="font-semibold">{pct}% ({totalCollected} / {totalAll})</span>
             </div>
             <ProgressBar pct={pct} />
-            <div className="flex justify-between text-sm">
+            <div className="flex justify-between text-sm max-sm:text-xs">
               <span className="text-[var(--color-muted)]">Jugadores</span>
               <span className="font-semibold">{playerCollected} / {ALL_PLAYERS.length}</span>
             </div>
@@ -124,7 +124,7 @@ function ProfileContent() {
               <div
                 key={ins.id}
                 title={ins.title}
-                className={`w-[72px] h-[72px] rounded-full grid place-items-center border-2 transition-colors ${
+                className={`w-[72px] max-sm:w-[56px] h-[72px] max-sm:h-[56px] rounded-full grid place-items-center border-2 transition-colors ${
                   ins.earned
                     ? "border-[var(--color-accent)] bg-[var(--color-accent-soft)] text-[var(--color-accent)]"
                     : "border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-muted)] opacity-30"
@@ -144,21 +144,21 @@ function ProfileContent() {
           ) : (
             <div className="flex flex-col gap-3">
               {state.trades.map((trade) => (
-                <div key={trade.id} className="flex items-center gap-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-3.5 px-[18px]">
+                <div key={trade.id} className="flex items-center gap-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] p-3.5 px-[18px] max-sm:flex-col max-sm:items-start max-sm:gap-2">
                   <div className={`w-10 h-10 rounded-full grid place-items-center shrink-0 ${trade.direction === "sent" ? "bg-[var(--color-field-soft)] text-[var(--color-field)]" : "bg-[var(--color-accent-soft)] text-[var(--color-accent)]"}`}>
                     {trade.direction === "sent" ? <Send size={18} strokeWidth={2} /> : <Inbox size={18} strokeWidth={2} />}
                   </div>
-                  <div className="flex-1">
-                    <div className="font-semibold text-sm">
+                  <div className="flex-1 min-w-0 max-sm:w-full">
+                    <div className="font-semibold text-sm break-words">
                       {trade.direction === "sent"
                         ? `Entregaste ${trade.offeredCardName} a ${trade.fromUser}`
                         : `Recibiste ${trade.cardName} de ${trade.fromUser}`}
                     </div>
-                    <div className="text-xs text-[var(--color-muted)] mt-0.5">
+                    <div className="text-xs text-[var(--color-muted)] mt-0.5 break-words">
                       {new Date(trade.date).toLocaleDateString("es-CR")} · {trade.direction === "sent" ? `Recibiste: ${trade.cardName}` : `Entregaste: ${trade.offeredCardName}`}
                     </div>
                   </div>
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${
                     trade.status === "completed" ? "bg-[oklch(94%_0.06_156)] text-[var(--color-success)]" :
                     trade.status === "cancelled" ? "bg-[oklch(94%_0.05_22)] text-[var(--color-danger)]" :
                     "bg-[oklch(95%_0.06_72)] text-[var(--color-warning)]"
