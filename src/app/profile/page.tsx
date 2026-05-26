@@ -94,21 +94,21 @@ function ProfileContent() {
         {/* Reputation */}
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-lg)] p-6 shadow-sm">
           <h3 className="text-[17px] font-bold font-[var(--font-display)] mb-4">Reputación de intercambio</h3>
-          <div className="flex items-center gap-5">
-            <div className="text-center">
-              <div className="font-[var(--font-display)] text-[48px] font-bold text-[var(--color-accent)]">{rep}%</div>
+          <div className="flex items-center gap-5 max-sm:flex-col max-sm:items-center max-sm:gap-3">
+            <div className="text-center shrink-0">
+              <div className="font-[var(--font-display)] text-[48px] max-sm:text-[36px] font-bold text-[var(--color-accent)]">{rep}%</div>
               <div className="text-xs text-[var(--color-muted)]">Reputación</div>
             </div>
-            <div className="flex-1 flex flex-col gap-2.5">
-              <div className="flex justify-between text-sm">
-                <span className="text-[var(--color-muted)]">Intercambios completados</span>
+            <div className="flex-1 max-sm:w-full flex flex-col gap-2.5">
+              <div className="flex justify-between text-sm max-sm:text-xs">
+                <span className="text-[var(--color-muted)]">Completados</span>
                 <span className="font-semibold">{completedTrades}</span>
               </div>
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-sm max-sm:text-xs">
                 <span className="text-[var(--color-muted)]">En curso</span>
                 <span className="font-semibold">{pendingTrades}</span>
               </div>
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-sm max-sm:text-xs">
                 <span className="text-[var(--color-muted)]">Miembro desde</span>
                 <span className="font-semibold">{createdAt}</span>
               </div>
