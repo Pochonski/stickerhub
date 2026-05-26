@@ -58,12 +58,14 @@ export default function ShopPage() {
       }
       cards.forEach((c) => collectCard(c.id));
       await refreshCollection();
-      checkTeamCompletions().then(teams => {
-        if (teams.length > 0) {
-          const t = TEAMS[teams[0]];
-          setTeamCelebration({ teamId: teams[0], teamName: t.name, teamFlag: t.flag, teamColor: t.color });
-        }
-      });
+      setTimeout(() => {
+        checkTeamCompletions().then(teams => {
+          if (teams.length > 0) {
+            const t = TEAMS[teams[0]];
+            setTeamCelebration({ teamId: teams[0], teamName: t.name, teamFlag: t.flag, teamColor: t.color });
+          }
+        });
+      }, 0);
       setTeamPackTeam(team);
       setTeamPackResult(cards);
       const newCount = cards.filter((c) => c.isNew).length;

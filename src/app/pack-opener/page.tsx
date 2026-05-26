@@ -54,12 +54,14 @@ function PackOpenerContent() {
     // If opening multiple packs, skip flip animation and collect immediately
     if (actualCount > 1) {
       allCards.forEach((card) => collectCard(card.id));
-      refreshCollection().then(() => checkTeamCompletions().then(teams => {
-        if (teams.length > 0) {
-          const t = TEAMS[teams[0]];
-          setTeamCelebration({ teamId: teams[0], teamName: t.name, teamFlag: t.flag, teamColor: t.color });
-        }
-      }));
+      setTimeout(() => {
+        refreshCollection().then(() => checkTeamCompletions().then(teams => {
+          if (teams.length > 0) {
+            const t = TEAMS[teams[0]];
+            setTeamCelebration({ teamId: teams[0], teamName: t.name, teamFlag: t.flag, teamColor: t.color });
+          }
+        }));
+      }, 0);
       const newCards = allCards.filter((c) => c.isNew).length;
       const dupeCards = allCards.filter((c) => !c.isNew).length;
       addToast(`¡${actualCount} sobres abiertos! ${newCards} nuevas, ${dupeCards} repetidas`, "success");
@@ -75,12 +77,14 @@ function PackOpenerContent() {
         const next = prev + 1;
         if (next >= currentPack.length) {
           currentPack.forEach((card) => collectCard(card.id));
-          refreshCollection().then(() => checkTeamCompletions().then(teams => {
-            if (teams.length > 0) {
-              const t = TEAMS[teams[0]];
-              setTeamCelebration({ teamId: teams[0], teamName: t.name, teamFlag: t.flag, teamColor: t.color });
-            }
-          }));
+          setTimeout(() => {
+            refreshCollection().then(() => checkTeamCompletions().then(teams => {
+              if (teams.length > 0) {
+                const t = TEAMS[teams[0]];
+                setTeamCelebration({ teamId: teams[0], teamName: t.name, teamFlag: t.flag, teamColor: t.color });
+              }
+            }));
+          }, 0);
           const newCards = currentPack.filter((c) => c.isNew).length;
           const dupeCards = currentPack.filter((c) => !c.isNew).length;
           addToast(`¡Sobre abierto! ${newCards} nuevas, ${dupeCards} repetidas`, "success");
@@ -89,7 +93,7 @@ function PackOpenerContent() {
         return next;
       });
     },
-    [currentPack, collectCard, refreshCollection, addToast]
+    [currentPack, collectCard, refreshCollection, checkTeamCompletions, addToast]
   );
 
   const handleOpenAnother = useCallback(() => {
