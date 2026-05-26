@@ -156,6 +156,7 @@ export default function ShopPage() {
             <h3 className="font-semibold mb-2"><Trash2 size={14} className="inline mr-1" /> Descartar repetidas</h3>
             <table className="w-full text-xs text-[var(--color-muted)]">
               <tbody>
+                <tr><td className="py-1">Cartas Estrella</td><td className="text-right font-bold text-[var(--color-accent)]"><Coins size={12} className="inline" /> 1,300</td></tr>
                 <tr><td className="py-1">Rating 90+</td><td className="text-right font-bold text-[var(--color-accent)]"><Coins size={12} className="inline" /> 900</td></tr>
                 <tr><td className="py-1">Rating 85-89</td><td className="text-right font-bold text-[var(--color-accent)]"><Coins size={12} className="inline" /> 700</td></tr>
                 <tr><td className="py-1">Rating 80-84</td><td className="text-right font-bold text-[var(--color-accent)]"><Coins size={12} className="inline" /> 500</td></tr>
@@ -166,7 +167,7 @@ export default function ShopPage() {
           </div>
           <div className="bg-[var(--color-bg)]/70 rounded-xl p-4">
             <h3 className="font-semibold mb-2"><Trophy size={14} className="inline mr-1" /> Completar equipos</h3>
-            <p className="text-xs text-[var(--color-muted)] mb-3">Al completar los 20 stickers de una selección:</p>
+            <p className="text-xs text-[var(--color-muted)] mb-3">Al completar todas las cartas de una selección:</p>
             <span className="font-[var(--font-display)] text-lg font-bold text-[var(--color-success)]"><Coins size={14} className="inline mr-1" />+500</span>
           </div>
         </div>
