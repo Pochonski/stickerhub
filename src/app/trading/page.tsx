@@ -109,17 +109,12 @@ export default function TradingPage() {
     }
     const info = getDupeInfo(publishCard.id);
     const sb = getSupabase();
-    // Try insert first, if conflict (inactive listing exists), reactivate it
-    let { error } = await sb.from("trade_listings").insert({
+    // Delete any previous listing (active or inactive) to avoid unique conflict
+    await sb.from("trade_listings").delete().eq("user_id", user.id).eq("card_id", publishCard.id);
+    const { error } = await sb.from("trade_listings").insert({
       user_id: user.id, card_id: publishCard.id, card_name: publishCard.name,
       team_name: info?.teamName || "", looking_for: lookingFor || null,
     });
-    if (error) {
-      const { error: updErr } = await sb.from("trade_listings").update({
-        is_active: true, looking_for: lookingFor || null, updated_at: new Date().toISOString(),
-      }).eq("user_id", user.id).eq("card_id", publishCard.id);
-      error = updErr;
-    }
     if (!error) {
       addToast(`¡${publishCard.name} publicada!`, "success");
       setPublishModal(false); setLookingFor(""); setPublishCard(null);
