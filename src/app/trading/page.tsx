@@ -109,17 +109,19 @@ export default function TradingPage() {
     }
     const info = getDupeInfo(publishCard.id);
     const sb = getSupabase();
-    // Check if listing already exists (maybe inactive)
-    const { data: existing } = await sb.from("trade_listings")
-      .select("id").eq("user_id", user.id).eq("card_id", publishCard.id).maybeSingle();
-    const { error } = existing
-      ? await sb.from("trade_listings").update({
-          is_active: true, looking_for: lookingFor || null, updated_at: new Date().toISOString(),
-        }).eq("id", existing.id)
-      : await sb.from("trade_listings").insert({
-          user_id: user.id, card_id: publishCard.id, card_name: publishCard.name,
-          team_name: info?.teamName || "", looking_for: lookingFor || null,
-        });
+    // Try insert first, if conflict (inactive listing exists), reactivate it
+    const { error: insertErr } = await sb.from("trade_listings").insert({
+      user_id: user.id, card_id: publishCard.id, card_name: publishCard.name,
+      team_name: info?.teamName || "", looking_for: lookingFor || null,
+    });
+    let error = insertErr;
+    if (insertErr && insertErr.code === "23505") {
+      // Duplicate key — listing exists but is inactive, reactivate it
+      const { error: updErr } = await sb.from("trade_listings").update({
+        is_active: true, looking_for: lookingFor || null, updated_at: new Date().toISOString(),
+      }).eq("user_id", user.id).eq("card_id", publishCard.id);
+      error = updErr;
+    }
     if (!error) {
       addToast(`¡${publishCard.name} publicada!`, "success");
       setPublishModal(false); setLookingFor(""); setPublishCard(null);
