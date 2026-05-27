@@ -106,7 +106,10 @@ export function FlipbookViewer() {
     return () => clearTimeout(t);
   }, [pastePhase, pasteIndex, pasteCards]);
 
-  const dismissPaste = () => { setPastePhase("done"); };
+  const dismissPaste = () => {
+    if (pastePhase === "show") { setPastePhase("done"); return; }
+    setPastePhase("idle"); setPasteCards([]);
+  };
 
   const currentTeamIndex = currentPage - 1; // page 0 = cover
   const currentTeam = currentTeamIndex >= 0 && currentTeamIndex < TEAM_LIST.length ? TEAM_LIST[currentTeamIndex] : null;
