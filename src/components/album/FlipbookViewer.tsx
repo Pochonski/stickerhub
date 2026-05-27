@@ -6,9 +6,9 @@ import HTMLFlipBook from "react-pageflip";
 import { StickerSlot } from "@/components/album/StickerSlot";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { useGame } from "@/context/GameContext";
-import { TEAM_LIST } from "@/data/teams";
+import { TEAM_LIST, TEAMS } from "@/data/teams";
 import { PLAYERS } from "@/data/players";
-import { ChevronLeft, ChevronRight, PackageOpen, ArrowLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight, PackageOpen, ArrowLeft, Check } from "lucide-react";
 import Link from "next/link";
 
 const SPECIAL_PLAYERS = new Set(["arg4", "por5", "fra1", "bra2", "cro2", "eng1", "esp1", "mar1", "esp3", "eng2", "col1", "uru1", "ned1", "ger1"]);
@@ -57,10 +57,62 @@ export function FlipbookViewer() {
     return () => window.removeEventListener("keydown", onKey);
   }, [goNext, goPrev]);
 
+  // Paste animation state
+  const [pasteCards, setPasteCards] = useState<string[]>([]);
+  const [pasteIndex, setPasteIndex] = useState(0);
+  const [pastePhase, setPastePhase] = useState<"idle" | "show" | "done">("idle");
+
+  useEffect(() => {
+    if (!isReady) return;
+    const raw = sessionStorage.getItem("stickerhub-paste-cards");
+    if (!raw) return;
+    sessionStorage.removeItem("stickerhub-paste-cards");
+    try {
+      const ids: string[] = JSON.parse(raw);
+      if (ids.length === 0) return;
+      setPasteCards(ids);
+      setPasteIndex(0);
+      setPastePhase("show");
+      // Flip to first card's team page
+      const firstCard = PLAYERS[Object.keys(PLAYERS).find(k => PLAYERS[k].some(p => p.id === ids[0])) ?? ""]?.find(p => p.id === ids[0]);
+      if (firstCard) {
+        const teamIdx = TEAM_LIST.findIndex(t => t.id === firstCard.teamId);
+        if (teamIdx >= 0) {
+          setTimeout(() => flipRef.current?.pageFlip()?.flip(teamIdx * 2 + 2), 400);
+        }
+      }
+    } catch {}
+  }, [isReady]);
+
+  // Auto-advance paste animation
+  useEffect(() => {
+    if (pastePhase !== "show" || pasteCards.length === 0) return;
+    const t = setTimeout(() => {
+      if (pasteIndex >= pasteCards.length - 1) {
+        setPastePhase("done");
+      } else {
+        const nextIdx = pasteIndex + 1;
+        setPasteIndex(nextIdx);
+        // Flip to next card's team page
+        const nextCard = PLAYERS[Object.keys(PLAYERS).find(k => PLAYERS[k].some(p => p.id === pasteCards[nextIdx])) ?? ""]?.find(p => p.id === pasteCards[nextIdx]);
+        if (nextCard) {
+          const teamIdx = TEAM_LIST.findIndex(t => t.id === nextCard.teamId);
+          if (teamIdx >= 0) {
+            setTimeout(() => flipRef.current?.pageFlip()?.flip(teamIdx * 2 + 2), 300);
+          }
+        }
+      }
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [pastePhase, pasteIndex, pasteCards]);
+
+  const dismissPaste = () => { setPastePhase("done"); };
+
   const currentTeamIndex = currentPage - 1; // page 0 = cover
   const currentTeam = currentTeamIndex >= 0 && currentTeamIndex < TEAM_LIST.length ? TEAM_LIST[currentTeamIndex] : null;
 
   return (
+    <>
     <div className="flex flex-col items-center gap-4">
       {/* Navigation bar */}
       <div className="flex items-center justify-between w-full max-w-[800px] gap-2 md:gap-4 px-2 md:px-4 flex-wrap">
@@ -245,5 +297,46 @@ export function FlipbookViewer() {
         </div>
       </div>
     </div>
-  );
+    {pastePhase !== "idle" && (
+      <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm" onClick={dismissPaste}>
+        {pastePhase === "show" && pasteCards[pasteIndex] && (() => {
+          const cardId = pasteCards[pasteIndex];
+          const player = PLAYERS[Object.keys(PLAYERS).find(k => PLAYERS[k].some(p => p.id === cardId)) ?? ""]?.find(p => p.id === cardId);
+          const team = player ? TEAMS[player.teamId] : null;
+          if (!player) return null;
+          return (
+            <div className="flex flex-col items-center gap-3 animate-sticker-paste" onClick={(e) => e.stopPropagation()}>
+              <div className="w-[140px] aspect-[3/4] rounded-xl overflow-hidden border-2 border-white/20 shadow-2xl" style={{ background: `url('/card-bg.png') center/cover, ${team ? `linear-gradient(180deg, ${team.color} 0%, ${team.colorDark} 50%, white 50%, #f8f8f8 100%)` : 'oklch(72% 0.1 250)'}`, backgroundBlendMode: "overlay" }}>
+                <div className="w-full h-[55%] flex items-end justify-center">
+                  {player.faceUrl ? (
+                    <img src={player.faceUrl} alt={player.name} className="w-[55%] object-contain" referrerPolicy="no-referrer" />
+                  ) : (
+                    <span className="text-2xl font-extrabold text-white/20 font-[var(--font-display)]">{player.num}</span>
+                  )}
+                </div>
+                <div className="bg-white/95 p-2 text-center flex-1 flex flex-col justify-center">
+                  {team?.flag && <span className="text-base block leading-none mb-0.5">{team.flag}</span>}
+                  <span className="text-[10px] font-bold leading-tight">{player.name}</span>
+                  <span className="text-[7px] text-[var(--color-muted)]">{player.pos} · #{player.num}</span>
+                </div>
+              </div>
+              <div className="animate-paste-badge">
+                <span className="bg-[var(--color-success)] text-white text-sm font-extrabold px-4 py-1.5 rounded-full shadow-lg">¡PEGADA!</span>
+              </div>
+              <p className="text-white/40 text-xs">{pasteIndex + 1} de {pasteCards.length}</p>
+            </div>
+          );
+        })()}
+        {pastePhase === "done" && (
+          <div className="flex flex-col items-center gap-3" onClick={(e) => e.stopPropagation()}>
+            <Check size={40} className="text-[var(--color-success)]" />
+            <p className="text-white text-lg font-semibold">¡{pasteCards.length} {pasteCards.length === 1 ? "pegada" : "pegadas"}!</p>
+            <p className="text-white/30 text-xs">Tocá para cerrar</p>
+          </div>
+        )}
+        <p className="absolute bottom-4 text-[10px] text-white/15">{pastePhase === "show" ? "Tocá para saltar" : ""}</p>
+      </div>
+    )}
+  </>
+);
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState, useCallback } from "react";
 import { AppShell } from "@/components/layout/AppShell";
@@ -17,12 +17,12 @@ import { ALL_PLAYERS } from "@/data/players";
 import { coinValue } from "@/hooks/useSupabasePacks";
 import { TeamCompleteCelebration } from "@/components/celebration/TeamCompleteCelebration";
 import { ProgressBar } from "@/components/ui/ProgressBar";
-import { StickerPasteAnimation } from "@/components/pack/StickerPasteAnimation";
 
 const QUANTITY_OPTIONS = [1, 2, 3, 5, 10, 15, 20, 25, 50];
 
 function PackOpenerContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const teamParam = searchParams.get("team") || "argentina";
   const { state, openPacks, collectCard, refreshCollection, checkTeamCompletions, completedTeams, coins } = useGame();
   const { addToast } = useToast();
@@ -31,12 +31,11 @@ function PackOpenerContent() {
   const totalAll = ALL_PLAYERS.length;
   const pct = totalAll > 0 ? Math.round((totalCollected / totalAll) * 100) : 0;
 
-  const [stage, setStage] = useState<"idle" | "torn" | "reveal" | "pasting" | "summary">("idle");
+  const [stage, setStage] = useState<"idle" | "torn" | "reveal" | "summary">("idle");
   const [currentPack, setCurrentPack] = useState<PackCard[]>([]);
   const [flipped, setFlipped] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [openedCount, setOpenedCount] = useState(0);
-  const [newCardsOnly, setNewCardsOnly] = useState<PackCard[]>([]);
   const [teamCelebration, setTeamCelebration] = useState<{ teamId: string; teamName: string; teamFlag: string; teamColor: string } | null>(null);
 
   const team = TEAMS[teamParam] || TEAMS.argentina;
@@ -72,8 +71,9 @@ function PackOpenerContent() {
       const dupeCards = allCards.filter((c) => !c.isNew).length;
       addToast(`¡${actualCount} sobres abiertos! ${newCards.length} nuevas, ${dupeCards} repetidas`, "success");
       if (newCards.length > 0) {
-        setNewCardsOnly(newCards);
-        setStage("pasting");
+        sessionStorage.setItem("stickerhub-paste-cards", JSON.stringify(newCards.map(c => c.id)));
+        setStage("summary");
+        setTimeout(() => router.push("/album/flipbook"), 1200);
       } else {
         setStage("summary");
       }
@@ -102,10 +102,10 @@ function PackOpenerContent() {
           const dupeCards = currentPack.filter((c) => !c.isNew).length;
           addToast(`¡Sobre abierto! ${newCards.length} nuevas, ${dupeCards} repetidas`, "success");
           if (newCards.length > 0) {
-            setNewCardsOnly(newCards);
-            setStage("pasting");
+            sessionStorage.setItem("stickerhub-paste-cards", JSON.stringify(newCards.map(c => c.id)));
+            setTimeout(() => { setStage("summary"); setTimeout(() => router.push("/album/flipbook"), 1200); }, 700);
           } else {
-            setStage("summary");
+            setTimeout(() => setStage("summary"), 700);
           }
         }, 0);
       }
@@ -196,7 +196,6 @@ function PackOpenerContent() {
               {stage === "idle" && `Abrir sobres${teamParam !== "argentina" ? ` · ${team.name}` : ""}`}
               {stage === "torn" && "Abriendo..."}
               {stage === "reveal" && "Revelá tus stickers"}
-              {stage === "pasting" && "Pegando stickers en tu álbum"}
               {stage === "summary" && `Resultado de ${openedCount} ${openedCount === 1 ? "sobre" : "sobres"}`}
             </h1>
           </div>
@@ -204,7 +203,6 @@ function PackOpenerContent() {
             {stage === "idle" && `Tenés ${state.packs} sobre${state.packs !== 1 ? "s" : ""}. Tocá para rasgar.${state.packs > 1 ? ` Elegí cuántos abrir.` : ""}`}
             {stage === "torn" && "Rasgando el sobre..."}
             {stage === "reveal" && `Tocá cada sticker para voltearlo. ${flipped} de ${currentPack.length} revelados.`}
-            {stage === "pasting" && "Cada sticker nuevo se está pegando en tu colección."}
             {stage === "summary" && "¡Sobres abiertos! Mirá lo que te tocó."}
           </p>
         </div>
@@ -288,15 +286,6 @@ function PackOpenerContent() {
               ))}
             </div>
           </>
-        )}
-
-        {/* Stage: Pasting animation */}
-        {stage === "pasting" && (
-          <StickerPasteAnimation
-            show={true}
-            cards={newCardsOnly}
-            onComplete={() => setStage("summary")}
-          />
         )}
 
         {stage === "summary" && currentPack.length > 0 && (() => {
