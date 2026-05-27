@@ -57,16 +57,13 @@ export async function POST(req: NextRequest) {
   }
 
   const { data, error } = await supabase
-    .from("trade_listings")
-    .insert({
-      user_id: user.id,
-      card_id: cardId,
-      card_name: cardName,
-      team_name: teamName,
-      looking_for: lookingFor,
-    })
-    .select()
-    .single();
+    .rpc("publish_listing", {
+      p_user_id: user.id,
+      p_card_id: cardId,
+      p_card_name: cardName,
+      p_team_name: teamName || "",
+      p_looking_for: lookingFor || null,
+    });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data, { status: 201 });
