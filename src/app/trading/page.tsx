@@ -335,41 +335,43 @@ export default function TradingPage() {
         ) : (
           <div className="grid grid-cols-4 gap-3 max-lg:grid-cols-3 max-sm:grid-cols-2">
             {filteredDupes.map((d) => (
-              <div key={d.id} className="group relative bg-[var(--color-bg)] rounded-lg overflow-hidden border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 transition-all">
-                <div className="aspect-[3/4] relative">
-                  <div className="w-full h-[58%] flex items-center justify-center relative" style={{ background: d.teamColor ? `linear-gradient(180deg, ${d.teamColor} 0%, ${d.teamColorDark} 100%), url('/card-bg.png') center/cover` : "oklch(72% 0.1 250)", backgroundBlendMode: d.teamColor ? "overlay" : undefined }}>
-                    {d.faceUrl ? (
-                      <img src={d.faceUrl} alt={d.name} className="w-[60%] h-[70%] object-contain" referrerPolicy="no-referrer" />
-                    ) : (
-                      <span className="text-lg font-extrabold text-white/20">{d.name.slice(0, 2).toUpperCase()}</span>
-                    )}
-                    {d.overall && (
-                      <span className="absolute top-1.5 right-1.5 bg-[var(--color-accent)] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm leading-none">{d.overall}</span>
-                    )}
+              <div key={d.id}>
+                <div className="group relative bg-[var(--color-bg)] rounded-lg overflow-hidden border border-[var(--color-border)] hover:border-[var(--color-primary)]/40 transition-all">
+                  <div className="aspect-[3/4] relative">
+                    <div className="w-full h-[58%] flex items-center justify-center relative" style={{ background: d.teamColor ? `linear-gradient(180deg, ${d.teamColor} 0%, ${d.teamColorDark} 100%), url('/card-bg.png') center/cover` : "oklch(72% 0.1 250)", backgroundBlendMode: d.teamColor ? "overlay" : undefined }}>
+                      {d.faceUrl ? (
+                        <img src={d.faceUrl} alt={d.name} className="w-[60%] h-[70%] object-contain" referrerPolicy="no-referrer" />
+                      ) : (
+                        <span className="text-lg font-extrabold text-white/20">{d.name.slice(0, 2).toUpperCase()}</span>
+                      )}
+                      {d.overall && (
+                        <span className="absolute top-1.5 right-1.5 bg-[var(--color-accent)] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm leading-none">{d.overall}</span>
+                      )}
+                    </div>
+                    <div className="h-[42%] bg-white/90 p-2 flex flex-col justify-center text-center">
+                      {d.flag && <span className="text-xs leading-none mb-0.5">{d.flag}</span>}
+                      <span className="text-[12px] font-bold leading-tight">{d.name}</span>
+                      {d.teamName && <span className="text-[10px] text-[var(--color-muted)] mt-0.5 truncate">{d.teamName}{d.num ? ` · #${d.num}` : ""}</span>}
+                    </div>
                   </div>
-                  <div className="h-[42%] bg-white/90 p-2 flex flex-col justify-center text-center">
-                    {d.flag && <span className="text-xs leading-none mb-0.5">{d.flag}</span>}
-                    <span className="text-[12px] font-bold leading-tight">{d.name}</span>
-                    {d.teamName && <span className="text-[10px] text-[var(--color-muted)] mt-0.5 truncate">{d.teamName}{d.num ? ` · #${d.num}` : ""}</span>}
-                  </div>
-                </div>
-                {!isCardAvailable(d.id) ? (
-                  <div className="absolute top-1.5 right-1.5 bg-[var(--color-warning)]/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-sm">En uso</div>
-                ) : (
-                  <>
+                  {!isCardAvailable(d.id) ? (
+                    <div className="absolute top-1.5 right-1.5 bg-[var(--color-warning)]/90 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-sm">En uso</div>
+                  ) : (
                     <button
                       onClick={() => { setPublishCard({ id: d.id, name: d.name }); setLookingFor(""); setPublishModal(true); }}
                       className="hidden lg:block absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center bg-black/40"
                     >
                       <span className="px-4 py-2 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold">Publicar</span>
                     </button>
-                    <button
-                      onClick={() => { setPublishCard({ id: d.id, name: d.name }); setLookingFor(""); setPublishModal(true); }}
-                      className="lg:hidden absolute bottom-0 left-0 right-0 py-1.5 bg-[var(--color-primary)] text-white text-[11px] font-semibold text-center"
-                    >
-                      Publicar
-                    </button>
-                  </>
+                  )}
+                </div>
+                {isCardAvailable(d.id) && (
+                  <button
+                    onClick={() => { setPublishCard({ id: d.id, name: d.name }); setLookingFor(""); setPublishModal(true); }}
+                    className="lg:hidden w-full mt-1 py-2 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-xs font-semibold text-center cursor-pointer border border-[var(--color-primary)]/20"
+                  >
+                    Publicar
+                  </button>
                 )}
               </div>
             ))}
