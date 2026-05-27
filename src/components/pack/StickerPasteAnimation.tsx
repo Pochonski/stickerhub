@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 import type { PackCard } from "@/lib/pack-generator";
 import { TEAMS } from "@/data/teams";
 import { PLAYERS } from "@/data/players";
+import { StickerSlot } from "@/components/album/StickerSlot";
 
 interface Props {
   show: boolean;
@@ -12,54 +13,63 @@ interface Props {
   onComplete: () => void;
 }
 
-function getAlbumSlots(teamId: string): { num: number; id: string }[] {
+const SPECIAL_PLAYERS = new Set(["arg2", "arg4", "bra2", "bra3", "cro2", "egy1", "eng1", "eng2", "eng3", "esp1", "esp2", "esp3", "fra1", "fra2", "ger1", "ger2", "ger3", "col1", "mar1", "ned1", "nor1", "por1", "por5", "uru1"]);
+
+function getAlbumSlots(teamId: string) {
   const players = PLAYERS[teamId] ?? [];
   return players
     .filter((p) => p.num > 0)
     .sort((a, b) => a.num - b.num)
-    .map((p) => ({ num: p.num, id: p.id }));
+    .map((p, i) => ({
+      id: p.id,
+      name: p.name,
+      num: p.num,
+      pos: p.pos,
+      faceUrl: p.faceUrl,
+      albumNumber: i + 1,
+      isSpecial: SPECIAL_PLAYERS.has(p.id),
+    }));
 }
 
 export function StickerPasteAnimation({ show, cards, onComplete }: Props) {
   const [visibleIndex, setVisibleIndex] = useState(0);
-  const [phase, setPhase] = useState<"fly-in" | "landed">("fly-in");
+  const [phase, setPhase] = useState<"fly-in" | "land">("fly-in");
   const [exiting, setExiting] = useState(false);
   const [pastedIds, setPastedIds] = useState<Set<string>>(new Set());
-  const [showAlbum, setShowAlbum] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const currentIndex = Math.min(visibleIndex, cards.length - 1);
   const currentCard = cards[currentIndex];
-  const isLastCard = currentIndex >= cards.length - 1;
-  const allDone = visibleIndex >= cards.length && phase === "landed";
+  const allDone = pastedIds.size >= cards.length && phase === "land";
 
   useEffect(() => {
     if (!show || cards.length === 0) { onComplete(); return; }
     setVisibleIndex(0);
     setPastedIds(new Set());
     setPhase("fly-in");
-    setShowAlbum(true);
     setExiting(false);
   }, [show, cards, onComplete]);
 
   useEffect(() => {
+    if (exiting) return;
     if (phase === "fly-in") {
       timerRef.current = setTimeout(() => {
-        setPhase("landed");
-        setPastedIds((prev) => new Set(prev).add(cards[currentIndex]?.id ?? ""));
+        if (currentCard) {
+          setPastedIds((prev) => new Set(prev).add(currentCard.id));
+        }
+        setPhase("land");
         timerRef.current = setTimeout(() => {
-          if (isLastCard) {
-            setVisibleIndex((v) => v + 1);
-            setPhase("fly-in");
+          if (currentIndex >= cards.length - 1) {
+            setPhase("land");
           } else {
             setVisibleIndex((v) => v + 1);
             setPhase("fly-in");
           }
-        }, 500);
+        }, 600);
       }, 800);
     }
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  }, [phase, currentIndex, isLastCard, cards]);
+  }, [phase, currentIndex, currentCard, cards, exiting]);
 
   const handleSkip = () => {
     if (exiting) return;
@@ -71,9 +81,6 @@ export function StickerPasteAnimation({ show, cards, onComplete }: Props) {
 
   const currentTeam = currentCard ? TEAMS[currentCard.teamId] : null;
   const albumSlots = currentTeam ? getAlbumSlots(currentCard.teamId) : [];
-  const teamCards = cards.filter((c) => c.teamId === currentCard?.teamId);
-  const pastedTeamIds = teamCards.filter((c) => pastedIds.has(c.id)).map((c) => c.id);
-  const allPastedCards = cards.filter((c) => pastedIds.has(c.id));
 
   return (
     <div
@@ -93,24 +100,23 @@ export function StickerPasteAnimation({ show, cards, onComplete }: Props) {
         )}
       </div>
 
-      {/* Center: current card + album page */}
-      <div className="flex-1 flex flex-col items-center gap-4 overflow-y-auto px-4 pb-4" onClick={(e) => e.stopPropagation()}>
-        {/* Flying card area */}
-        <div className="shrink-0 h-[180px] flex items-center justify-center">
+      {/* Content: card + album */}
+      <div className="flex-1 flex flex-col items-center gap-3 overflow-y-auto px-4 pb-4" onClick={(e) => e.stopPropagation()}>
+        {/* Flying card */}
+        <div className="shrink-0 h-[160px] flex items-center justify-center">
           {currentCard && phase === "fly-in" && !exiting && !allDone && (
             <div className="flex flex-col items-center gap-2 animate-sticker-paste">
-              <div className="w-[120px] aspect-[3/4] rounded-lg overflow-hidden border-2 border-white/20 shadow-2xl" style={{ background: `url('/card-bg.png') center/cover, ${currentCard.gradient}`, backgroundBlendMode: "overlay" }}>
+              <div className="w-[110px] aspect-[3/4] rounded-lg overflow-hidden border-2 border-white/20 shadow-2xl" style={{ background: `url('/card-bg.png') center/cover, ${currentCard.gradient}`, backgroundBlendMode: "overlay" }}>
                 <div className="w-full h-[50%] flex items-end justify-center">
                   {currentCard.faceUrl ? (
                     <img src={currentCard.faceUrl} alt={currentCard.name} className="w-[55%] object-contain" referrerPolicy="no-referrer" />
-                  ) : currentCard.num ? (
-                    <span className="text-2xl font-extrabold text-white/20">{currentCard.num}</span>
-                  ) : null}
+                  ) : (
+                    <span className="text-xl font-extrabold text-white/20 font-[var(--font-display)]">{currentCard.num}</span>
+                  )}
                 </div>
-                <div className="bg-white/95 p-1.5 text-center flex-1 flex flex-col justify-center">
-                  {currentTeam?.flag && <span className="text-xs block leading-none mb-0.5">{currentTeam.flag}</span>}
-                  <span className="text-[9px] font-bold leading-tight">{currentCard.name}</span>
-                  {currentCard.num && <span className="text-[7px] text-[var(--color-muted)]">#{currentCard.num}</span>}
+                <div className="bg-white/95 p-1 text-center flex-1 flex flex-col justify-center">
+                  <span className="text-[7px] font-bold leading-tight">{currentCard.name}</span>
+                  {currentCard.num && <span className="text-[6px] text-[var(--color-muted)]">#{currentCard.num}</span>}
                 </div>
               </div>
               <div className="animate-paste-badge">
@@ -121,74 +127,49 @@ export function StickerPasteAnimation({ show, cards, onComplete }: Props) {
         </div>
 
         {/* Album page */}
-        {showAlbum && currentTeam && (
+        {currentTeam && (
           <div
-            className="w-full max-w-[400px] rounded-xl overflow-hidden border-2 border-white/10 shadow-2xl"
+            className="w-full max-w-[420px] rounded-xl overflow-hidden border-2 border-white/10 shadow-2xl"
             style={{
-              background: currentTeam.color
-                ? `linear-gradient(135deg, ${currentTeam.color}aa 0%, ${currentTeam.color} 50%, ${currentTeam.colorDark} 100%)`
+              background: currentTeam.colorDark
+                ? `linear-gradient(180deg, ${currentTeam.color} 0%, ${currentTeam.colorDark} 100%)`
                 : "oklch(60% 0.1 250)",
             }}
           >
-            {/* Album page header */}
-            <div className="px-4 py-3 bg-black/20 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">{currentTeam.flag}</span>
+            {/* Page header */}
+            <div className="px-4 py-2.5 bg-black/20 flex items-center gap-3">
+              <span className="text-lg">{currentTeam.flag}</span>
+              <div>
                 <span className="font-[var(--font-display)] text-sm font-bold text-white">{currentTeam.name}</span>
+                <span className="text-white/40 text-xs ml-2">{albumSlots.length} stickers</span>
               </div>
-              <span className="text-white/40 text-xs font-medium">{albumSlots.length} stickers</span>
             </div>
 
-            {/* Album grid */}
+            {/* Sticker grid — same layout as album page */}
             <div className="p-3">
-              <div className="grid grid-cols-4 gap-2 max-sm:gap-1.5">
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 md:gap-3">
                 {albumSlots.map((slot) => {
-                  const isPasted = pastedTeamIds.includes(slot.id);
-                  const isTarget = currentCard?.id === slot.id && phase === "landed";
-                  const pastedCard = allPastedCards.find((c) => c.id === slot.id);
-                  const team = TEAMS[currentCard?.teamId ?? ""];
+                  const isPasted = pastedIds.has(slot.id);
+                  const wasJustPasted = !!(currentCard && currentCard.id === slot.id && phase === "land");
 
                   return (
                     <div
                       key={slot.id}
-                      className={`aspect-[3/4] rounded-md relative overflow-hidden transition-all duration-500 ${
-                        isTarget ? "ring-2 ring-[var(--color-success)] ring-offset-1 ring-offset-black/20 scale-110 z-10" : ""
-                      } ${
-                        isPasted ? "scale-100 opacity-100" : "scale-95 opacity-60"
-                      }`}
-                      style={{
-                        background: pastedCard && isPasted
-                          ? `url('/card-bg.png') center/cover, ${pastedCard.gradient}`
-                          : `url('/card-bg.png') center/cover, ${currentTeam.color}88`,
-                        backgroundBlendMode: "overlay",
-                      }}
+                      className={`transition-all duration-500 ${wasJustPasted ? "scale-110 ring-2 ring-[var(--color-success)] ring-offset-1 ring-offset-transparent z-10 rounded-[3px]" : "scale-100"}`}
                     >
-                      {isPasted && pastedCard ? (
-                        <>
-                          <div className="w-full h-[55%] flex items-end justify-center">
-                            {pastedCard.faceUrl ? (
-                              <img src={pastedCard.faceUrl} alt={pastedCard.name} className="w-[55%] object-contain" referrerPolicy="no-referrer" />
-                            ) : (
-                              <span className="text-xl font-extrabold text-white/20">{pastedCard.num}</span>
-                            )}
-                          </div>
-                          <div className="bg-white/90 p-1 text-center flex-1 flex flex-col justify-center">
-                            <span className="text-[7px] font-bold leading-tight">{pastedCard.name}</span>
-                          </div>
-                        </>
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-lg font-extrabold text-white/20 font-[var(--font-display)]">{slot.num}</span>
-                        </div>
-                      )}
-
-                      {/* Slot number badge */}
-                      <span className="absolute top-0.5 right-0.5 bg-black/30 text-white/50 text-[8px] font-bold px-1 rounded-sm">{slot.num}</span>
-
-                      {/* Newly pasted glow */}
-                      {isTarget && (
-                        <div className="absolute inset-0 bg-[var(--color-success)]/20 animate-pulse pointer-events-none" />
-                      )}
+                      <StickerSlot
+                        id={slot.id}
+                        collected={isPasted}
+                        name={slot.name}
+                        num={slot.num}
+                        pos={slot.pos}
+                        gradient={isPasted ? slot.name : undefined}
+                        albumNumber={slot.albumNumber}
+                        teamName={currentTeam.name}
+                        isSpecial={slot.isSpecial}
+                        faceUrl={slot.faceUrl}
+                        flag={currentTeam.flag}
+                      />
                     </div>
                   );
                 })}
@@ -197,13 +178,14 @@ export function StickerPasteAnimation({ show, cards, onComplete }: Props) {
           </div>
         )}
 
-        {/* Other teams indicator */}
+        {/* Other teams badge */}
         {(() => {
-          const otherTeams = cards.filter((c) => c.teamId !== currentCard?.teamId && pastedIds.has(c.id));
-          if (otherTeams.length === 0) return null;
+          const otherCount = cards.filter((c) => c.teamId !== currentCard?.teamId && pastedIds.has(c.id)).length;
+          if (otherCount === 0) return null;
+          const otherTeams = new Set(cards.filter((c) => c.teamId !== currentCard?.teamId && pastedIds.has(c.id)).map((c) => c.teamId));
           return (
             <p className="text-white/30 text-xs">
-              +{otherTeams.length} en otras {new Set(otherTeams.map((c) => c.teamId)).size} selecciones
+              +{otherCount} en {otherTeams.size} {otherTeams.size === 1 ? "selección más" : "selecciones más"}
             </p>
           );
         })()}
