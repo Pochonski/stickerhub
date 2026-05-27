@@ -89,16 +89,22 @@ export default function TradingPage() {
   const [myPendingRequests, setMyPendingRequests] = useState<Set<string>>(new Set());
   const [publishModal, setPublishModal] = useState(false);
   const [publishCard, setPublishCard] = useState<{ id: string; name: string } | null>(null);
+  const [publishing, setPublishing] = useState(false);
   const [lookingFor, setLookingFor] = useState("");
   const [section, setSection] = useState<"publish" | "mine" | "market">("publish");
 
   const handlePublish = async () => {
-    if (!user || !publishCard) return;
-    // Check if already published
+    if (!user || !publishCard || publishing) return;
+    setPublishing(true);
     const alreadyPublished = myListings.some((l) => l.card_id === publishCard.id);
+    if (alreadyPublished) {
+      addToast("Ya publicaste esta carta", "warning");
+      setPublishModal(false); setPublishCard(null); setPublishing(false);
+      return;
+    }
     if (!isCardAvailable(publishCard.id)) {
       addToast("Ya no tenés copias disponibles de esta carta", "warning");
-      setPublishModal(false); setPublishCard(null);
+      setPublishModal(false); setPublishCard(null); setPublishing(false);
       return;
     }
     const info = getDupeInfo(publishCard.id);
@@ -114,6 +120,7 @@ export default function TradingPage() {
     } else {
       addToast("Error al publicar", "error");
     }
+    setPublishing(false);
   };
 
   const handleUnpublish = async (listingId: string) => {
@@ -359,16 +366,18 @@ export default function TradingPage() {
                   ) : (
                     <button
                       onClick={() => { setPublishCard({ id: d.id, name: d.name }); setLookingFor(""); setPublishModal(true); }}
-                      className="hidden lg:block absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center bg-black/40"
+                      className="hidden md:block absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 cursor-pointer border-none"
                     >
-                      <span className="px-4 py-2 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold">Publicar</span>
+                      <span className="absolute inset-0 flex items-center justify-center">
+                        <span className="px-4 py-2 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold">Publicar</span>
+                      </span>
                     </button>
                   )}
                 </div>
                 {isCardAvailable(d.id) && (
                   <button
                     onClick={() => { setPublishCard({ id: d.id, name: d.name }); setLookingFor(""); setPublishModal(true); }}
-                    className="lg:hidden w-full mt-1 py-2 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-xs font-semibold text-center cursor-pointer border border-[var(--color-primary)]/20"
+                    className="md:hidden w-full mt-1 py-2 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-xs font-semibold text-center cursor-pointer border border-[var(--color-primary)]/20"
                   >
                     Publicar
                   </button>
@@ -542,7 +551,7 @@ export default function TradingPage() {
         />
         <div className="flex gap-2.5 justify-end">
           <button onClick={() => setPublishModal(false)} className="px-5 py-3 rounded-full bg-transparent text-[var(--color-muted)] text-sm font-semibold cursor-pointer border-none hover:bg-[var(--color-accent-soft)] min-h-[44px]">Cancelar</button>
-          <button onClick={handlePublish} className="px-5 py-3 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold cursor-pointer border-none hover:bg-[var(--color-primary-hover)] min-h-[44px]">Publicar</button>
+          <button onClick={handlePublish} disabled={publishing} className="px-5 py-3 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold cursor-pointer border-none hover:bg-[var(--color-primary-hover)] min-h-[44px] disabled:opacity-50">Publicar</button>
         </div>
       </Modal>
     </AppShell>
