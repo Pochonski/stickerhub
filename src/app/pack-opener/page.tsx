@@ -86,30 +86,31 @@ function PackOpenerContent() {
     (_idx: number) => {
       setFlipped((prev) => {
         const next = prev + 1;
-        if (next >= currentPack.length) {
+        return next;
+      });
+      // Process completion after state settles
+      if (flipped + 1 >= currentPack.length) {
+        setTimeout(() => {
           currentPack.forEach((card) => collectCard(card.id));
-          setTimeout(() => {
-            refreshCollection().then(() => checkTeamCompletions().then(teams => {
-              if (teams.length > 0) {
-                const t = TEAMS[teams[0]];
-                setTeamCelebration({ teamId: teams[0], teamName: t.name, teamFlag: t.flag, teamColor: t.color });
-              }
-            }));
-          }, 0);
+          refreshCollection().then(() => checkTeamCompletions().then(teams => {
+            if (teams.length > 0) {
+              const t = TEAMS[teams[0]];
+              setTeamCelebration({ teamId: teams[0], teamName: t.name, teamFlag: t.flag, teamColor: t.color });
+            }
+          }));
           const newCards = currentPack.filter((c) => c.isNew);
           const dupeCards = currentPack.filter((c) => !c.isNew).length;
           addToast(`¡Sobre abierto! ${newCards.length} nuevas, ${dupeCards} repetidas`, "success");
           if (newCards.length > 0) {
             setNewCardsOnly(newCards);
-            setTimeout(() => setStage("pasting"), 700);
+            setStage("pasting");
           } else {
-            setTimeout(() => setStage("summary"), 700);
+            setStage("summary");
           }
-        }
-        return next;
-      });
+        }, 0);
+      }
     },
-    [currentPack, collectCard, refreshCollection, checkTeamCompletions, addToast]
+    [currentPack, flipped, collectCard, refreshCollection, checkTeamCompletions, addToast]
   );
 
   const handleOpenAnother = useCallback(() => {
