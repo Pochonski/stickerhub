@@ -328,7 +328,7 @@ export function FlipbookViewer() {
           );
         })()}
         {pastePhase === "done" && (
-          <div className="flex flex-col items-center gap-3" onClick={(e) => e.stopPropagation()}>
+          <div className="flex flex-col items-center gap-3">
             <Check size={40} className="text-[var(--color-success)]" />
             <p className="text-white text-lg font-semibold">¡{pasteCards.length} {pasteCards.length === 1 ? "pegada" : "pegadas"}!</p>
             <p className="text-white/30 text-xs">Tocá para cerrar</p>
