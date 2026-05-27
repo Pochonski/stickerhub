@@ -56,14 +56,29 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "You don't own this card as a duplicate" }, { status: 400 });
   }
 
+  // UPDATE first: reactivate any existing listing
+  const { data: updated } = await supabase
+    .from("trade_listings")
+    .update({
+      is_active: true, card_name: cardName,
+      team_name: teamName || "", looking_for: lookingFor || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("user_id", user.id)
+    .eq("card_id", cardId)
+    .select("id")
+    .maybeSingle();
+
+  if (updated) return NextResponse.json({ id: updated.id }, { status: 200 });
+
   const { data, error } = await supabase
-    .rpc("publish_listing", {
-      p_user_id: user.id,
-      p_card_id: cardId,
-      p_card_name: cardName,
-      p_team_name: teamName || "",
-      p_looking_for: lookingFor || null,
-    });
+    .from("trade_listings")
+    .insert({
+      user_id: user.id, card_id: cardId, card_name: cardName,
+      team_name: teamName || "", looking_for: lookingFor || null,
+    })
+    .select()
+    .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data, { status: 201 });
