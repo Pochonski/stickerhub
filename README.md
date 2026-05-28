@@ -1,246 +1,86 @@
-# StickerHub — Mundial FIFA 2026
+# StickerHub — El Album Virtual del Mundial 2026
 
-Coleccioná stickers digitales de las 48 selecciones del Mundial. Abrí sobres, completá tu colección estilo Panini e intercambiá con amigos.
-
----
-
-## 🎮 Cómo jugar
-
-### 1. Registro
-
-Ingresá con tu email y recibí un **link mágico** — sin contraseñas. Cada usuario tiene su propia colección, progreso y estadísticas guardadas en la nube.
-
-### 2. Abrir sobres
-
-Cada sobre contiene **7 stickers** aleatorios mezclados del pool completo (jugadores, estadios y sedes). La apertura tiene una animación al estilo **Pokémon TCG Pocket**: el sobre flota, lo rasgás, las cartas salen en cascada y las volteás una por una para descubrir qué te tocó.
-
-Si una carta ya la tenías, se marca como **repetida** y queda disponible para intercambiar.
-
-### 3. La colección
-
-El álbum es un **flipbook interactivo** con efecto 3D de pasar páginas, simulando un álbum Panini físico. Cada selección ocupa una página con:
-
-- **Header** con bandera, nombre y barra de progreso sobre el degradado del equipo
-- **Grid de 20 stickers** con fotos reales de los jugadores (dataset FIFA 26)
-- Los cracks tienen badge de estrella ★
-- Los stickers coleccionados tienen brillo foil y textura de papel
-
-**48 selecciones · 871 jugadores · Datos reales de FIFA 26**
-
-### 4. Stickers individuales
-
-Al tocar cualquier sticker coleccionado, ves la **ficha completa** del jugador:
-
-- Foto real desde SOFIFA
-- Dorsal, posición, equipo
-- Datos físicos (estatura, peso, perfil)
-- Biografía generada desde el dataset
-- **Stats FIFA**: Ritmo, Tiro, Pase, Regate, Defensa, Físico
-- Logros destacados
-
-### 5. Intercambios
-
-Publicá tus stickers repetidas en el **marketplace** y otros usuarios pueden solicitarlas. El sistema maneja:
-
-- Publicaciones con búsqueda y filtros
-- Solicitud de intercambio (elegís qué ofrecer a cambio)
-- Aceptar / rechazar / cancelar
-- Transferencia atómica de stickers entre colecciones
-- Notificaciones en tiempo real
-
-### 6. Perfil
-
-Tu perfil muestra:
-
-- **Avatar y nombre** (de tu cuenta)
-- **Progreso total** de la colección
-- **Reputación** de intercambios
-- **Insignias** desbloqueables (Primer sticker, 10 stickers, 50 stickers, Colección al 25%/50%, 10 intercambios, etc.)
-- **Historial** de intercambios completados
+Coleccioná, intercambiá y completá tu album Panini digital con las 48 selecciones del Mundial. Abrí sobres, descubrí jugadores y armá tu colección.
 
 ---
 
-## 🖼️ Capturas
+## El Album
 
-*(Agregar screenshots del flipbook, pack opener, perfil y trading)*
+Imaginate un album de figuritas que vive en tu bolsillo. StickerHub es un **flipbook interactivo** — pasás las páginas como si tuvieras el album físico en las manos, con el sonido del papel y los anillos de encuadernación. Cada selección tiene su doble página con la bandera, los colores del equipo, y los espacios para pegar cada sticker.
 
----
+Cuando completás un sticker nuevo, se pega con brillo foil — ese momento de "¡me salió!" que todos conocemos. Y cuando llenás un equipo entero, el album te celebra con fuegos artificiales y monedas de recompensa.
 
-## 🛠️ Tecnologías
-
-| Capa | Stack |
-|------|-------|
-| **Frontend** | Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 |
-| **Backend** | Supabase (Auth, PostgreSQL, Row Level Security, Realtime) |
-| **Animaciones** | react-pageflip (álbum 3D) · CSS custom (pack opener, stickers foil) |
-| **Datos** | FIFA 26 dataset (18,405 jugadores, top 20 por selección) |
-| **Deploy** | Vercel · Supabase |
+**48 selecciones · 871 jugadores · Datos reales del Mundial 2026**
 
 ---
 
-## 📦 Setup local
+## Abrir Sobres
 
-```bash
-git clone https://github.com/pochonski/stickerhub.git
-cd stickerhub
-npm install
-cp .env.local.example .env.local
-```
+Cada sobre es una pequeña ceremonia. Lo ves flotar, lo rasgás con el dedo, y las cartas empiezan a salir en cascada. Una por una, las vas volteando para descubrir quiénes te tocaron.
 
-Completá `.env.local` con tus credenciales de Supabase:
+El sobre trae **6 jugadores** de cualquier selección del mundo. Podés comprar sobres sueltos o en paquetes. También podés comprar sobres de un equipo específico — ideal cuando te faltan pocos para completar una selección.
 
-```env
-NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
-SUPABASE_SERVICE_ROLE_KEY=tu-service-role-key
-```
-
-Ejecutá las migraciones SQL en Supabase (`supabase/migrations/000_full.sql`) y luego:
-
-```bash
-npm run dev
-```
+Si te sale repetida, no pasa nada: te sirve para intercambiar por la que te falta.
 
 ---
 
-## 🚀 Deploy
+## El Mercado de Intercambios
 
-### Vercel
+Acá es donde el album se vuelve social. Publicás tus repetidas en el marketplace y otros coleccionistas pueden pedírtelas. Vos también podés buscar lo que te falta y ofrecer algo a cambio.
 
-```bash
-vercel --prod
-```
+Cuando recibís una solicitud, te llega una notificación. La aceptás, y el intercambio se hace solo: las cartas cambian de dueño, las reputaciones suben, y el listing se desactiva. Todo automático, sin pasos extra.
 
-Variables de entorno requeridas en Vercel:
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-
-### Supabase
-
-Configurar en Authentication → URL Configuration:
-- Site URL: `https://tu-dominio.vercel.app`
-- Redirect URLs: `https://tu-dominio.vercel.app/**`
-
-Habilitar Email provider (magic link).
+El marketplace tiene filtros por tipo de carta, por selección, por valor de jugador. Podés buscar cracks de 90+ o rellenar huecos de equipos chicos.
 
 ---
 
-## 🏗️ Arquitectura
+## Los Jugadores
 
-### Rutas
+Cada sticker es una ventana al jugador. Tocás cualquier carta coleccionada y ves su **ficha completa**:
 
-```
-/                   Landing page
-/album              Vista general de la colección
-/album/flipbook     Flipbook 3D con las 48 selecciones
-/album/[team]       Detalle de una selección
-/card/[id]          Ficha individual de sticker
-/pack-opener        Abrir sobres
-/trading            Marketplace de intercambios
-/my-cards           Gestión de stickers (colección + repetidas)
-/profile            Perfil de usuario
-/login              Inicio de sesión (magic link)
-```
+- Foto real
+- Dorsal, posición, selección
+- Estatura, peso, perfil
+- Los seis stats de FIFA: Ritmo, Tiro, Pase, Regate, Defensa, Físico
+- Logros destacados (campeón de Champions, goleador del torneo, mundialista)
 
-### API Routes
-
-```
-GET  /api/collections        Colección del usuario
-POST /api/collections        Agregar sticker
-GET  /api/packs              Sobres disponibles
-POST /api/packs              Abrir sobre (devuelve 7 cartas)
-GET  /api/listings           Marketplace
-POST /api/listings           Publicar repetida
-GET  /api/trades             Historial de intercambios
-POST /api/trades             Solicitar intercambio
-PUT  /api/trades/[id]/accept  Aceptar (transfiere stickers)
-PUT  /api/trades/[id]/reject  Rechazar
-PUT  /api/trades/[id]/cancel  Cancelar
-GET  /api/profile            Perfil con estadísticas
-GET  /api/notifications      Notificaciones del usuario
-```
-
-### Base de datos
-
-```
-profiles ────< user_collections ────> cards ────> teams
-  │
-  ├──< user_packs
-  ├──< trade_listings
-  ├──< trade_offers (from/to)
-  ├──< badges
-  └──< notifications
-```
-
-Todas las tablas con **Row Level Security** — cada usuario solo accede a sus datos.
-
-### Componentes principales
-
-```
-components/
-├── album/
-│   ├── AlbumSpread      Doble página con textura de papel
-│   ├── BindingEdge      Anillos de encuadernación
-│   ├── FlipbookViewer   Flipbook 3D (react-pageflip)
-│   ├── StickerSlot      Sticker individual estilo Panini
-│   ├── PositionSilhouette  SVG de silueta por posición
-│   └── TeamCard         Tarjeta de selección
-├── auth/
-│   ├── AuthProvider     Contexto de autenticación (magic link)
-│   └── AuthGuard        Protección de rutas
-├── layout/
-│   ├── AppShell         Contenedor principal
-│   ├── AppHeader        Header con avatar y navegación
-│   └── AppNav           Navegación principal
-├── pack/
-│   ├── BoosterPack      Sobre animado con rasgado 3D
-│   ├── FlipCard         Carta con giro 3D
-│   └── PackSummary      Resumen de sobre abierto
-└── ui/
-    ├── Modal, Tabs, Pill, ProgressBar, EmptyState, Toast
-```
+Los cracks tienen una **estrella dorada ★** que los distingue en el album. Messi, Cristiano, Mbappé, Vinicius, Haaland — los 24 jugadores más valiosos del torneo brillan más que el resto.
 
 ---
 
-## 📂 Estructura de archivos
+## Tu Perfil
 
-```
-src/
-├── app/               # Rutas (App Router)
-├── components/        # Componentes React
-├── context/           # GameContext (estado híbrido Supabase/localStorage)
-├── data/              # 48 equipos, 871 jugadores, cartas
-├── hooks/             # useUser, useCollection, useSupabasePacks
-├── lib/               # Cliente Supabase
-└── types/             # Declaraciones TypeScript
-supabase/
-└── migrations/        # Schema SQL + seed (2071 líneas)
-```
+Cada coleccionista tiene su espacio. Tu perfil muestra:
+
+- Cuántas cartas tenés y cuántas te faltan
+- Cuántos sobres abriste
+- Tu **reputación** como intercambiador (sube cada vez que completás un intercambio)
+- Las insignias que vas desbloqueando al alcanzar hitos
+
+Es tu carta de presentación en el marketplace — una reputación alta te hace más confiable para intercambiar.
 
 ---
 
-## 🔐 Auth flow
+## Monedas y Tienda
 
-```
-Usuario ingresa email → Supabase envía magic link → 
-Usuario hace clic → Token en URL hash → 
-getSupabase().auth.getSession() → sesión establecida →
-useUser() retorna el usuario → GameContext usa Supabase
-```
+Cada carta tiene un valor en monedas según su rareza. Las cartas de cracks valen más, y las estrellas doradas ★ valen todavía más. Cuando descartás repetidas, ganás monedas.
+
+En la tienda usás esas monedas para comprar más sobres. También podés comprar sobres temáticos de un equipo específico si querés apuntar a completar una selección en particular. Y al completar un equipo entero, el album te premia con 2,000 monedas.
 
 ---
 
-## 🔄 Trade flow
+## La Colección
 
-```
-1. Usuario A publica sticker repetido en /trading
-2. Usuario B ve la publicación y solicita intercambio
-3. Usuario A recibe notificación
-4. Usuario A acepta:
-   - Sticker A → colección de B
-   - Sticker B → colección de A
-   - Se actualizan reputaciones
-   - Se desactiva la publicación
-5. Ambos ven el intercambio en su historial
-```
+Administrar tu colección es parte del juego. En tu sección de cartas podés ver todo lo que tenés, filtrar por equipo, posición, valor, y decidir qué hacer con cada repetida: ¿la descartás por monedas o la publicás para intercambiar?
+
+También hay una vista de album general donde ves, de un vistazo, cómo vas con cada selección. Barras de progreso por equipo, cuántas te faltan, y el botón directo para ir a completar.
+
+---
+
+## Empezá a Jugar
+
+Entrás con tu correo electrónico y recibís un enlace mágico — sin contraseñas, sin registros largos. Tu colección se guarda en la nube y la ves desde cualquier dispositivo. Al empezar, el album te regala 5 sobres de bienvenida para que arranques tu colección.
+
+---
+
+**StickerHub** · El album del Mundial en tu bolsillo.
