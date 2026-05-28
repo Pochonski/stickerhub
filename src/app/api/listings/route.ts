@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient();
@@ -33,9 +34,13 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const token = authHeader.slice(7);
 
   const { cardId, cardName, teamName, lookingFor } = await req.json();
 
@@ -43,8 +48,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "cardId and cardName are required" }, { status: 400 });
   }
 
+  // Verify the JWT and get user identity via Supabase's REST API.
+  // We don't use the admin client for JWT verification — instead we create
+  // a one-shot client with the user's token as the auth header.
+  const verifyRes = await fetch(
+    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/user`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      },
+    }
+  );
+
+  if (!verifyRes.ok) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const user = await verifyRes.json();
+
   // Verify user owns this card as duplicate
-  const { data: owned } = await supabase
+  const { data: owned } = await supabaseAdmin
     .from("user_collections")
     .select("id")
     .eq("user_id", user.id)
@@ -56,30 +80,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "You don't own this card as a duplicate" }, { status: 400 });
   }
 
-  // UPDATE first: reactivate any existing listing
-  const { data: updated } = await supabase
+  // Use admin client to atomically delete any existing listing + insert fresh one.
+  await supabaseAdmin
     .from("trade_listings")
-    .update({
-      is_active: true, card_name: cardName,
-      team_name: teamName || "", looking_for: lookingFor || null,
-      updated_at: new Date().toISOString(),
-    })
+    .delete()
     .eq("user_id", user.id)
-    .eq("card_id", cardId)
-    .select("id")
-    .maybeSingle();
+    .eq("card_id", cardId);
 
-  if (updated) return NextResponse.json({ id: updated.id }, { status: 200 });
-
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from("trade_listings")
     .insert({
-      user_id: user.id, card_id: cardId, card_name: cardName,
-      team_name: teamName || "", looking_for: lookingFor || null,
+      user_id: user.id,
+      card_id: cardId,
+      card_name: cardName,
+      team_name: teamName || "",
+      looking_for: lookingFor || null,
     })
-    .select()
+    .select("id")
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data, { status: 201 });
+  } catch (err) {
+    console.error("[POST /api/listings]", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }
+
