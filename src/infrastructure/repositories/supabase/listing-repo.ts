@@ -34,6 +34,12 @@ export class SupabaseListingRepository implements ListingRepository {
   }
 
   async publishListing(params: PublishListingDTO): Promise<ListingDTO> {
+    await supabaseAdmin
+      .from("trade_listings")
+      .delete()
+      .eq("user_id", params.userId)
+      .eq("card_id", params.cardId);
+
     const { data, error } = await supabaseAdmin
       .from("trade_listings")
       .insert({

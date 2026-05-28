@@ -3,7 +3,8 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { SupabaseCollectionRepository } from "@/infrastructure/repositories/supabase";
+import { SupabaseListingRepository } from "@/infrastructure/repositories/supabase";
 
 export async function GET(req: NextRequest) {
   const supabase = await createClient();
@@ -35,75 +36,52 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-  const authHeader = req.headers.get("authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const token = authHeader.slice(7);
-
-  const { cardId, cardName, teamName, lookingFor } = await req.json();
-
-  if (!cardId || !cardName) {
-    return NextResponse.json({ error: "cardId and cardName are required" }, { status: 400 });
-  }
-
-  // Verify the JWT and get user identity via Supabase's REST API.
-  // We don't use the admin client for JWT verification — instead we create
-  // a one-shot client with the user's token as the auth header.
-  const verifyRes = await fetch(
-    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/user`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      },
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-  );
 
-  if (!verifyRes.ok) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+    const token = authHeader.slice(7);
 
-  const user = await verifyRes.json();
+    const verifyRes = await fetch(
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/user`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        },
+      }
+    );
 
-  // Verify user owns this card as duplicate
-  const { data: owned } = await supabaseAdmin
-    .from("user_collections")
-    .select("id")
-    .eq("user_id", user.id)
-    .eq("card_id", cardId)
-    .eq("is_duplicate", true)
-    .single();
+    if (!verifyRes.ok) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  if (!owned) {
-    return NextResponse.json({ error: "You don't own this card as a duplicate" }, { status: 400 });
-  }
+    const user = await verifyRes.json();
+    const { cardId, cardName, teamName, lookingFor } = await req.json();
 
-  // Use admin client to atomically delete any existing listing + insert fresh one.
-  await supabaseAdmin
-    .from("trade_listings")
-    .delete()
-    .eq("user_id", user.id)
-    .eq("card_id", cardId);
+    if (!cardId || !cardName) {
+      return NextResponse.json({ error: "cardId and cardName are required" }, { status: 400 });
+    }
 
-  const { data, error } = await supabaseAdmin
-    .from("trade_listings")
-    .insert({
-      user_id: user.id,
-      card_id: cardId,
-      card_name: cardName,
-      team_name: teamName || "",
-      looking_for: lookingFor || null,
-    })
-    .select("id")
-    .single();
+    const collectionRepo = new SupabaseCollectionRepository();
+    const duplicates = await collectionRepo.getDuplicates(user.id);
+    if (!duplicates.includes(cardId)) {
+      return NextResponse.json({ error: "You don't own this card as a duplicate" }, { status: 400 });
+    }
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data, { status: 201 });
+    const listingRepo = new SupabaseListingRepository();
+    const listing = await listingRepo.publishListing({
+      userId: user.id,
+      cardId,
+      cardName,
+      teamName: teamName || "",
+      lookingFor: lookingFor || null,
+    });
+
+    return NextResponse.json(listing, { status: 201 });
   } catch (err) {
     console.error("[POST /api/listings]", err);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
-
