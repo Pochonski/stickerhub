@@ -1,0 +1,535 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "StickerHub API",
+    "version": "0.1.0",
+    "description": "API para el album de stickers virtual del Mundial 2026. Colecciona stickers, abre sobres, e intercambia con otros usuarios."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Desarrollo local"
+    }
+  ],
+  "paths": {
+    "/api/profile": {
+      "get": {
+        "summary": "Obtener perfil del usuario",
+        "tags": ["Profile"],
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Perfil con estadisticas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "display_name": { "type": "string" },
+                    "avatar_url": { "type": "string" },
+                    "country": { "type": "string" },
+                    "reputation": { "type": "integer" },
+                    "badge_tier": { "type": "string" },
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "collected": { "type": "integer", "description": "Stickers unicos" },
+                        "duplicates": { "type": "integer", "description": "Stickers repetidos" },
+                        "completedTrades": { "type": "integer" },
+                        "pendingTrades": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "No autorizado" }
+        }
+      },
+      "put": {
+        "summary": "Actualizar perfil del usuario",
+        "tags": ["Profile"],
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "displayName": { "type": "string", "description": "Nombre visible" },
+                  "country": { "type": "string", "description": "Codigo de pais (ej. MX, AR)" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Perfil actualizado" },
+          "401": { "description": "No autorizado" },
+          "500": { "description": "Error del servidor" }
+        }
+      }
+    },
+    "/api/collections": {
+      "get": {
+        "summary": "Obtener coleccion del usuario",
+        "tags": ["Collections"],
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Lista de stickers coleccionados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "card_id": { "type": "string" },
+                      "is_duplicate": { "type": "boolean" },
+                      "collected_at": { "type": "string", "format": "date-time" },
+                      "source": { "type": "string", "enum": ["pack", "trade"] }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "No autorizado" }
+        }
+      },
+      "post": {
+        "summary": "Agregar sticker a la coleccion",
+        "tags": ["Collections"],
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["cardId"],
+                "properties": {
+                  "cardId": { "type": "string", "description": "ID del sticker" },
+                  "isDuplicate": { "type": "boolean", "default": false },
+                  "source": { "type": "string", "enum": ["pack", "trade"], "default": "pack" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Sticker agregado" },
+          "400": { "description": "cardId requerido" },
+          "401": { "description": "No autorizado" },
+          "409": { "description": "El sticker ya esta en la coleccion" }
+        }
+      }
+    },
+    "/api/packs": {
+      "get": {
+        "summary": "Consultar cantidad de sobres",
+        "tags": ["Packs"],
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Cantidad de sobres disponibles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "quantity": { "type": "integer" },
+                    "total_opened": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "No autorizado" }
+        }
+      },
+      "post": {
+        "summary": "Abrir un sobre (6 stickers aleatorios)",
+        "tags": ["Packs"],
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "teamId": { "type": "string", "description": "ID del equipo para filtrar (opcional)" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sobre abierto, stickers revelados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "cards": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "name": { "type": "string" },
+                          "num": { "type": "integer" },
+                          "pos": { "type": "string" },
+                          "teamId": { "type": "string" },
+                          "faceUrl": { "type": "string" },
+                          "isNew": { "type": "boolean" }
+                        }
+                      }
+                    },
+                    "packsLeft": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Sin sobres disponibles" },
+          "401": { "description": "No autorizado" }
+        }
+      }
+    },
+    "/api/listings": {
+      "get": {
+        "summary": "Explorar publicaciones del mercado",
+        "tags": ["Listings"],
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Buscar por nombre de sticker o equipo"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "default": 1 },
+            "description": "Numero de pagina"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 20, "maximum": 50 },
+            "description": "Resultados por pagina"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de publicaciones activas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "card_id": { "type": "string" },
+                      "card_name": { "type": "string" },
+                      "team_name": { "type": "string" },
+                      "looking_for": { "type": "string", "nullable": true },
+                      "created_at": { "type": "string", "format": "date-time" },
+                      "profiles": {
+                        "type": "object",
+                        "properties": {
+                          "display_name": { "type": "string" },
+                          "avatar_url": { "type": "string" },
+                          "reputation": { "type": "integer" },
+                          "badge_tier": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "No autorizado" }
+        }
+      },
+      "post": {
+        "summary": "Publicar un sticker repetido para intercambiar",
+        "tags": ["Listings"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["cardId", "cardName"],
+                "properties": {
+                  "cardId": { "type": "string", "description": "ID del sticker" },
+                  "cardName": { "type": "string", "description": "Nombre del sticker" },
+                  "teamName": { "type": "string", "description": "Nombre del equipo" },
+                  "lookingFor": { "type": "string", "description": "Que buscas a cambio" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Publicacion creada" },
+          "400": { "description": "No tienes este sticker como repetido" },
+          "401": { "description": "No autorizado" }
+        }
+      }
+    },
+    "/api/listings/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "integer" },
+          "description": "ID de la publicacion"
+        }
+      ],
+      "delete": {
+        "summary": "Eliminar una publicacion",
+        "tags": ["Listings"],
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": { "description": "Publicacion desactivada" },
+          "401": { "description": "No autorizado" },
+          "500": { "description": "Error del servidor" }
+        }
+      }
+    },
+    "/api/trades": {
+      "get": {
+        "summary": "Obtener ofertas de intercambio del usuario",
+        "tags": ["Trades"],
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Lista de ofertas (enviadas y recibidas)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "integer" },
+                      "from_user_id": { "type": "string" },
+                      "to_user_id": { "type": "string" },
+                      "listing_id": { "type": "integer" },
+                      "requested_card_id": { "type": "string" },
+                      "requested_card_name": { "type": "string" },
+                      "offered_card_id": { "type": "string" },
+                      "offered_card_name": { "type": "string" },
+                      "status": { "type": "string", "enum": ["pending", "completed", "rejected", "cancelled"] },
+                      "created_at": { "type": "string", "format": "date-time" },
+                      "from_user": { "type": "object", "properties": { "display_name": {}, "avatar_url": {} } },
+                      "to_user": { "type": "object", "properties": { "display_name": {}, "avatar_url": {} } }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "No autorizado" }
+        }
+      },
+      "post": {
+        "summary": "Crear una oferta de intercambio",
+        "tags": ["Trades"],
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["toUserId", "requestedCardId", "offeredCardId"],
+                "properties": {
+                  "toUserId": { "type": "string", "description": "ID del usuario destinatario" },
+                  "listingId": { "type": "integer", "description": "ID de la publicacion (opcional)" },
+                  "requestedCardId": { "type": "string", "description": "ID del sticker que quieres recibir" },
+                  "requestedCardName": { "type": "string" },
+                  "offeredCardId": { "type": "string", "description": "ID del sticker que ofreces" },
+                  "offeredCardName": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Oferta creada" },
+          "400": { "description": "No tienes el sticker ofrecido como repetido" },
+          "401": { "description": "No autorizado" }
+        }
+      }
+    },
+    "/api/trades/{id}/accept": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "integer" },
+          "description": "ID de la oferta de intercambio"
+        }
+      ],
+      "put": {
+        "summary": "Aceptar una oferta de intercambio",
+        "tags": ["Trades"],
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": { "description": "Intercambio completado exitosamente" },
+          "401": { "description": "No autorizado" },
+          "404": { "description": "Oferta no encontrada o ya no esta pendiente" }
+        }
+      }
+    },
+    "/api/trades/{id}/reject": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "integer" },
+          "description": "ID de la oferta de intercambio"
+        }
+      ],
+      "put": {
+        "summary": "Rechazar una oferta de intercambio",
+        "tags": ["Trades"],
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": { "description": "Oferta rechazada" },
+          "401": { "description": "No autorizado" },
+          "500": { "description": "Error del servidor" }
+        }
+      }
+    },
+    "/api/trades/{id}/cancel": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "integer" },
+          "description": "ID de la oferta de intercambio"
+        }
+      ],
+      "put": {
+        "summary": "Cancelar una oferta de intercambio (solo iniciador)",
+        "tags": ["Trades"],
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": { "description": "Oferta cancelada" },
+          "401": { "description": "No autorizado" },
+          "500": { "description": "Error del servidor" }
+        }
+      }
+    },
+    "/api/notifications": {
+      "get": {
+        "summary": "Obtener notificaciones del usuario",
+        "tags": ["Notifications"],
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 20, "maximum": 50 },
+            "description": "Cantidad maxima de notificaciones"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notificaciones con conteo de no leidas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "notifications": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "integer" },
+                          "type": { "type": "string" },
+                          "title": { "type": "string" },
+                          "body": { "type": "string" },
+                          "is_read": { "type": "boolean" },
+                          "reference_id": { "type": "integer" },
+                          "created_at": { "type": "string", "format": "date-time" }
+                        }
+                      }
+                    },
+                    "unreadCount": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "No autorizado" }
+        }
+      },
+      "put": {
+        "summary": "Marcar notificacion(es) como leidas",
+        "tags": ["Notifications"],
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "integer", "description": "ID de notificacion especifica. Si se omite, marca todas como leidas." }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Notificacion(es) marcadas como leidas" },
+          "401": { "description": "No autorizado" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sb-wsqbrbucfrmwyzajeyoi-auth-token",
+        "description": "Session cookie de Supabase"
+      },
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Token JWT de Supabase (usado en POST /api/listings)"
+      }
+    }
+  },
+  "tags": [
+    { "name": "Profile", "description": "Perfil de usuario" },
+    { "name": "Collections", "description": "Coleccion de stickers" },
+    { "name": "Packs", "description": "Sobres de stickers" },
+    { "name": "Listings", "description": "Publicaciones del mercado" },
+    { "name": "Trades", "description": "Intercambios" },
+    { "name": "Notifications", "description": "Notificaciones" }
+  ]
+}

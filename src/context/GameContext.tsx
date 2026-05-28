@@ -241,7 +241,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const completeTrade = useCallback(
     async (tradeId: string) => {
       if (usingSupabase) {
-        await fetch(`/api/trades/${tradeId}/accept`, { method: "PUT" });
+        const { data: { session } } = await getSupabase().auth.getSession();
+        await fetch(`/api/trades/${tradeId}/accept`, {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${session?.access_token}` },
+        });
         fetchTrades();
         supabaseCollection.refresh();
         return;

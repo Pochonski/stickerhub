@@ -1,20 +1,38 @@
 // PUT /api/trades/[id]/accept — Accept a trade offer
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 
 export async function PUT(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
+  const token = authHeader.slice(7);
+
+  const verifyRes = await fetch(
+    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/user`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      },
+    }
+  );
+
+  if (!verifyRes.ok) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const user = await verifyRes.json();
   const { id } = await params;
 
   // Get the trade offer
-  const { data: trade, error: fetchError } = await supabase
+  const { data: trade, error: fetchError } = await supabaseAdmin
     .from("trade_offers")
     .select("*")
     .eq("id", id)
@@ -26,11 +44,8 @@ export async function PUT(
     return NextResponse.json({ error: "Trade not found or not pending" }, { status: 404 });
   }
 
-  // Transfer cards in a transaction would be ideal, but Supabase JS doesn't support transactions directly.
-  // Using sequential operations with validation:
-
   // 1. Remove offered card from initiator's duplicates
-  const { error: removeOffered } = await supabase
+  const { error: removeOffered } = await supabaseAdmin
     .from("user_collections")
     .delete()
     .eq("user_id", trade.from_user_id)
@@ -41,8 +56,8 @@ export async function PUT(
     return NextResponse.json({ error: "Failed to transfer offered card" }, { status: 500 });
   }
 
-  // 2. Add offered card to recipient (or mark as duplicate if already owned)
-  const { error: addOffered } = await supabase
+  // 2. Add offered card to recipient
+  const { error: addOffered } = await supabaseAdmin
     .from("user_collections")
     .upsert({
       user_id: user.id,
@@ -57,7 +72,7 @@ export async function PUT(
   }
 
   // 3. Remove requested card from recipient's duplicates
-  const { error: removeRequested } = await supabase
+  const { error: removeRequested } = await supabaseAdmin
     .from("user_collections")
     .delete()
     .eq("user_id", user.id)
@@ -69,7 +84,7 @@ export async function PUT(
   }
 
   // 4. Add requested card to initiator
-  const { error: addRequested } = await supabase
+  const { error: addRequested } = await supabaseAdmin
     .from("user_collections")
     .upsert({
       user_id: trade.from_user_id,
@@ -84,7 +99,7 @@ export async function PUT(
   }
 
   // 5. Mark trade as completed
-  const { error: completeError } = await supabase
+  const { error: completeError } = await supabaseAdmin
     .from("trade_offers")
     .update({
       status: "completed",
@@ -99,18 +114,18 @@ export async function PUT(
 
   // 6. Deactivate listing
   if (trade.listing_id) {
-    await supabase
+    await supabaseAdmin
       .from("trade_listings")
       .update({ is_active: false, updated_at: new Date().toISOString() })
       .eq("id", trade.listing_id);
   }
 
   // 7. Update reputations
-  await supabase.rpc("increment_reputation", { user_id: trade.from_user_id });
-  await supabase.rpc("increment_reputation", { user_id: user.id });
+  await supabaseAdmin.rpc("increment_reputation", { user_id: trade.from_user_id });
+  await supabaseAdmin.rpc("increment_reputation", { user_id: user.id });
 
   // 8. Notify initiator
-  await supabase.from("notifications").insert({
+  await supabaseAdmin.from("notifications").insert({
     user_id: trade.from_user_id,
     type: "trade_completed",
     title: "Intercambio completado",

@@ -69,8 +69,12 @@ export default function InboxPage() {
   }, [user]);
 
   const handleAccept = async (trade: TradeItem) => {
-    // Use the API route which handles full card transfer atomically
-    const res = await fetch(`/api/trades/${trade.id}/accept`, { method: "PUT" });
+    const sb = getSupabase();
+    const { data: { session } } = await sb.auth.getSession();
+    const res = await fetch(`/api/trades/${trade.id}/accept`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${session?.access_token}` },
+    });
     const json = await res.json();
     if (!res.ok) {
       addToast("Error al aceptar: " + (json.error || "Error"), "error");
