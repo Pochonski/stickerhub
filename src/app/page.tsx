@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { AppShell } from "@/components/layout/AppShell";
-import { useGame } from "@/context/GameContext";
+import { AppShell } from "@/presentation/components/layout/AppShell";
+import { useGame } from "@/presentation/contexts/GameContext";
 import { BookOpen, ArrowRightLeft, WalletCards, User, PackageOpen } from "lucide-react";
 
 const iconClass = "size-12 text-white/80";

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { getSupabase } from "@/lib/supabase/client";
-import { useAuth } from "@/components/auth/AuthProvider";
+import { useAuth } from "@/presentation/components/auth/AuthProvider";
 
 interface CollectionItem {
   card_id: string;

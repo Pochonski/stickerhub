@@ -2,9 +2,9 @@
 import { use } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { AppShell } from "@/components/layout/AppShell";
-import { Pill } from "@/components/ui/Pill";
-import { useGame } from "@/context/GameContext";
+import { AppShell } from "@/presentation/components/layout/AppShell";
+import { Pill } from "@/presentation/components/ui/Pill";
+import { useGame } from "@/presentation/contexts/GameContext";
 import { ALL_PLAYERS, PLAYER_DETAILS } from "@/data/players";
 import { TEAMS } from "@/data/teams";
 import type { PlayerDetail, Player, Team } from "@/data/types";

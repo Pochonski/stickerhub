@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { AppShell } from "@/components/layout/AppShell";
-import { useGame } from "@/context/GameContext";
-import { useToast } from "@/hooks/useToast";
+import { AppShell } from "@/presentation/components/layout/AppShell";
+import { useGame } from "@/presentation/contexts/GameContext";
+import { useToast } from "@/presentation/hooks/useToast";
 import { getSupabase } from "@/lib/supabase/client";
 import { ALL_PLAYERS } from "@/data/players";
 import { ALL_STADIUM_CARDS, ALL_VENUE_CARDS } from "@/data/cards";

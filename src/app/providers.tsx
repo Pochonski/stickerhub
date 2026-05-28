@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, type ReactNode } from "react";
-import { AuthProvider } from "@/components/auth/AuthProvider";
-import { GameProvider } from "@/context/GameContext";
-import { WelcomeOverlay } from "@/components/onboarding/WelcomeOverlay";
+import { AuthProvider } from "@/presentation/components/auth/AuthProvider";
+import { GameProvider } from "@/presentation/contexts/GameContext";
+import { WelcomeOverlay } from "@/presentation/components/onboarding/WelcomeOverlay";
 
 function LoadingSkeleton() {
   return (

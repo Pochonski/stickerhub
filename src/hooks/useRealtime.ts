@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { getSupabase } from "@/lib/supabase/client";
-import { useAuth } from "@/components/auth/AuthProvider";
+import { useAuth } from "@/presentation/components/auth/AuthProvider";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
 type TableName = "user_packs" | "trade_offers" | "trade_listings" | "user_collections" | "notifications";

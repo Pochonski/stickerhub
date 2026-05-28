@@ -1,17 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AppShell } from "@/components/layout/AppShell";
-import { useAuth } from "@/components/auth/AuthProvider";
-import { useGame } from "@/context/GameContext";
-import { useToast } from "@/hooks/useToast";
+import { AppShell } from "@/presentation/components/layout/AppShell";
+import { useAuth } from "@/presentation/components/auth/AuthProvider";
+import { useGame } from "@/presentation/contexts/GameContext";
+import { useToast } from "@/presentation/hooks/useToast";
 import { getSupabase } from "@/lib/supabase/client";
 import { ALL_PLAYERS } from "@/data/players";
 import { ALL_STADIUM_CARDS, ALL_VENUE_CARDS } from "@/data/cards";
 import { TEAMS, TEAM_LIST, STADIUMS, VENUES } from "@/data/teams";
 import { Check, X, Send, Inbox, Loader2, Search } from "lucide-react";
-import { TradeCelebration } from "@/components/trade/TradeCelebration";
-import { TeamCompleteCelebration } from "@/components/celebration/TeamCompleteCelebration";
+import { TradeCelebration } from "@/presentation/components/trading/TradeCelebration";
+import { TeamCompleteCelebration } from "@/presentation/components/celebration/TeamCompleteCelebration";
 
 interface TradeItem {
   id: string;

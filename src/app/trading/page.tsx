@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { Search, Send, Inbox, Upload, X, Tag, Users } from "lucide-react";
-import { AppShell } from "@/components/layout/AppShell";
-import { Modal } from "@/components/ui/Modal";
-import { useAuth } from "@/components/auth/AuthProvider";
-import { useGame } from "@/context/GameContext";
+import { AppShell } from "@/presentation/components/layout/AppShell";
+import { Modal } from "@/presentation/components/ui/Modal";
+import { useAuth } from "@/presentation/components/auth/AuthProvider";
+import { useGame } from "@/presentation/contexts/GameContext";
 import { getSupabase } from "@/lib/supabase/client";
-import { useToast } from "@/hooks/useToast";
+import { useToast } from "@/presentation/hooks/useToast";
 import { ALL_PLAYERS } from "@/data/players";
 import { ALL_STADIUM_CARDS, ALL_VENUE_CARDS } from "@/data/cards";
 import { TEAMS, STADIUMS, VENUES, TEAM_LIST } from "@/data/teams";

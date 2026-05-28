@@ -2,11 +2,11 @@
 import { use } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { AppShell } from "@/components/layout/AppShell";
-import { ProgressBar } from "@/components/ui/ProgressBar";
-import { AlbumSpread } from "@/components/album/AlbumSpread";
-import { StickerSlot } from "@/components/album/StickerSlot";
-import { useGame } from "@/context/GameContext";
+import { AppShell } from "@/presentation/components/layout/AppShell";
+import { ProgressBar } from "@/presentation/components/ui/ProgressBar";
+import { AlbumSpread } from "@/presentation/components/album/AlbumSpread";
+import { StickerSlot } from "@/presentation/components/album/StickerSlot";
+import { useGame } from "@/presentation/contexts/GameContext";
 import { getTeam } from "@/data/teams";
 import { PLAYERS } from "@/data/players";
 import type { CardType } from "@/data/types";

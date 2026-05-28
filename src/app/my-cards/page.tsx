@@ -2,17 +2,17 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { AppShell } from "@/components/layout/AppShell";
-import { Pill } from "@/components/ui/Pill";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { useGame } from "@/context/GameContext";
+import { AppShell } from "@/presentation/components/layout/AppShell";
+import { Pill } from "@/presentation/components/ui/Pill";
+import { EmptyState } from "@/presentation/components/ui/EmptyState";
+import { useGame } from "@/presentation/contexts/GameContext";
 import { ALL_PLAYERS } from "@/data/players";
 import { TEAMS, TEAM_LIST } from "@/data/teams";
-import { useToast } from "@/hooks/useToast";
+import { useToast } from "@/presentation/hooks/useToast";
 import { getSupabase } from "@/lib/supabase/client";
 import { coinValue } from "@/hooks/useSupabasePacks";
 import { Search, WalletCards, Send, Inbox, Trash2, Filter } from "lucide-react";
-import { StatCard } from "@/components/ui/StatCard";
+import { StatCard } from "@/presentation/components/ui/StatCard";
 
 interface CardInfo {
   name: string;

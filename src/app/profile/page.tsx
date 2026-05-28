@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { AppShell } from "@/components/layout/AppShell";
-import { Pill } from "@/components/ui/Pill";
-import { ProgressBar } from "@/components/ui/ProgressBar";
-import { useAuth } from "@/components/auth/AuthProvider";
+import { AppShell } from "@/presentation/components/layout/AppShell";
+import { Pill } from "@/presentation/components/ui/Pill";
+import { ProgressBar } from "@/presentation/components/ui/ProgressBar";
+import { useAuth } from "@/presentation/components/auth/AuthProvider";
 import { useUser } from "@/hooks/useUser";
-import { useGame } from "@/context/GameContext";
+import { useGame } from "@/presentation/contexts/GameContext";
 import { ALL_PLAYERS } from "@/data/players";
 import { Medal, Star, Gem, Crown, Send, Inbox, Handshake, Award, BadgeCheck, LogOut } from "lucide-react";
 

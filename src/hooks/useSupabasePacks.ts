@@ -2,31 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getSupabase } from "@/lib/supabase/client";
-import { useAuth } from "@/components/auth/AuthProvider";
+import { useAuth } from "@/presentation/components/auth/AuthProvider";
+import type { PackBundle } from "@/core/domain/value-objects";
+import { PACK_BUNDLES, SPECIAL_STARS } from "@/core/domain/value-objects";
+import { calculateCoinValue } from "@/core/domain/rules";
 
-export interface PackBundle {
-  quantity: number;
-  price: number;
-  label: string;
-  savings: string;
-}
-
-export const PACK_BUNDLES: PackBundle[] = [
-  { quantity: 1, price: 500, label: "1 sobre", savings: "" },
-  { quantity: 3, price: 1350, label: "3 sobres", savings: "ahorrá 150" },
-  { quantity: 5, price: 2000, label: "5 sobres", savings: "ahorrá 500" },
-];
-
-const SPECIAL_STARS = new Set(["arg2", "arg4", "bra2", "bra3", "cro2", "egy1", "eng1", "eng2", "eng3", "esp1", "esp2", "esp3", "fra1", "fra2", "ger1", "ger2", "ger3", "col1", "mar1", "ned1", "nor1", "por1", "por5", "uru1"]);
-
-export function coinValue(rating: number, cardId?: string): number {
-  if (cardId && SPECIAL_STARS.has(cardId)) return 1300;
-  if (rating >= 90) return 900;
-  if (rating >= 85) return 700;
-  if (rating >= 80) return 500;
-  if (rating >= 75) return 300;
-  return 150;
-}
+export { PACK_BUNDLES, type PackBundle };
+export { calculateCoinValue as coinValue };
+export { SPECIAL_STARS };
 
 export function usePacks() {
   const { user } = useAuth();

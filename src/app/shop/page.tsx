@@ -1,14 +1,15 @@
 "use client";
 
-import { AppShell } from "@/components/layout/AppShell";
-import { useGame } from "@/context/GameContext";
-import { useToast } from "@/hooks/useToast";
+import { AppShell } from "@/presentation/components/layout/AppShell";
+import { useGame } from "@/presentation/contexts/GameContext";
+import { useToast } from "@/presentation/hooks/useToast";
 import { PACK_BUNDLES } from "@/hooks/useSupabasePacks";
-import { TeamSelectModal } from "@/components/shop/TeamSelectModal";
-import { TeamPackResult } from "@/components/shop/TeamPackResult";
-import { generateTeamPack, type PackCard } from "@/lib/pack-generator";
+import { TeamSelectModal } from "@/presentation/components/shop/TeamSelectModal";
+import { TeamPackResult } from "@/presentation/components/shop/TeamPackResult";
+import { generateTeamPack } from "@/lib/pack-generator";
+import type { PackCard } from "@/core/domain/models";
 import { PackageOpen, Coins, Sparkles, Flag, Trash2, Trophy } from "lucide-react";
-import { TeamCompleteCelebration } from "@/components/celebration/TeamCompleteCelebration";
+import { TeamCompleteCelebration } from "@/presentation/components/celebration/TeamCompleteCelebration";
 import { TEAMS } from "@/data/teams";
 import { useState, useCallback } from "react";
 import type { Team } from "@/data/types";

@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { AppShell } from "@/components/layout/AppShell";
-import { TeamCard } from "@/components/album/TeamCard";
-import { useGame } from "@/context/GameContext";
-import { StatCard } from "@/components/ui/StatCard";
+import { AppShell } from "@/presentation/components/layout/AppShell";
+import { TeamCard } from "@/presentation/components/album/TeamCard";
+import { useGame } from "@/presentation/contexts/GameContext";
+import { StatCard } from "@/presentation/components/ui/StatCard";
 import { TEAM_LIST } from "@/data/teams";
 import { PLAYERS } from "@/data/players";
 import { PackageOpen, BookOpen } from "lucide-react";
