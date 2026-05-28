@@ -4,12 +4,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getSupabase } from "@/lib/supabase/client";
 import { useAuth } from "@/presentation/components/auth/AuthProvider";
 import type { PackBundle } from "@/core/domain/value-objects";
-import { PACK_BUNDLES, SPECIAL_STARS } from "@/core/domain/value-objects";
+import { PACK_BUNDLES } from "@/core/domain/value-objects";
 import { calculateCoinValue } from "@/core/domain/rules";
 
 export { PACK_BUNDLES, type PackBundle };
 export { calculateCoinValue as coinValue };
-export { SPECIAL_STARS };
 
 export function usePacks() {
   const { user } = useAuth();

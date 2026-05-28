@@ -15,7 +15,7 @@ export const STADIUM_CARDS: Record<string, CardItem[]> = {
   ],
 };
 
-export const VENUE_CARDS: Record<string, CardItem[]> = {
+const VENUE_CARDS: Record<string, CardItem[]> = {
   doha: [
     { id: "doh1", name: "Doha, Catar", collected: false, bg: "linear-gradient(180deg, oklch(80% 0.03 95), oklch(55% 0.04 95))", teamId: "doha", type: "venue" },
   ],
@@ -32,4 +32,3 @@ export const VENUE_CARDS: Record<string, CardItem[]> = {
 
 export const ALL_STADIUM_CARDS = Object.values(STADIUM_CARDS).flat();
 export const ALL_VENUE_CARDS = Object.values(VENUE_CARDS).flat();
-export const ALL_CARDS = [...ALL_STADIUM_CARDS, ...ALL_VENUE_CARDS];

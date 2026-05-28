@@ -407,6 +407,3 @@ export const VENUES: Record<string, Team> = {
   nynj: { id: "nynj", name: "NY / NJ", flag: "🏙️", color: "oklch(80% 0.03 355)", colorDark: "oklch(55% 0.04 355)", accent: "oklch(100% 0 0)" },
   rio: { id: "rio", name: "Río de Janeiro", flag: "🏙️", color: "oklch(80% 0.03 285)", colorDark: "oklch(55% 0.04 285)", accent: "oklch(100% 0 0)" },
 };
-
-export const STADIUM_LIST = Object.values(STADIUMS);
-export const VENUE_LIST = Object.values(VENUES);
