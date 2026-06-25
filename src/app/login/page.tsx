@@ -38,7 +38,7 @@ export default function LoginPage() {
         await signInWithPassword(email, password);
         clearTimeout(timeout);
         // Use hard redirect to ensure cookie is set before middleware runs
-        window.location.href = "/album";
+        window.location.href = "https://stickerhubs.vercel.app/";
       } else {
         await signIn(email);
         clearTimeout(timeout);
