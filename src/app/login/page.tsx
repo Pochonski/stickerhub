@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/presentation/components/auth/AuthProvider";
+import { getSupabase } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { Mail, Trophy, LogIn } from "lucide-react";
 
@@ -39,8 +40,14 @@ export default function LoginPage() {
         clearTimeout(timeout);
         if (error) throw error;
         setSending(false);
-        // Redirect after successful login
-        window.location.href = "https://stickerhubs.vercel.app/";
+        // Wait a moment for cookie to be set, then verify session before redirect
+        await new Promise(resolve => setTimeout(resolve, 300));
+        const { data: { session } } = await getSupabase().auth.getSession();
+        if (session) {
+          window.location.href = "https://stickerhubs.vercel.app/";
+        } else {
+          setError("Error al establecer sesión. Intentá de nuevo.");
+        }
       } else {
         await signIn(email);
         clearTimeout(timeout);
