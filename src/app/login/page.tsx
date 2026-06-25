@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/presentation/components/auth/AuthProvider";
-import { getSupabase } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { Mail, Trophy, LogIn } from "lucide-react";
 
@@ -36,15 +35,12 @@ export default function LoginPage() {
 
     try {
       if (showPassword) {
-        await signInWithPassword(email, password);
+        const { error } = await signInWithPassword(email, password);
         clearTimeout(timeout);
-        // Wait for SIGNED_IN event to ensure cookie is propagated before redirect
-        const { data: { subscription } } = getSupabase().auth.onAuthStateChange((event) => {
-          if (event === 'SIGNED_IN') {
-            subscription.unsubscribe();
-            window.location.href = "https://stickerhubs.vercel.app/";
-          }
-        });
+        if (error) throw error;
+        setSending(false);
+        // Redirect after successful login
+        window.location.href = "https://stickerhubs.vercel.app/";
       } else {
         await signIn(email);
         clearTimeout(timeout);
