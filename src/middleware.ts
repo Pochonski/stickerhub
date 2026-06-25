@@ -27,9 +27,10 @@ export async function middleware(request: NextRequest) {
   );
 
   const {
-    data: { user },
+    data: { session },
   } = await supabase.auth.getSession();
 
+  const user = session?.user;
   const isAlbumRoute = request.nextUrl.pathname.startsWith("/album");
   const isLoginRoute = request.nextUrl.pathname === "/login";
 
