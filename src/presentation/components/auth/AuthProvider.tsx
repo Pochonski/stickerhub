@@ -18,7 +18,7 @@ const AuthContext = createContext<AuthState>({
   session: null,
   loading: true,
   signIn: async () => {},
-  signInWithPassword: async () => {},
+  signInWithPassword: async () => ({ error: null }),
   signOut: async () => {},
 });
 
