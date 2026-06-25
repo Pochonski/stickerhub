@@ -17,11 +17,19 @@ export default function LoginPage() {
   const [cooldown, setCooldown] = useState(0);
 
   // Cooldown timer
+  // Cooldown timer
   useEffect(() => {
     if (cooldown <= 0) return;
     const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
     return () => clearTimeout(t);
   }, [cooldown]);
+
+  // Redirect to album after successful password login
+  useEffect(() => {
+    if (user && !loading && showPassword) {
+      router.push("/album");
+    }
+  }, [user, loading, showPassword, router]);
 
   const handleLogin = async () => {
     if (!email || sending || cooldown > 0) return;

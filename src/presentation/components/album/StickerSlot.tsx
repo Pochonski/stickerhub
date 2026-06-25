@@ -94,11 +94,6 @@ export function StickerSlot({
                 {pos}
               </span>
             )}
-            {teamName && (
-              <span className="text-[9px] text-[var(--color-muted)]/70 uppercase tracking-widest leading-none mt-0.5">
-                {flag && <span className="mr-1">{flag}</span>}{teamName}
-              </span>
-            )}
           </div>
 
           {/* Glossy shine overlay */}
