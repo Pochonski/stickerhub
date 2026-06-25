@@ -9,7 +9,7 @@ interface AuthState {
   session: Session | null;
   loading: boolean;
   signIn: (email: string) => Promise<void>;
-  signInWithPassword: (email: string, password: string) => Promise<void>;
+  signInWithPassword: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInWithPassword = async (email: string, password: string) => {
     const sb = getSupabase();
     const { error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) throw error;
+    return { error };
   };
 
   const signOut = async () => {
