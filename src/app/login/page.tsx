@@ -1,13 +1,11 @@
 "use client";
 
 import { useAuth } from "@/presentation/components/auth/AuthProvider";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Mail, Trophy, LogIn } from "lucide-react";
 
 export default function LoginPage() {
-  const { user, loading, signIn, signInWithPassword } = useAuth();
-  const router = useRouter();
+  const { signIn, signInWithPassword } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -17,19 +15,11 @@ export default function LoginPage() {
   const [cooldown, setCooldown] = useState(0);
 
   // Cooldown timer
-  // Cooldown timer
   useEffect(() => {
     if (cooldown <= 0) return;
     const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
     return () => clearTimeout(t);
   }, [cooldown]);
-
-  // Redirect to album after successful password login
-  useEffect(() => {
-    if (user && !loading && showPassword) {
-      router.push("/album");
-    }
-  }, [user, loading, showPassword, router]);
 
   const handleLogin = async () => {
     if (!email || sending || cooldown > 0) return;
@@ -46,11 +36,14 @@ export default function LoginPage() {
     try {
       if (showPassword) {
         await signInWithPassword(email, password);
+        clearTimeout(timeout);
+        // Use hard redirect to ensure cookie is set before middleware runs
+        window.location.href = "/album";
       } else {
         await signIn(email);
+        clearTimeout(timeout);
+        setSent(true);
       }
-      clearTimeout(timeout);
-      setSent(true);
     } catch (e: unknown) {
       clearTimeout(timeout);
       const msg = e instanceof Error ? e.message : String(e);
@@ -64,8 +57,8 @@ export default function LoginPage() {
         setError(showPassword ? "Error al ingresar." : "Error al enviar. Revisá el email.");
         setCooldown(15);
       }
+      setSending(false);
     }
-    setSending(false);
   };
 
   return (
