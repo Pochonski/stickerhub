@@ -48,5 +48,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/album/:path*", "/login"],
+  matcher: ["/album", "/album/:path*", "/login"],
 };
