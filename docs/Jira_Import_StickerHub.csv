@@ -1,0 +1,514 @@
+Issue Type,Summary,Description,Priority,Story Points,Epic Link,Sprint,Assignee,Labels,Components,Status
+Epic,[AUTH] Sistema de Autenticacion,"Como usuario quiero registrarme e iniciar sesion en StickerHub para acceder a mi coleccion de figuritas.
+
+Incluye:
+- Registro con magic link
+- Inicio de sesion
+- Middleware de proteccion de rutas
+
+Descripcion Tecnica:
+- Supabase Auth
+- Next.js Middleware
+- RLS policies",High,,,Sprint 1,,epic-auth,"auth,backend",To Do
+Epic,[ALBUM] Album Digital,"Como coleccionista quiero ver y navegar el album de figuritas del Mundial FIFA 2026 con las 48 selecciones.
+
+Incluye:
+- Album general con 48 selecciones
+- Album por equipo
+- Vista flipbook interactiva
+- Fichas de jugadores con estadisticas FIFA
+
+Descripcion Tecnica:
+- Next.js App Router
+- Supabase PostgreSQL
+- react-pageflip",High,,,Sprint 1,,epic-album,"frontend,album",To Do
+Epic,[PACKS] Sistema de Sobres y Economia,"Como coleccionista quiero abrir sobres virtuales y gestionar monedas.
+
+Incluye:
+- Apertura de sobres con animacion
+- Sobres de bienvenida (5 + 500 monedas)
+- Economia de monedas (descarte, recompensas)
+- Tienda de sobres
+
+Descripcion Tecnica:
+- API Routes /api/packs
+- Sistema de inventario
+- Animaciones CSS/React",High,,,Sprint 1,,epic-packs,"frontend,packs",To Do
+Epic,[TRADING] Marketplace de Intercambios,"Como coleccionista quiero intercambiar figuritas con otros usuarios.
+
+Incluye:
+- Publicar repetidas en marketplace
+- Proponer intercambios
+- Aceptar/Rechazar trades
+- Inbox de notificaciones
+- Actualizacion automatica de colecciones
+
+Descripcion Tecnica:
+- API Routes /api/trades, /api/listings
+- Supabase Realtime
+- Transacciones atomicas",High,,,Sprint 1,,epic-trading,"frontend,trading",To Do
+Epic,[PROFILE] Perfil y Estadisticas,"Como coleccionista quiero ver mi perfil con estadisticas, progreso e insignias.
+
+Incluye:
+- Perfil de usuario
+- Estadisticas de coleccion
+- Insignias por hitos
+- Dashboard de progreso
+- Sistema de reputacion
+
+Descripcion Tecnica:
+- Tabla profiles
+- Badges system
+- Gamificacion",High,,,Sprint 1,,epic-profile,"frontend,profile",To Do
+Epic,[CI/CD] Pipeline de Integracion y Despliegue,"Como equipo de desarrollo necesitamos automatizar el build, test y deploy del proyecto.
+
+Incluye:
+- GitHub Actions workflow
+- Vercel deployment automatico
+- Lint y TypeScript check
+- Security audit RLS
+
+Descripcion Tecnica:
+- .github/workflows/ci.yml
+- Vercel hooks
+- Preview deployments",High,,,Sprint 1,,epic-cicd,"cicd,infra",To Do
+Epic,[DOCS] Documentacion Academica,"Como equipo necesitamos entregar la documentacion completa del proyecto segun los lineamientos del curso.
+
+Incluye:
+- 7 entregables academicos
+- Project Charter
+- Planes de gestion
+- Sprints
+- Video CI/CD demonstrativo
+
+Descripcion Tecnica:
+- Documentos en formato .docx
+- Video mp4
+- Jira + Google Drive",High,,,Sprint 1,,epic-docs,docs,To Do
+Story,US-01: Repositorio GitHub con CI/CD,"Como equipo de desarrollo, necesitamos un repositorio GitHub con CI/CD para automatizar el build y deploy del proyecto.
+
+Criterios de Aceptacion:
+- Dado que un desarrollador hace un push a la rama main
+- Cuando GitHub Actions ejecuta el workflow
+- Entonces el build compila sin errores, el lint pasa sin advertencias y Vercel realiza el deploy automaticamente en menos de 5 minutos.
+
+- Dado que el build falla por un error de compilacion
+- Cuando GitHub Actions termina la ejecucion
+- Entonces el workflow muestra estado de error y no actualiza produccion.",High,5,epic-cicd,Sprint 1 (22-28 May 2026),,"cicd,infra",backend,To Do
+Story,US-02: Registro con Magic Link,"Como nuevo usuario, quiero registrarme con mi direccion de email para acceder a StickerHub sin necesidad de contrasena.
+
+Criterios de Aceptacion:
+- Dado que un visitante esta en la pagina de login
+- Cuando ingresa su email valido y presiona 'Enviar magic link'
+- Entonces el sistema crea una cuenta en Supabase Auth y envia el email de acceso en menos de 30 segundos.
+
+- Dado que el usuario ingresa un email con formato invalido
+- Cuando presiona 'Enviar magic link'
+- Entonces el sistema muestra 'Ingresa un email valido' sin enviar solicitud al servidor.",High,5,epic-auth,Sprint 1 (22-28 May 2026),,"auth,frontend",frontend,To Do
+Story,US-03: Inicio de Sesion con Magic Link,"Como usuario registrado, quiero iniciar sesion con un magic link enviado a mi email para acceder a mi coleccion de forma segura.
+
+Criterios de Aceptacion:
+- Dado que el usuario tiene cuenta registrada y recibio el magic link
+- Cuando hace clic en el enlace
+- Entonces el sistema valida el token, inicia la sesion y redirige al album dentro de 3 segundos.
+
+- Dado que el usuario presiona 'Cerrar sesion'
+- Cuando el sistema procesa la solicitud
+- Entonces la sesion de Supabase se invalida y el usuario es redirigido al login.",High,5,epic-auth,Sprint 1 (22-28 May 2026),,"auth,backend",backend,To Do
+Story,US-04: Esquema de Base de Datos,"Como equipo, necesitamos el esquema inicial de la base de datos en Supabase con las tablas principales del sistema.
+
+Criterios de Aceptacion:
+- Dado que el proyecto Supabase esta creado
+- Cuando se revisan las tablas en Supabase Studio
+- Entonces existen las tablas profiles, cards, user_collections, trades, listings y notifications con sus columnas y politicas RLS configuradas.",High,3,epic-auth,Sprint 1 (22-28 May 2026),,"backend,database",backend,To Do
+Task,T-01: Configurar branching strategy,"Crear repositorio GitHub con branching: main (produccion), dev (desarrollo), feature branches.
+
+Pasos:
+1. Crear repositorio en GitHub
+2. Configurar protected branches para main
+3. Crear rama dev
+4. Definir convencion de nombres: feature/*, bugfix/*, hotfix/*",Medium,,,Sprint 1 (22-28 May 2026),,cicd,backend,To Do
+Task,T-02: Configurar workflow CI,"Archivo .github/workflows/ci.yml con pasos: checkout --> setup-node --> npm ci --> lint --> build --> deploy.
+
+Pasos:
+1. Crear directorio .github/workflows/
+2. Crear archivo ci.yml
+3. Configurar trigger en push a main y PRs
+4. Configurar cache para node_modules
+5. Probar workflow con commit de test",Medium,,epic-cicd,Sprint 1 (22-28 May 2026),,cicd,backend,To Do
+Task,T-03: Conectar Vercel con GitHub,"Proyecto Vercel enlazado al repositorio con deploy automatico en push a main.
+
+Pasos:
+1. Crear proyecto en Vercel
+2. Importar repositorio de GitHub
+3. Configurar production branch = main
+4. Configurar build command: npm run build
+5. Agregar environment variables",Medium,,,Sprint 1 (22-28 May 2026),,"cicd,infra",backend,To Do
+Task,T-04: Configurar variables de entorno,"Variables en Vercel: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY.
+
+Pasos:
+1. Obtener valores de Supabase Dashboard
+2. Agregar en Vercel > Settings > Environment Variables
+3. Configurar para Production y Preview
+4. Regenerar build",Medium,,,Sprint 1 (22-28 May 2026),,"cicd,infra",backend,To Do
+Task,T-05: Crear proyecto Supabase,"Proyecto, base de datos PostgreSQL, habilitacion de Auth con magic link.
+
+Pasos:
+1. Crear proyecto en Supabase
+2. Habilitar Auth > Providers > Magic Link
+3. Configurar Site URL y Redirect URLs en Supabase
+4. Obtener API keys",Medium,,,Sprint 1 (22-28 May 2026),,"backend,database",backend,To Do
+Task,T-06: Escribir migraciones SQL iniciales,"Scripts SQL en supabase/migrations/ para crear tablas iniciales: profiles, cards, user_collections.
+
+Pasos:
+1. Crear directorio supabase/migrations/
+2. Escribir SQL para profiles (id, username, email, avatar_url, reputation, coins, created_at)
+3. Escribir SQL para cards (id, name, card_type, team_id, rarity, overall)
+4. Escribir SQL para user_collections (user_id, card_id, is_duplicate, quantity)
+5. Configurar RLS policies",Medium,,,Sprint 1 (22-28 May 2026),,database,backend,To Do
+Story,US-05: Album Completo 48 Selecciones,"Como coleccionista, quiero ver el album completo con las 48 selecciones del Mundial 2026 para conocer que figuritas existen.
+
+Criterios de Aceptacion:
+- Dado que el usuario esta autenticado y navega a la seccion 'Album'
+- Cuando la pagina carga
+- Entonces se muestran las 48 selecciones del Mundial FIFA 2026 organizadas por grupos, cada una con su bandera, nombre e indicador de progreso (X/Y figuritas).",High,8,epic-album,Sprint 2 (29 May-4 Jun 2026),,"frontend,album",frontend,To Do
+Story,US-06: Album por Equipo,"Como coleccionista, quiero navegar por el album de cada equipo para ver sus jugadores y mi progreso por equipo.
+
+Criterios de Aceptacion:
+- Dado que el usuario presiona sobre la tarjeta de un equipo
+- Cuando la pagina del equipo carga
+- Entonces se muestran todas las figuritas del equipo diferenciando las obtenidas (a color) de las faltantes (en gris/silueta), con porcentaje de completitud del equipo.",High,5,epic-album,Sprint 2 (29 May-4 Jun 2026),,"frontend,album",frontend,To Do
+Story,US-07: Ficha de Jugador,"Como coleccionista, quiero ver la ficha completa de un jugador al seleccionar su figurita para conocer sus estadisticas.
+
+Criterios de Aceptacion:
+- Dado que el usuario presiona sobre la figurita de un jugador
+- Cuando se abre el detalle de la carta
+- Entonces se muestra la imagen del jugador, su nombre completo, seleccion, posicion y sus 6 estadisticas FIFA (Ritmo, Tiro, Pase, Regate, Defensa, Fisico).",High,5,epic-album,Sprint 2 (29 May-4 Jun 2026),,"frontend,album",frontend,To Do
+Story,US-08: Vista Flipbook,"Como coleccionista, quiero navegar el album en modo flipbook para experimentar la sensacion de hojear un album fisico.
+
+Criterios de Aceptacion:
+- Dado que el usuario navega a 'Album / Flipbook'
+- Cuando la pagina carga
+- Entonces se muestra una presentacion paginada con animacion de volteo de pagina que simula hojear un album fisico.
+
+- Dado que el usuario presiona 'pagina siguiente'
+- Cuando se ejecuta la animacion
+- Entonces la pagina gira visualmente de derecha a izquierda sin recargar la pagina completa.",Medium,5,epic-album,Sprint 2 (29 May-4 Jun 2026),,"frontend,album",frontend,To Do
+Task,T-07: Seed de datos FIFA 2026,"Script de inserccion de datos de jugadores, equipos y cartas en Supabase.
+
+Pasos:
+1. Compilar dataset de 48 selecciones
+2. Compilar dataset de ~750 jugadores con estadisticas FIFA
+3. Crear script seed_player_data.ts
+4. Ejecutar en Supabase
+5. Verificar conteos en tablas",Medium,,,Sprint 2 (29 May-4 Jun 2026),,database,backend,To Do
+Task,T-08: Migracion RLS en user_collections,"Politica RLS: cada usuario solo ve y modifica su propia coleccion.
+
+Pasos:
+1. Crear policy para SELECT: user_id = auth.uid()
+2. Crear policy para INSERT: user_id = auth.uid()
+3. Crear policy para UPDATE: user_id = auth.uid()
+4. Probar con usuario de test",Medium,,,Sprint 2 (29 May-4 Jun 2026),,database,backend,To Do
+Task,T-09: Deploy nuevas rutas,"Verificar que rutas /album, /album/[team], /album/flipbook, /card/[id] estan en produccion.
+
+Pasos:
+1. Push cambios a dev branch
+2. Merge a main
+3. Verificar deploy en Vercel
+4. Probar cada ruta manualmente",Medium,,,Sprint 2 (29 May-4 Jun 2026),,"cicd,frontend",frontend,To Do
+Story,US-09: Apertura de Sobres,"Como coleccionista, quiero abrir un sobre virtual con animacion para descubrir mis 6 nuevas figuritas de forma emocionante.
+
+Criterios de Aceptacion:
+- Dado que el usuario tiene al menos un sobre disponible y navega a 'Abrir Sobre'
+- Cuando presiona el boton 'Abrir'
+- Entonces se ejecuta una animacion y se revelan 6 figuritas aleatorias una a una, con efecto visual por rareza.
+
+- Dado que la animacion termina
+- Cuando el usuario ve las 6 figuritas
+- Entonces el sistema registra las figuritas en la coleccion del usuario y descuenta el sobre del inventario.
+
+- Dado que el usuario no tiene sobres disponibles
+- Cuando intenta abrir uno
+- Entonces el sistema muestra 'No tienes sobres disponibles. Ve a la tienda para conseguir mas.'",High,8,epic-packs,Sprint 3 (5-11 Jun 2026),,"frontend,packs",frontend,To Do
+Story,US-10: Sobres de Bienvenida,"Como nuevo usuario, quiero recibir sobres de bienvenida al registrarme para iniciar mi coleccion de inmediato.
+
+Criterios de Aceptacion:
+- Dado que un nuevo usuario completa su primer inicio de sesion exitoso
+- Cuando es redirigido al album por primera vez
+- Entonces el sistema le asigna automaticamente 5 sobres de bienvenida y 500 monedas, y muestra un mensaje de bienvenida.",High,3,epic-packs,Sprint 3 (5-11 Jun 2026),,"backend,packs",backend,To Do
+Story,US-11: Descarte de Repetidas,"Como coleccionista, quiero descartar mis figuritas repetidas a cambio de monedas para luego invertirlas en mas sobres.
+
+Criterios de Aceptacion:
+- Dado que el usuario tiene figuritas repetidas y navega a 'Descartar'
+- Cuando selecciona una o mas figuritas repetidas y confirma el descarte
+- Entonces las figuritas se eliminan de su coleccion y el usuario recibe monedas proporcionales a la rareza (Comun: 10, Raro: 50, Epico: 150).
+
+- Dado que el usuario selecciona figuritas para descartar
+- Cuando revisa el resumen
+- Entonces el sistema muestra el total de monedas que recibira antes de confirmar la accion.",High,5,epic-packs,Sprint 3 (5-11 Jun 2026),,"frontend,packs",frontend,To Do
+Story,US-12: Tienda de Sobres,"Como coleccionista, quiero comprar sobres en la tienda usando mis monedas para conseguir mas figuritas.
+
+Criterios de Aceptacion:
+- Dado que el usuario navega a la tienda y tiene monedas suficientes
+- Cuando selecciona un sobre estandar (200 monedas) y presiona 'Comprar'
+- Entonces se descontoan 200 monedas de su saldo y se agrega 1 sobre a su inventario.
+
+- Dado que el usuario no tiene monedas suficientes
+- Cuando presiona 'Comprar'
+- Entonces el sistema muestra 'Monedas insuficientes. Necesitas X monedas mas.' sin procesar la transaccion.",High,5,epic-packs,Sprint 3 (5-11 Jun 2026),,"frontend,packs",frontend,To Do
+Story,US-13: Recompensa por Equipo Completo,"Como coleccionista, quiero recibir 2,000 monedas bonus cuando complete el album de un equipo entero.
+
+Criterios de Aceptacion:
+- Dado que el usuario obtiene la ultima figurita faltante de un equipo
+- Cuando el sistema detecta completitud del equipo al 100%
+- Entonces se acreditan 2,000 monedas bonus con animacion de celebracion e insignia 'Equipo Completo: [Nombre]'.",Medium,2,epic-packs,Sprint 3 (5-11 Jun 2026),,"frontend,packs",frontend,To Do
+Task,T-10: API Route /api/packs,"Endpoint para generar sobre aleatorio con distribucion por rareza y actualizar coleccion.
+
+Pasos:
+1. Crear GET /api/packs
+2. Logica: seleccionar 6 cartas aleatorias (70% comun, 25% raro, 5% epico)
+3. Insertar en user_collections
+4. Decrementar inventory
+5. Retornar cartas al frontend",Medium,,,Sprint 3 (5-11 Jun 2026),,"backend,packs",backend,To Do
+Task,T-11: API Route /api/collections PATCH,"Endpoint para descartar figuritas y acreditar monedas.
+
+Pasos:
+1. Crear PATCH /api/collections
+2. Recibir lista de card_ids para descartar
+3. Calcular monedas segun rareza
+4. Eliminar de user_collections
+5. Actualizar coins en profiles",Medium,,,Sprint 3 (5-11 Jun 2026),,"backend,packs",backend,To Do
+Task,T-12: Migracion columna coins en profiles,"Agregar saldo de monedas al perfil del usuario.
+
+Pasos:
+1. Crear migracion SQL
+2. ALTER TABLE profiles ADD COLUMN coins INTEGER DEFAULT 500
+3. Configurar RLS para coins
+4. Agregar indice en coins",Medium,,,Sprint 3 (5-11 Jun 2026),,database,backend,To Do
+Task,T-13: Migracion tabla inventory,"Tabla para registrar sobres disponibles por usuario.
+
+Pasos:
+1. CREATE TABLE user_packs (user_id, quantity, total_opened, updated_at)
+2. Configurar RLS policies
+3. Trigger para inicializar en registro
+4. Funcion para decrementar en apertura",Medium,,,Sprint 3 (5-11 Jun 2026),,database,backend,To Do
+Task,T-14: Trigger Supabase onboarding,"Trigger automatico para asignar 5 sobres y 500 monedas al primer login.
+
+Pasos:
+1. Crear funcion on_auth_user_created()
+2. En la funcion: INSERT INTO user_packs (user_id, quantity) VALUES (NEW.id, 5)
+3. UPDATE profiles SET coins = 500 WHERE id = NEW.id
+4. Crear trigger AFTER INSERT ON auth.users",Medium,,,Sprint 3 (5-11 Jun 2026),,database,backend,To Do
+Task,T-15: Verificacion RLS en nuevas tablas,"Asegurar que inventory y coins tienen politicas RLS correctas.
+
+Pasos:
+1. Revisar policies en user_packs
+2. Revisar policies en profiles para coins
+3. Probar como usuario A que no ve datos de usuario B
+4. Documentar en README",Medium,,,Sprint 3 (5-11 Jun 2026),,database,backend,To Do
+Story,US-14: Publicar en Marketplace,"Como coleccionista, quiero publicar una figurita repetida en el marketplace para que otros usuarios puedan ofrecerme un intercambio.
+
+Criterios de Aceptacion:
+- Dado que el usuario tiene figuritas repetidas y navega al marketplace (/trading)
+- Cuando selecciona 'Publicar figurita' y elige una de sus repetidas
+- Entonces el sistema crea un listing visible para todos los usuarios autenticados.
+
+- Dado que el usuario intenta publicar una figurita ya publicada
+- Cuando selecciona esa figurita
+- Entonces el sistema informa que ya esta publicada y ofrece la opcion de cancelar el listing existente.",High,5,epic-trading,Sprint 4 (12-18 Jun 2026),,"frontend,trading",frontend,To Do
+Story,US-15: Ver Marketplace,"Como coleccionista, quiero ver las figuritas disponibles de otros usuarios en el marketplace para encontrar las que me faltan.
+
+Criterios de Aceptacion:
+- Dado que el usuario autenticado navega a /trading
+- Cuando la pagina carga
+- Entonces ve una lista de figuritas publicadas por otros usuarios con nombre del jugador, equipo, rareza y propietario.
+
+- Dado que el usuario usa el filtro de equipo
+- Cuando aplica el filtro
+- Entonces la lista se actualiza mostrando solo las figuritas del equipo seleccionado.",High,5,epic-trading,Sprint 4 (12-18 Jun 2026),,"frontend,trading",frontend,To Do
+Story,US-16: Proponer Intercambio,"Como coleccionista, quiero proponer un intercambio ofreciendo una de mis figuritas repetidas por una que necesito.
+
+Criterios de Aceptacion:
+- Dado que el usuario ve una figurita que necesita en el marketplace
+- Cuando presiona 'Proponer intercambio' y selecciona una de sus repetidas para ofrecer
+- Entonces el sistema registra el trade con estado 'pendiente' y el propietario recibe una notificacion.
+
+- Dado que el usuario no tiene figuritas repetidas disponibles
+- Cuando intenta seleccionar que ofrecer
+- Entonces el sistema indica 'No tienes figuritas repetidas disponibles para intercambiar'.",High,8,epic-trading,Sprint 4 (12-18 Jun 2026),,"backend,trading",backend,To Do
+Story,US-17: Aceptar/Rechazar Trade,"Como coleccionista, quiero aceptar o rechazar solicitudes de intercambio que me lleguen para gestionar mis intercambios pendientes.
+
+Criterios de Aceptacion:
+- Dado que el usuario tiene una solicitud de intercambio pendiente y presiona 'Aceptar'
+- Cuando el sistema procesa la accion
+- Entonces las figuritas se transfieren automaticamente entre ambos usuarios, el listing se cierra y los estados de coleccion se actualizan en Supabase.
+
+- Dado que el usuario presiona 'Rechazar'
+- Cuando el sistema procesa la accion
+- Entonces el trade queda registrado como 'rechazado' y las figuritas permanecen con sus propietarios originales.",High,5,epic-trading,Sprint 4 (12-18 Jun 2026),,"backend,trading",backend,To Do
+Story,US-18: Inbox de Notificaciones,"Como coleccionista, quiero recibir una notificacion en mi inbox cuando alguien solicita una de mis figuritas.
+
+Criterios de Aceptacion:
+- Dado que otro usuario propone un intercambio por una figurita que tengo publicada
+- Cuando navego a mi inbox (/inbox)
+- Entonces veo la notificacion con el nombre del solicitante, la figurita que ofrece, la figurita que quiere y los botones 'Aceptar' y 'Rechazar'.",High,3,epic-trading,Sprint 4 (12-18 Jun 2026),,"frontend,trading",frontend,To Do
+Story,US-19: Perfil de Usuario,"Como coleccionista, quiero ver mi perfil con estadisticas de coleccion, reputacion e insignias ganadas.
+
+Criterios de Aceptacion:
+- Dado que el usuario autenticado navega a su perfil (/profile)
+- Cuando la pagina carga
+- Entonces ve: nombre, correo, figuritas obtenidas/repetidas/faltantes, porcentaje de completitud del album, reputacion como intercambiador e insignias ganadas.",Medium,5,epic-profile,Sprint 4 (12-18 Jun 2026),,"frontend,profile",frontend,To Do
+Task,"T-16: API Route /api/listings GET, POST","Listar publicaciones del marketplace y crear nuevas.
+
+Pasos:
+1. GET /api/listings - retornar listings activos con JOIN a cards y profiles
+2. POST /api/listings - crear nuevo listing
+3. Validar que carta es del usuario y es duplicate
+4. RLS policies",Medium,,,Sprint 4 (12-18 Jun 2026),,"backend,trading",backend,To Do
+Task,T-17: API Route /api/listings/[id] DELETE,"Cancelar un listing propio.
+
+Pasos:
+1. DELETE /api/listings/[id]
+2. Verificar que listing existe y pertenece al usuario
+3. Eliminar de la base de datos
+4. Retornar exito",Medium,,,Sprint 4 (12-18 Jun 2026),,"backend,trading",backend,To Do
+Task,"T-18: API Route /api/trades GET, POST","Listar trades y proponer nuevos intercambios.
+
+Pasos:
+1. GET /api/trades - retornar trades del usuario (como from_user y to_user)
+2. POST /api/trades - crear nueva propuesta de trade
+3. Crear en tabla trade_offers con status 'pending'
+4. Crear notificacion para to_user",Medium,,,Sprint 4 (12-18 Jun 2026),,"backend,trading",backend,To Do
+Task,T-19: API Route /api/trades/[id]/accept,"Aceptar trade con transaccion atomica en Supabase.
+
+Pasos:
+1. Verificar trade existe y status = pending
+2. Verificar to_user es el usuario autenticado
+3. RPC para transferencia atomica:
+   - Eliminar listing
+   - Transferir carta from_user -> to_user
+   - Transferir carta to_user -> from_user
+   - Update trade status = 'completed'
+   - Incrementar reputacion de ambos
+4. IMPORTANTE: Usar Authorization: Bearer <token> para supabaseAdmin",Medium,,,Sprint 4 (12-18 Jun 2026),,"backend,trading",backend,To Do
+Task,T-20: API Route /api/trades/[id]/reject,"Rechazar trade propuesto.
+
+Pasos:
+1. Verificar trade existe y status = pending
+2. Verificar to_user es el usuario autenticado
+3. UPDATE trade_offers SET status = 'rejected'
+4. No transferir cartas",Medium,,,Sprint 4 (12-18 Jun 2026),,"backend,trading",backend,To Do
+Task,T-21: API Route /api/trades/[id]/cancel,"Cancelar trade propio.
+
+Pasos:
+1. Verificar trade existe y status = pending
+2. Verificar from_user es el usuario autenticado
+3. UPDATE trade_offers SET status = 'cancelled'",Medium,,,Sprint 4 (12-18 Jun 2026),,"backend,trading",backend,To Do
+Task,T-22: API Route /api/notifications,"Listar notificaciones del usuario autenticado.
+
+Pasos:
+1. GET /api/notifications
+2. JOIN con trades para mostrar detalle
+3. Marcar como leidas con PATCH
+4. RLS: solo notificaciones del usuario",Medium,,,Sprint 4 (12-18 Jun 2026),,"backend,trading",backend,To Do
+Task,T-23: Fix Authorization header,"Bug critico: usar Authorization: Bearer <token> en lugar de cookies para endpoint con supabaseAdmin.
+
+Problema: Endpoint /api/trades/[id]/accept usaba cookies pero requeria supabaseAdmin.
+
+Pasos:
+1. Modificar accept route para recibir Authorization header
+2. Extraer token del header
+3. Usar supabaseAdmin.auth.getUser(token) para validar
+4. Probar flujo completo",Medium,,,Sprint 4 (12-18 Jun 2026),,"backend,trading",backend,To Do
+Task,T-24: Migracion tabla notifications,"Tabla para persistir notificaciones con estado leido/no leido.
+
+Pasos:
+1. CREATE TABLE notifications
+2. Columnas: id, user_id, type, title, body, reference_id, is_read, created_at
+3. RLS policies
+4. Trigger para crear notificacion en nuevo trade",Medium,,,Sprint 4 (12-18 Jun 2026),,database,backend,To Do
+Story,US-20: Mi Coleccion Personal,"Como coleccionista, quiero ver toda mi coleccion personal en una sola vista para gestionar mis cartas facilmente.
+
+Criterios de Aceptacion:
+- Dado que el usuario autenticado navega a 'Mis Cartas' (/my-cards)
+- Cuando la pagina carga
+- Entonces ve todas las figuritas obtenidas organizadas por equipo con indicacion de repetidas y cantidad de copias.
+
+- Dado que el usuario filtra por 'Repetidas'
+- Cuando aplica el filtro
+- Entonces solo se muestran las figuritas con mas de 1 copia.",High,5,epic-profile,Sprint 5 (19-25 Jun 2026),,"frontend,profile",frontend,To Do
+Story,US-21: Diseno Responsivo,"Como usuario, quiero que la plataforma sea usable en dispositivos moviles para acceder desde mi telefono.
+
+Criterios de Aceptacion:
+- Dado que un usuario accede desde un smartphone con pantalla de 390px de ancho
+- Cuando navega por el album, el marketplace y el perfil
+- Entonces todos los elementos se muestran correctamente sin desbordamiento horizontal y los botones son accesibles con el dedo.",High,5,epic-profile,Sprint 5 (19-25 Jun 2026),,"frontend,responsive",frontend,To Do
+Story,US-22: Mensajes de Error Claros,"Como usuario, quiero mensajes de error claros y amigables cuando algo falla para saber que occured.
+
+Criterios de Aceptacion:
+- Dado que el usuario pierde la conexion mientras abre un sobre
+- Cuando el sistema detecta el error de red
+- Entonces muestra 'Sin conexion. Verifica tu internet e intenta de nuevo.' con boton de reintento que no descuenta el sobre si la operacion no fue confirmada.",Medium,3,epic-profile,Sprint 5 (19-25 Jun 2026),,"frontend,ux",frontend,To Do
+Story,US-23: README Tecnico,"Como equipo, necesitamos un README tecnico completo con instrucciones de setup y arquitectura del proyecto.
+
+Criterios de Aceptacion:
+- Dado que un nuevo desarrollador accede al repositorio en GitHub
+- Cuando lee el README
+- Entonces encuentra: descripcion del proyecto, instrucciones de instalacion local, arquitectura del sistema, lista de rutas de la aplicacion y pasos para contribuir.",High,3,epic-docs,Sprint 5 (19-25 Jun 2026),,"docs,backend",backend,To Do
+Story,US-24: Video Demonstrativo CI/CD,"Como equipo, necesitamos grabar el video demostrativo del pipeline CI/CD para el entregable del curso.
+
+Criterios de Aceptacion:
+- Dado que se requiere entregar evidencia del pipeline CI/CD
+- Cuando se graba el video
+- Entonces muestra: commit pusheado a main, workflow de GitHub Actions ejecutandose paso a paso, deploy completandose en Vercel y cambio visible en URL de produccion; todo en menos de 5 minutos.",High,2,epic-cicd,Sprint 5 (19-25 Jun 2026),,"cicd,docs",backend,To Do
+Story,US-25: Documentacion Academica,"Como equipo, necesitamos entregar toda la documentacion academica completa (7 entregables).
+
+Criterios de Aceptacion:
+- Dado que es el dia de la entrega final (25 junio 2026)
+- Cuando el profesor revisa los entregables
+- Entonces encuentra los 7 documentos completos con formato APA 7, tablas correctas, criterios de aceptacion en formato BDD y los informes de sprint incluidos.",High,5,epic-docs,Sprint 5 (19-25 Jun 2026),,docs,frontend,To Do
+Task,T-25: Smoke test de produccion,"Verificar manualmente todos los flujos: auth --> album --> sobres --> descarte --> tienda --> trading --> inbox --> perfil.
+
+Pasos:
+1. Crear lista de verificacion
+2. Ejecutar cada flujo en produccion
+3. Documentar resultados
+4. Reportar bugs encontrados",Medium,,,Sprint 5 (19-25 Jun 2026),,qa,qa,To Do
+Task,T-26: Tag release v1.0.0,"Crear el tag v1.0.0 en GitHub marcando el MVP final.
+
+Pasos:
+1. Asegurar que main tiene todos los cambios
+2. git tag -a v1.0.0 -m 'MVP Release - Sprint 5'
+3. git push origin v1.0.0
+4. Crear Release en GitHub con notas",Medium,,,Sprint 5 (19-25 Jun 2026),,cicd,backend,To Do
+Task,T-27: Audit RLS en Supabase,"Verificar que ninguna tabla expone datos entre usuarios no relacionados.
+
+Pasos:
+1. Revisar cada tabla y sus RLS policies
+2. Probar como usuario A intentando acceder datos de usuario B
+3. Verificar profiles, user_collections, user_packs, notifications
+4. Documentar hallazgos",Medium,,,Sprint 5 (19-25 Jun 2026),,security,backend,To Do
+Task,T-28: Verificacion variables de entorno,"Confirmar que todas las variables de produccion en Vercel estan correctas.
+
+Pasos:
+1. Revisar Vercel Dashboard > Environment Variables
+2. Verificar NEXT_PUBLIC_SUPABASE_URL
+3. Verificar NEXT_PUBLIC_SUPABASE_ANON_KEY
+4. Verificar SUPABASE_SERVICE_ROLE_KEY
+5. Regenerar build si es necesario",Medium,,,Sprint 5 (19-25 Jun 2026),,"cicd,infra",backend,To Do
+Task,T-29: Grabacion video CI/CD,"Grabar pantalla mostrando el pipeline completo desde commit hasta produccion.
+
+Pasos:
+1. Preparar script de demo
+2. Grabar con OBS o herramienta similar
+3. Editar video a maximo 5 minutos
+4. Exportar como MP4
+5. Subir a Google Drive y compartir con profesor",Medium,,,Sprint 5 (19-25 Jun 2026),,docs,backend,To Do
+Task,T-30: QA completo,"Smoke test de todos los modulos del MVP.
+
+Pasos:
+1. Probar flujo completo de usuario nuevo
+2. Probar todos los modulos: album, packs, trading, profile
+3. Verificar edge cases: sin coins, sin sobres, sin repetidas
+4. Documentar bugs encontrados
+5. Bugs criticos deben resolverse antes de demo",Medium,,,Sprint 5 (19-25 Jun 2026),,qa,qa,To Do
