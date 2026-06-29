@@ -84,3 +84,95 @@ Entrás con tu correo electrónico y recibís un enlace mágico — sin contrase
 ---
 
 **StickerHub** · El album del Mundial en tu bolsillo.
+
+---
+
+## CI/CD y DevOps — Pipeline de Integración y Despliegue Continuo
+
+> **Entregable #8** del Proyecto Final de Administración de Proyectos G51 (ITCR, I Sem 2026).
+> Demostración práctica de los conceptos de CI/CD aplicados al proyecto.
+> **Ver video:** (link al video una vez grabado)
+
+Este proyecto implementa un pipeline completo de **Integración Continua (CI)** y **Despliegue Continuo (CD)** utilizando herramientas dentro del plan gratuito, aplicando los principios DevOps (modelo CAMS: Cultura, Automatización, Medición, Compartir) en un equipo de 2 personas.
+
+### Stack del pipeline
+
+| Componente | Herramienta | Costo | Función |
+|---|---|---|---|
+| Repositorio + CI | **GitHub** + **GitHub Actions** | Gratis | Versionado + ejecución automática de tests y build |
+| Hosting + Deploy | **Vercel** | Gratis (Hobby) | Despliegue automático en cada push a `main` |
+| Base de datos + Auth | **Supabase** | Gratis (500 MB / 50k MAU) | PostgreSQL + Auth con magic link |
+
+### ¿Qué se automatiza?
+
+Cada vez que se hace **push a `main` o `dev`**, o se abre un **Pull Request**, se ejecuta automáticamente:
+
+1. **Lint** — `npm ci` + `npm run lint` (ESLint con configuración Next.js)
+2. **Build** — `npm run build` (Next.js 16 con Turbopack, verificación de TypeScript)
+3. **Deploy** — Vercel detecta el push y despliega a producción automáticamente
+
+**Tiempo total del pipeline:** ~1m 24s
+**Tiempo de commit a producción:** < 5 minutos
+
+### Estrategia de branching
+
+```
+feature/SH-XX-desc  ──┐
+                      │
+bugfix/SH-XX-desc   ──┼──►  dev  ──────────►  main  ──────────►  v1.0.0 (tag)
+                      │       │                  ▲
+                      │       └── PR + review ───┘
+                      │
+                      └── (cada merge dispara CI automático)
+```
+
+- **`main`** — Producción, siempre desplegable, protegida
+- **`dev`** — Integración del equipo, base para features
+- **`feature/SH-XX-desc`** — Una rama por historia de usuario, mergeada vía PR a `dev`
+- **Tag `v1.0.0`** — Release oficial del MVP
+
+### Convención de commits
+
+Cada commit sigue el formato **Conventional Commits + Smart Commits de Jira**:
+
+```bash
+# Formato
+<tipo>: <descripción>
+[SH-XX] #done <tipo>: <descripción>
+
+# Ejemplos reales del proyecto
+feat: add flipbook viewer component
+SH-01 #done chore: configure CI/CD pipeline with GitHub Actions
+SH-01 #done fix(eslint): disable react-hooks/refs to allow CI pass
+```
+
+Los Smart Commits con `[SH-XX] #done` mueven automáticamente las tarjetas en Jira al hacer merge, sin necesidad de actualizaciones manuales.
+
+### Badges de estado
+
+![CI Status](https://github.com/Pochonski/stickerhub/actions/workflows/ci.yml/badge.svg)
+![Vercel](https://vercel.com/button)
+
+### Evidencia del pipeline funcionando
+
+- **Pipeline CI/CD en vivo:** https://github.com/Pochonski/stickerhub/actions
+- **Producción:** https://stickerhub.vercel.app
+- **Tag v1.0.0:** https://github.com/Pochonski/stickerhub/releases/tag/v1.0.0
+
+### Lecciones aprendidas (documentadas)
+
+1. **Configurar CI/CD en el Sprint 1** rindió desde el Sprint 2 — eliminó deploys manuales
+2. **`npm ci` en lugar de `npm install`** garantiza instalaciones deterministas (sin "funciona en mi máquina")
+3. **Endpoints con `supabaseAdmin`** requieren `Authorization: Bearer <token>` explícito, no cookies — bug crítico documentado en Sprint 4
+4. **Smart Commits** redujeron el trabajo administrativo de actualizar Jira manualmente
+5. **Cultura DevOps con equipo pequeño** genera confianza y base para escalar
+
+### Documentación técnica adicional
+
+- [`docs/BRANCHING.md`](./docs/BRANCHING.md) — Estrategia de branching completa
+- [`docs/DEVELOPMENT.md`](./docs/DEVELOPMENT.md) — Guía de desarrollo (setup + arquitectura)
+- [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) — Definición del pipeline
+
+---
+
+**StickerHub** · El album del Mundial en tu bolsillo · CI/CD con GitHub Actions + Vercel
