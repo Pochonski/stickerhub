@@ -8,7 +8,10 @@ const eslintConfig = defineConfig([
   {
     rules: {
       "react-hooks/exhaustive-deps": "warn",
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/purity": "warn",
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "@next/next/no-img-element": "warn",
     },
   },
   // Override default ignores of eslint-config-next.
