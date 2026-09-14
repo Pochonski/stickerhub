@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 import { Providers } from "./providers";
+import RouteReporter from "@/presentation/embed/RouteReporter";
 
 export const metadata: Metadata = {
   title: "StickerHub — Mundial FIFA",
@@ -17,6 +19,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div id="main">
           <Providers>{children}</Providers>
         </div>
+        <Suspense fallback={null}>
+          <RouteReporter />
+        </Suspense>
       </body>
     </html>
   );
