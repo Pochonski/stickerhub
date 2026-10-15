@@ -25,24 +25,33 @@ function isAllowedParentOrigin(origin: string): boolean {
   }
 }
 
+function reportRoute() {
+  const url = new URL(window.location.href);
+  window.parent.postMessage(
+    { source: "porto-site-route", href: url.origin + url.pathname },
+    "*"
+  );
+}
+
 export default function RouteReporter() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    window.parent.postMessage(
-      { source: "porto-site-route", href: window.location.href },
-      "*"
-    );
+    reportRoute();
   }, [pathname, searchParams]);
 
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       const data = event.data as { source?: unknown; href?: unknown } | null;
-      if (!data || data.source !== "porto-site-navigate" || typeof data.href !== "string") {
+      if (!data || event.source !== window.parent || !isAllowedParentOrigin(event.origin)) {
         return;
       }
-      if (!isAllowedParentOrigin(event.origin)) return;
+      if (data.source === "porto-site-route-request") {
+        reportRoute();
+        return;
+      }
+      if (data.source !== "porto-site-navigate" || typeof data.href !== "string") return;
       let dest: URL;
       try {
         dest = new URL(data.href, window.location.origin);
